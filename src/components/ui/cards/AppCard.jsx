@@ -1,4 +1,4 @@
-import { Download, Star } from "lucide-react";
+import { ArrowDownToLine, Download, Star } from "lucide-react";
 
 function AppCard({ id, icon, name, category, rating, downloads, rank }) {
   return (
@@ -29,8 +29,8 @@ function AppCard({ id, icon, name, category, rating, downloads, rank }) {
                 {rating}
               </span>
             </div>
-            <div className="flex items-center gap-1 text-gray-500 text-sm">
-              <Download size={12} className="text-gray-500 " />
+            <div className="flex items-center gap-0.5 text-gray-500 text-sm">
+              <ArrowDownToLine size={12} className="text-gray-500 " />
               <span className="text-xs font-medium font-montserrat text-gray-500">
                 {downloads}
               </span>

@@ -1,114 +1,300 @@
-import {
-  Mail,
-  Calendar,
-  MapPin,
-  Download,
-  Star,
-  Code2,
-  Users,
-  LogOut,
-} from "lucide-react";
+import { useState } from "react";
+import { MapPin, Settings, Copy, Globe, Sticker } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
+import numberSuffixer from "../../utils/numberSuffixer";
+import { NavLink } from "react-router-dom";
+import DevsRepoImport from "../../assets/images/DevsRepoInvert.png";
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
 
-function Profile() {
-  const { user, logout } = useAuthStore();
-
-  // Mock data for user stats
-  const userStats = {
-    appsDownloaded: 24,
-    appsPublished: 3,
-    totalDownloads: 1500,
-    averageRating: 4.7,
-  };
-
-  const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-inter">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+export default function Profile() {
+  const [activeTab, setActiveTab] = useState("apps");
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
+  const { user } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        {/* Main Profile Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-          {/* Profile Header with Gradient */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-8 sm:p-8 lg:p-10">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
-              {/* Avatar Section */}
-              <div className="flex-shrink-0">
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.name}
-                    className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-2xl border-4 border-white shadow-lg"
-                  />
-                ) : (
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-green-500 to-green-700 rounded-2xl flex items-center justify-center text-white text-2xl sm:text-3xl font-bold border-4 border-white shadow-lg">
-                    {user.name?.charAt(0) || "U"}
-                  </div>
-                )}
+    <div className="min-h-screen bg-white select-none">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* User Profile*/}
+        <div className="mb-12">
+          {/*  */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-12 mb-4">
+            <div className="flex flex-row gap-5">
+              {/* Avatar */}
+              <div className="flex justify-start">
+                <img
+                  src={user.photoURL}
+                  alt={user.name}
+                  className="w-24 h-24 aspect-square sm:w-40 sm:h-40 rounded-full object-cover"
+                />
               </div>
-
-              {/* User Information */}
-              <div className="flex-1 text-center sm:text-left">
-                <div className="mb-4 lg:mb-6">
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-poppins font-bold text-gray-900 mb-2">
-                    {user.name}
-                  </h1>
-                  <p className="text-lg text-gray-600 font-inter mb-3">
-                    @{user.username}
-                  </p>
-                  <button onClick={() => logout()}>
-                    <LogOut />
-                  </button>
-
-                  {user.bio && (
-                    <p className="text-gray-700 font-inter leading-relaxed text-sm sm:text-base max-w-2xl">
-                      {user.bio}
-                    </p>
-                  )}
+              {/* Username & Stats */}
+              <div className="flex-1">
+                {/* Name */}
+                <div className="w-full flex gap-4 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
+                  <div className="w-full truncate">
+                    <h2 className="text-lg sm:text-3xl font-medium font-poppins text-gray-800 line-clamp-1">
+                      {user.name}
+                    </h2>
+                  </div>
+                  {user.providerId === "google" && <FcGoogle />}
+                  {user.providerId === "github" && <FaGithub />}
                 </div>
-
-                {/* User Metadata */}
-                <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-4 lg:gap-6 text-sm text-gray-600">
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm">
-                    <Mail size={16} className="text-green-600" />
-                    <span className="font-medium">{user.email}</span>
+                {/* Stats */}
+                <div className="w-full justify-between flex gap-8 sm:gap-12 mb-6">
+                  {/* Apps */}
+                  <div className="w-auto">
+                    <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
+                      {user.developerProfile.isDeveloper
+                        ? numberSuffixer(
+                            user.developerProfile.apps.publishedAppIds.length
+                          )
+                        : "NaD"}
+                    </p>
+                    <p className="text-gray-800 text-sm font-normal font-poppins">
+                      Apps
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm">
-                    <Calendar size={16} className="text-green-600" />
-                    <span className="font-medium">
-                      Joined {formatDate(user.createdAt)}
-                    </span>
+                  {/* Followers */}
+                  <div className="w-auto">
+                    <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
+                      {numberSuffixer(
+                        user.developerProfile.social.followersIds.length
+                      )}
+                    </p>
+                    <p className="text-gray-800 text-sm font-normal font-poppins">
+                      Followers
+                    </p>
                   </div>
-                  {user.country && (
-                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm">
-                      <MapPin size={16} className="text-green-600" />
-                      <span className="font-medium">{user.country}</span>
-                    </div>
-                  )}
+                  {/* Following */}
+                  <div className="w-auto mr-1">
+                    <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
+                      {numberSuffixer(
+                        user.developerProfile.social.followingIds.length
+                      )}
+                    </p>
+                    <p className="text-gray-800 text-sm font-normal font-poppins">
+                      Following
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Profile Info */}
+            <div className="flex-1">
+              {/* Username and Button */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+                {/* Username */}
+                <div className="w-full flex gap-4 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
+                  <div className="w-full truncate">
+                    <span className="text-xl">@</span>
+                    {user.username}
+                  </div>
+                  <Copy size={18} className="" />
+                </div>
+                {/* Edit and settings btn */}
+                <div className="flex flex-row gap-3">
+                  <button className="sm:ml-auto w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer">
+                    Edit Profile
+                  </button>
+                  <NavLink
+                    to="/setting"
+                    className="ml-auto w-auto px-2.5 py-2 bg-gray-800 text-gray-100 font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <Settings size={22} />
+                  </NavLink>
+                </div>
+              </div>
+
+              {/* Bio, Location & Website */}
+              <div className="space-y-2">
+                <p
+                  onClick={() => setIsBioExpanded(!isBioExpanded)}
+                  className={`text-gray-800 font-poppins text-sm sm:text-base ${
+                    isBioExpanded ? "" : "truncate"
+                  }`}
+                >
+                  {user.bio}
+                </p>
+                <div className="w-full flex items-center gap-2 text-gray-700 font-poppins text-sm truncate">
+                  <MapPin className="w-4 h-4" />
+                  <span>{user.location}</span>
+                </div>
+                {user.developerProfile.isDeveloper &&
+                  user.developerProfile.website && (
+                    <a
+                      href={user.developerProfile.website}
+                      className="w-full flex items-center gap-2 text-gray-700 font-poppins text-sm truncate"
+                    >
+                      <Globe className="w-4 h-4" />
+                      {user.developerProfile.website}
+                    </a>
+                  )}
+              </div>
+
+              {/* If Banned */}
+              {user.system.banStatus.isbanned && (
+                <div className="w-full max-w-md mx-auto mt-6">
+                  <div className="bg-rose-50 border border-rose-300 rounded-xl shadow-sm overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-rose-500 text-white px-4 py-3 font-poppins font-semibold">
+                      Your Account is Banned
+                    </div>
+
+                    {/* Body */}
+                    <div className="px-4 py-3 space-y-2 text-sm font-outfit text-gray-700">
+                      <p>
+                        <span className="font-medium">Reason:</span>{" "}
+                        {user.system.banStatus.reason}
+                      </p>
+                      <p>
+                        <span className="font-medium">Ban Lift Date:</span>{" "}
+                        {user.system.banStatus.bannedUntil}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        If you believe this is a mistake, contact support for
+                        further assistance.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="border-t-2 border-gray-200 pt-6">
+            <div className="flex border-b-2 border-gray-200 gap-10 sm:gap-12">
+              {/* Apps */}
+              <button
+                onClick={() => setActiveTab("apps")}
+                className={`pb-4 text-sm font-medium font-poppins border-b-2 transition-colors ${
+                  activeTab === "apps"
+                    ? "text-gray-800 border-green-600"
+                    : "text-gray-600 border-white"
+                }`}
+              >
+                Apps
+              </button>
+              {/* Pending Apps */}
+              <button
+                onClick={() => setActiveTab("pending-apps")}
+                className={`pb-4 text-sm font-medium font-poppins border-b-2 transition-colors ${
+                  activeTab === "pending-apps"
+                    ? "text-gray-800 border-green-600"
+                    : "text-gray-600 border-white"
+                }`}
+              >
+                Pending Apps
+              </button>
+              {/* Reviews */}
+              <button
+                onClick={() => setActiveTab("reviews")}
+                className={`pb-4 text-sm font-medium font-poppins border-b-2 transition-colors ${
+                  activeTab === "reviews"
+                    ? "text-gray-800 border-green-600"
+                    : "text-gray-600 border-white"
+                }`}
+              >
+                Reviews
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Apps Grid */}
+        {activeTab === "apps" && (
+          <>
+            {user.developerProfile.isDeveloper ? (
+              <>
+                {user.developerProfile.apps.publishedAppIds.length != 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
+                ) : (
+                  <NoData
+                    happyIcon={false}
+                    text="You haven’t published any apps yet. Start by clicking the Dev Dash button above to publish your first app!"
+                  />
+                )}
+              </>
+            ) : (
+              <NoData
+                happyIcon={false}
+                text="You are currently not a developer(NaD). You can become a developer by
+                      updating turning on Developer Profile in Settings."
+              />
+            )}
+          </>
+        )}
+
+        {/* Pending Apps Grid */}
+        {activeTab === "pending-apps" && (
+          <>
+            {user.developerProfile.isDeveloper &&
+            user.developerProfile.apps.submittedAppIds ? (
+              <>
+                {user.developerProfile.apps.publishedAppIds.length != 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
+                ) : (
+                  <NoData
+                    happyIcon={true}
+                    text="Great! You don’t have any pending apps. Everything is up to date!"
+                  />
+                )}
+              </>
+            ) : (
+              <NoData
+                happyIcon={false}
+                text="You are currently not a developer(NaD). You can become a developer by
+                      updating turning on Developer Profile in Settings."
+              />
+            )}
+          </>
+        )}
+
+        {/* Reviews Grid */}
+        {activeTab === "reviews" && (
+          <>
+            {user.developerProfile.isDeveloper ? (
+              <>
+                {user.developerProfile.apps.publishedAppIds.length != 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
+                ) : (
+                  <NoData
+                    happyIcon={false}
+                    text="You haven’t published any apps yet, so there are no reviews to show."
+                  />
+                )}
+              </>
+            ) : (
+              <NoData
+                happyIcon={false}
+                text="You are currently not a developer(NaD). You can become a developer by
+                      updating turning on Developer Profile in Settings."
+              />
+            )}
+          </>
+        )}
+      </main>
     </div>
   );
 }
 
-export default Profile;
+function NoData({ happyIcon, text }) {
+  return (
+    <div className="w-full flex flex-col gap-2 justify-center items-center mt-30">
+      {happyIcon ? (
+        <Sticker size={80} className="text-green-600" />
+      ) : (
+        <img
+          src={DevsRepoImport}
+          alt="devs-repo-import"
+          className="h-20 w-20"
+        />
+      )}
+      <p className="text-sm px-6 mt-2 font-poppins font-medium text-gray-700 text-center">
+        {text}
+      </p>
+    </div>
+  );
+}

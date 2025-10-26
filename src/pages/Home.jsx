@@ -1,6 +1,7 @@
 import AppCard from "../components/ui/cards/AppCard";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import AppCardSquare from "../components/ui/cards/AppCardSquare";
 
 function HomePage() {
   const [activeFilter, setActiveFilter] = useState("downloads");
@@ -214,9 +215,9 @@ function HomePage() {
             </h2>
           </div>
           {/* App Lists */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {newApps.map((app, index) => (
-              <AppCard
+              <AppCardSquare
                 key={index}
                 id={app.id}
                 icon={app.icon}

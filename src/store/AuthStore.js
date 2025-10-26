@@ -38,13 +38,14 @@ export const useAuthStore = create(
           // Basic custom fields
           username,
           role: "user",
-          bio: "",
-          country: "",
+          bio: "Hey! I'm using DevsRepo.",
+          location: "Anywhere on Earth",
           createdAt: timestamp,
           lastLogin: timestamp,
 
           // Preferences & Settings
           preferences: {
+            emailNewsletter: true,
             notifications: {
               appUpdates: true,
               developerNews: true,
@@ -71,6 +72,10 @@ export const useAuthStore = create(
               submittedAppIds: [],
               publishedAppIds: [],
               rejectedAppIds: [],
+            },
+            social: {
+              followingIds: [],
+              followersIds: [],
             },
           },
 
@@ -110,7 +115,7 @@ export const useAuthStore = create(
             return { isNewUser: false, userData };
           }
         } catch (error) {
-          console.error("❌ Firestore sync error:", error);
+          console.error("Firestore sync error:", error);
           throw error;
         }
       },

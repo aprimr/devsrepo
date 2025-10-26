@@ -4,6 +4,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuthStore } from "./store/AuthStore";
 import { Toaster } from "sonner";
 
@@ -16,7 +17,7 @@ import Footer from "./components/Footer";
 import PageNotFound from "./pages/others/PageNotFound";
 import Onboarding from "./pages/others/Onboarding";
 import ProtectedRoute from "./pages/auth/ProtectedRoute";
-import { useEffect } from "react";
+import Setting from "./pages/settings/Settings";
 
 function AppContent() {
   const location = useLocation();
@@ -33,6 +34,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting"
+          element={
+            <ProtectedRoute>
+              <Setting />
             </ProtectedRoute>
           }
         />

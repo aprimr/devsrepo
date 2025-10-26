@@ -17,7 +17,7 @@ function Navbar() {
   const { user, isAuthenticated } = useAuthStore();
 
   const location = useLocation();
-  const hideMobileMenuRoutes = ["/profile"];
+  const hideMobileMenuRoutes = ["/profile", "/setting"];
   const hideMobileMenu = hideMobileMenuRoutes.includes(location.pathname);
 
   const categories = [
@@ -80,7 +80,7 @@ function Navbar() {
           </button>
 
           {/* Dev Dash btn */}
-          {isAuthenticated && user?.role === "developer" && (
+          {isAuthenticated && user.developerProfile.isDeveloper && (
             <button
               className="flex justify-center items-center gap-2 px-3 md:px-4 py-2 rounded-full border-2 border-green-600 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all duration-300 font-poppins font-medium text-sm md:text-base"
               aria-label="Upload"
