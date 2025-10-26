@@ -1,0 +1,64 @@
+{
+  // 🔑 Basic Auth & Identity 
+  uid: string, 
+  name: string,
+  email: string,
+  photoURL: string,
+  emailVerified: boolean,
+  providerId: "google" | "github" | "email/password" | string, 
+
+  // 🔤 Basic custom fields
+  username: string,
+  role: "user" | "developer" | "admin" | "moderator", 
+  bio: string,
+  country: string,
+  createdAt: number, 
+  lastLogin: number, 
+
+  // ⚙️ Preferences & Settings
+  preferences: {
+    notifications: { // **CHANGE: Structured notifications object**
+      appUpdates: boolean,
+      developerNews: boolean,
+      marketing: boolean,
+    },
+    timezone: string, // Crucial for log/activity timestamps
+  },
+
+  // 👨‍💻 Developer Information
+  developerProfile: {
+    isDeveloper: boolean,
+    developerId: string, // Use the same value as 'uid'
+    organizationName: string,
+    website: string,
+    contactEmail: string,
+    verifiedDeveloper: boolean, 
+    developerStatus: "pending_review" | "active" | "suspended", 
+    totalDownloadsAcrossApps: number,
+    developerSince: number, 
+    
+    // 📊 Developer Analytics/Metrics
+    metrics: {
+        totalPublishedApps: number, // Denormalized count
+        totalReviewsReceived: number,
+    },
+    
+    apps: {
+      submittedAppIds: string[],
+      publishedAppIds: string[],
+      rejectedAppIds: string[],
+    },
+    
+    
+  },
+
+  // 🔐 Admin / Internal System Info
+  system: {
+    banStatus: {
+      isBanned: boolean,
+      reason: string,
+      bannedUntil: number,
+    },
+    lastActivity: number, 
+  }
+}

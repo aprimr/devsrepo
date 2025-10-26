@@ -1,16 +1,25 @@
-import { Link, NavLink } from "react-router-dom";
 import {
-  Search,
   Sticker,
+  Search,
+  FileUp,
   Smartphone,
   Layout,
   Globe,
   Zap,
   GalleryVerticalEnd,
-  FileUp,
+  LayoutDashboard,
 } from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/AuthStore";
 
 function Navbar() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthStore();
+
+  const location = useLocation();
+  const hideMobileMenuRoutes = ["/profile"];
+  const hideMobileMenu = hideMobileMenuRoutes.includes(location.pathname);
+
   const categories = [
     {
       name: "All",
@@ -29,15 +38,15 @@ function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+      <div className="max-w-[1450px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-2">
+          <NavLink to="/" className="flex items-center gap-2">
             <Sticker size={32} className="text-green-600" />
             <span className="text-xl sm:text-2xl font-poppins font-medium text-gray-800 tracking-tight">
               DevsRepo
             </span>
-          </Link>
+          </NavLink>
         </div>
 
         {/* Categories - desktop */}
@@ -62,6 +71,7 @@ function Navbar() {
 
         {/* Profile, Upload and Search */}
         <div className="flex items-center gap-2 sm:gap-4">
+          {/* Search */}
           <button
             className="hover:bg-gray-100 p-2 rounded-full transition-colors"
             aria-label="Search"
@@ -69,43 +79,64 @@ function Navbar() {
             <Search size={20} className="text-gray-600" />
           </button>
 
-          <button
-            className="flex justify-center items-center gap-2 px-3 md:px-4 py-2 rounded-full border-2 border-green-600 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all duration-300 font-poppins font-medium text-sm md:text-base"
-            aria-label="Upload"
-          >
-            <FileUp size={16} className="md:size-[18px]" />
-            <span className="hidden lg:flex">Publish App</span>
-            <span className="flex sm:hidden">Publish</span>
-          </button>
+          {/* Dev Dash btn */}
+          {isAuthenticated && user?.role === "developer" && (
+            <button
+              className="flex justify-center items-center gap-2 px-3 md:px-4 py-2 rounded-full border-2 border-green-600 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all duration-300 font-poppins font-medium text-sm md:text-base"
+              aria-label="Upload"
+            >
+              <LayoutDashboard
+                size={16}
+                className="hidden lg:flex md:size-[18px]"
+              />
+              <span className="">Dev Dash</span>
+            </button>
+          )}
 
-          {/* Profile Avatar */}
-          <div className="w-10 h-10 flex items-center justify-center bg-linear-to-br from-green-500 to-green-700 text-white font-semibold rounded-full border-2 border-white shadow-sm text-sm sm:text-base">
-            D
-          </div>
+          {/* Login Button & Profile */}
+          {isAuthenticated ? (
+            <img
+              onClick={() => {
+                navigate("/profile");
+              }}
+              src={user?.photoURL}
+              alt="user-icon"
+              className="w-10 h-10 flex items-center justify-center bg-linear-to-br from-green-500 to-green-700 text-white font-semibold rounded-full border-2 border-white shadow-sm cursor-pointer"
+            />
+          ) : (
+            <NavLink
+              to="/login"
+              className="flex justify-center items-center gap-2 px-5 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
+            >
+              <span>Login</span>
+            </NavLink>
+          )}
         </div>
       </div>
 
       {/* Menu chips - mobile */}
-      <div className="md:hidden bg-white border-t border-gray-200 px-3 sm:px-4 py-2">
-        <div className="flex gap-3 sm:gap-2 overflow-x-auto no-scrollbar">
-          {categories.map((cat) => (
-            <NavLink
-              key={cat.name}
-              to={cat.path}
-              className={({ isActive }) =>
-                `flex items-center gap-1 sm:gap-2 whitespace-nowrap px-2 sm:px-3 py-1.5 text-xs font-medium font-outfit rounded-full transition-colors border-2 ${
-                  isActive
-                    ? "bg-green-50 text-green-700 border-green-600 shadow-sm"
-                    : "bg-white text-gray-600 border-gray-400"
-                }`
-              }
-            >
-              {cat.icon}
-              {cat.name}
-            </NavLink>
-          ))}
+      {!hideMobileMenu && (
+        <div className="md:hidden bg-white border-t border-gray-200 px-3 sm:px-4 py-2">
+          <div className="flex gap-3 sm:gap-2 overflow-x-auto no-scrollbar">
+            {categories.map((cat) => (
+              <NavLink
+                key={cat.name}
+                to={cat.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-1 sm:gap-2 whitespace-nowrap px-2 sm:px-3 py-1.5 text-xs font-medium font-outfit rounded-full transition-colors border-2 ${
+                    isActive
+                      ? "bg-green-50 text-green-700 border-green-600 shadow-sm"
+                      : "bg-white text-gray-600 border-gray-400"
+                  }`
+                }
+              >
+                {cat.icon}
+                {cat.name}
+              </NavLink>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 }

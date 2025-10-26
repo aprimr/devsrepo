@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import AppCard from "../components/ui/cards/AppCard";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -132,8 +131,28 @@ function HomePage() {
             <h2 className="text-2xl font-poppins font-medium text-gray-900">
               Top Charts
             </h2>
-            <div className="text-green-600 hover:text-green-700 text-sm font-poppins font-medium cursor-pointer">
-              View all
+            {/* Filter Toggle */}
+            <div className="flex items-center gap-2 p-1 bg-gray-200/50 rounded-xl">
+              <button
+                className={`px-3 py-1.5 rounded-[9px] text-xs font-medium font-poppins transition-all duration-200 ${
+                  activeFilter === "downloads"
+                    ? "bg-green-500 text-white shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+                onClick={() => setActiveFilter("downloads")}
+              >
+                Downloads
+              </button>
+              <button
+                className={`px-3 py-1.5 rounded-[9px] text-xs font-medium font-poppins transition-all dura ${
+                  activeFilter === "rating"
+                    ? "bg-green-500 text-white shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+                onClick={() => setActiveFilter("rating")}
+              >
+                Rating
+              </button>
             </div>
           </div>
           {/* App Lists */}
@@ -150,6 +169,11 @@ function HomePage() {
                 rank={index + 1}
               />
             ))}
+          </div>
+          <div className="w-full flex justify-center mt-4">
+            <button className="text-green-600 hover:text-green-700 text-sm font-poppins font-medium cursor-pointer">
+              View More
+            </button>
           </div>
         </section>
 
@@ -188,29 +212,6 @@ function HomePage() {
             <h2 className="text-2xl font-poppins font-medium text-gray-900">
               All Apps
             </h2>
-            {/* Filter Toggle */}
-            <div className="flex items-center gap-2 p-1 bg-gray-200/50 rounded-xl">
-              <button
-                className={`px-3 py-1.5 rounded-[9px] text-xs font-medium font-poppins transition-all duration-200 ${
-                  activeFilter === "downloads"
-                    ? "bg-green-500 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-                onClick={() => setActiveFilter("downloads")}
-              >
-                Downloads
-              </button>
-              <button
-                className={`px-3 py-1.5 rounded-[9px] text-xs font-medium font-poppins transition-all dura ${
-                  activeFilter === "rating"
-                    ? "bg-green-500 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-                onClick={() => setActiveFilter("rating")}
-              >
-                Rating
-              </button>
-            </div>
           </div>
           {/* App Lists */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
