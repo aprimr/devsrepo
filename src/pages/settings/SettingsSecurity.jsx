@@ -59,13 +59,13 @@ function SettingsSecurity() {
             </span>
           </NavLink>
 
-          {/* Save */}
+          {/* Button */}
           <button
             onClick={() => setDangerMode(!dangerMode)}
             className={`flex justify-center items-center gap-2 px-4 py-2 rounded-xl text-white border-2  disabled:text-gray-200 transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer ${
               dangerMode
-                ? "border-green-600 bg-green-600 hover:bg-green-700 disabled:bg-green-700"
-                : "border-rose-500 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-700"
+                ? "border-green-600 bg-green-600"
+                : "border-rose-500 bg-rose-500"
             }`}
           >
             {dangerMode ? <Shield size={18} /> : <Skull size={18} />}

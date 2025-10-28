@@ -26,11 +26,20 @@ import {
 import { useAuthStore } from "../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import {
+  FaFacebook,
+  FaFacebookMessenger,
+  FaLink,
+  FaTwitter,
+  FaWhatsapp,
+} from "react-icons/fa";
+import { PiTwitterLogo } from "react-icons/pi";
 
 function Setting() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -39,7 +48,7 @@ function Setting() {
 
   const SectionButton = ({ icon: Icon, label, func, redirect }) => (
     <button
-      onClick={() => (redirect ? navigate(redirect) : func)}
+      onClick={() => (redirect ? navigate(redirect) : func())}
       className={`flex items-center justify-between w-full p-3 sm:p-4 rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50 border border-transparent`}
     >
       <div className="flex gap-3 items-center">
@@ -139,7 +148,7 @@ function Setting() {
               <SectionButton
                 icon={Forward}
                 label="Share Profile"
-                func={() => showShare()}
+                func={() => setShowShare(true)}
               />
             </div>
           </div>
@@ -291,6 +300,122 @@ function Setting() {
                 Yes, Sign Out
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Profile Modal */}
+      {showShare && (
+        <div
+          onClick={() => {
+            setShowShare(false);
+          }}
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 select-none"
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-3xl shadow-xl border border-gray-200 p-6 animate-slide-up sm:animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header with User Info */}
+            <div className="flex items-start gap-4 mb-6">
+              <div className="flex-1">
+                <h2 className="text-xl font-medium text-gray-900 font-poppins text-left">
+                  Share Profile
+                </h2>
+                <p className="text-xs text-gray-600 font-poppins text-left leading-relaxed">
+                  Let others find you by sharing your profile.
+                </p>
+              </div>
+              <img
+                src={user?.photoURL}
+                alt={user?.photoURL}
+                className="w-12 h-12 rounded-xl object-cover border border-gray-200"
+              />
+            </div>
+
+            {/* Link Copy Section */}
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700 font-poppins mb-1">
+                Profile Link
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    readOnly
+                    disabled
+                    value={window.location.href}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-mono text-gray-600 tracking-tighter pr-4"
+                    onClick={(e) => e.target.select()}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert("Profile link copied to clipboard!");
+                  }}
+                  className="px-4 py-3 bg-green-500 text-white rounded-xl font-medium text-sm font-poppins transition-all duration-200 whitespace-nowrap"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            {/* Share Options */}
+            <div className="mb-3">
+              <h3 className="text-sm font-medium text-gray-700 font-poppins mb-1">
+                Share via
+              </h3>
+              <div className="grid grid-cols-4 gap-3">
+                {/* Twitter */}
+                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
+                  <div className="p-2 bg-[#1DA1F2] rounded-lg transition-all">
+                    <FaTwitter className="text-white" size={18} />
+                  </div>
+                  <span className="text-xs font-poppins font-medium text-gray-600">
+                    Twitter
+                  </span>
+                </button>
+
+                {/* Messenger */}
+                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
+                  <div className="p-2 bg-[#0084FF] rounded-lg transition-all">
+                    <FaFacebookMessenger className="text-white" size={18} />
+                  </div>
+                  <span className="text-xs font-poppins font-medium text-gray-600">
+                    Messenger
+                  </span>
+                </button>
+
+                {/* WhatsApp */}
+                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
+                  <div className="p-2 bg-[#25D366] rounded-lg transition-all">
+                    <FaWhatsapp className="text-white" size={18} />
+                  </div>
+                  <span className="text-xs font-poppins font-medium text-gray-600">
+                    WhatsApp
+                  </span>
+                </button>
+
+                {/* Facebook */}
+                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
+                  <div className="p-2 bg-[#1877F2] rounded-lg transition-all">
+                    <FaFacebook className="text-white" size={18} />
+                  </div>
+                  <span className="text-xs font-poppins font-medium text-gray-600">
+                    Facebook
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => setShowShare(false)}
+              className="w-full py-3.5 rounded-xl text-gray-700 font-semibold text-sm bg-gray-100 hover:bg-gray-200 font-poppins transition-all duration-200 border border-transparent hover:border-gray-200"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
