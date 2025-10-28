@@ -1,12 +1,10 @@
 import {
   ChevronLeft,
-  LogOut,
   UserRound,
   Mail,
   Shield,
   Code,
   Lock,
-  Share,
   Bell,
   Globe,
   ChevronRight,
@@ -20,7 +18,6 @@ import {
   Sticker,
   LogOutIcon,
   Handshake,
-  Binary,
   Terminal,
 } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
@@ -29,11 +26,9 @@ import { useState } from "react";
 import {
   FaFacebook,
   FaFacebookMessenger,
-  FaLink,
   FaTwitter,
   FaWhatsapp,
 } from "react-icons/fa";
-import { PiTwitterLogo } from "react-icons/pi";
 
 function Setting() {
   const { user, logout } = useAuthStore();
@@ -272,7 +267,7 @@ function Setting() {
       {/* Logout Modal */}
       {showConfirm && (
         <div className="fixed inset-0 min-h-screen bg-black/20 backdrop-blur-xs flex items-center justify-center z-50 px-4 select-none">
-          <div className="bg-white rounded-xl shadow-xl p-5 sm:p-6 w-full max-w-xs text-center border border-gray-100">
+          <div className="bg-white rounded-xl shadow-xl p-5 sm:p-6 w-full max-w-sm text-center border border-gray-100">
             {/* Text Content */}
             <h2 className="text-lg font-semibold text-gray-800 font-poppins">
               Ready to leave?
@@ -286,7 +281,7 @@ function Setting() {
             <div className="mt-5 flex gap-5 justify-center">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-5 py-2 rounded-lg border border-green-700 text-green-700 font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all font-poppins"
+                className="px-5 py-2 rounded-lg border-2 border-green-700 text-green-700 font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all font-poppins"
               >
                 Stay Signed In
               </button>
@@ -295,7 +290,7 @@ function Setting() {
                   handleLogout();
                   setShowConfirm(false);
                 }}
-                className="px-5 py-2 rounded-lg border border-rose-600 bg-rose-600 text-white font-semibold text-xs sm:text-sm hover:bg-rose-500 transition-all font-poppins"
+                className="px-5 py-2 rounded-lg border-2 border-rose-600 bg-rose-600 text-white font-semibold text-xs sm:text-sm hover:bg-rose-500 transition-all font-poppins"
               >
                 Yes, Sign Out
               </button>
@@ -328,7 +323,7 @@ function Setting() {
               </div>
               <img
                 src={user?.photoURL}
-                alt={user?.photoURL}
+                alt={user?.name}
                 className="w-12 h-12 rounded-xl object-cover border border-gray-200"
               />
             </div>

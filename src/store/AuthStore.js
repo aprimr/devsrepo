@@ -67,6 +67,7 @@ export const useAuthStore = create(
           preferences: {
             emailNewsletter: true,
             notifications: {
+              allowNotifications: true,
               appUpdates: true,
               developerNews: true,
               marketing: false,

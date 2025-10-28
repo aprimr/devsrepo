@@ -23,6 +23,8 @@ import SettingsProfile from "./pages/settings/SettingsProfile";
 import SettingsSecurity from "./pages/settings/SettingsSecurity";
 import SettingsPrivacy from "./pages/settings/SettingsPrivacy";
 import SettingsStatus from "./pages/settings/SettingsStatus";
+import SettingsNotifications from "./pages/settings/SettingsNotifications";
+import SettingsEmail from "./pages/settings/SettingsEmail";
 
 function AppContent() {
   const location = useLocation();
@@ -35,6 +37,8 @@ function AppContent() {
     "/setting-security",
     "/setting-privacy",
     "/setting-status",
+    "/setting-notifications",
+    "/setting-email",
   ];
   const hideNavbarFooter = hideNavbarFooterRoutes.includes(location.pathname);
 
@@ -96,6 +100,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <SettingsStatus />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-notifications"
+          element={
+            <ProtectedRoute>
+              <SettingsNotifications />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-email"
+          element={
+            <ProtectedRoute>
+              <SettingsEmail />
             </ProtectedRoute>
           }
         />
