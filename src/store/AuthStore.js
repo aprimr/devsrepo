@@ -1,14 +1,25 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  deleteUser,
+  reauthenticateWithPopup,
+} from "firebase/auth";
 import {
   doc,
   setDoc,
   getDoc,
   updateDoc,
+  deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, db, googleProvider, githubProvider } from "../firebase/config";
+
+const getPrimaryProviderId = (firebaseUser) => {
+  return firebaseUser.providerData[0]?.providerId || "unknown";
+};
 
 export const useAuthStore = create(
   persist(
@@ -20,8 +31,7 @@ export const useAuthStore = create(
       error: null,
 
       // Generate Firestore User Model
-      generateUserModel: (firebaseUser, provider = "google") => {
-        const timestamp = Date.now();
+      generateUserModel: (firebaseUser, provider) => {
         const baseUsername =
           firebaseUser.displayName?.toLowerCase().replace(/\s+/g, "_") ||
           "user";
@@ -39,9 +49,19 @@ export const useAuthStore = create(
           username,
           role: "user",
           bio: "Hey! I'm using DevsRepo.",
-          location: "Anywhere on Earth",
-          createdAt: timestamp,
-          lastLogin: timestamp,
+          location: "",
+          privacy: {
+            privateFollower: false,
+            privateFollowing: false,
+          },
+          socialLinks: {
+            github: "",
+            linkedin: "",
+            x: "",
+            youtube: "",
+            instagram: "",
+            facebook: "",
+          },
 
           // Preferences & Settings
           preferences: {
@@ -81,12 +101,12 @@ export const useAuthStore = create(
 
           // Internal System Info
           system: {
+            isAdmin: false,
             banStatus: {
               isBanned: false,
               reason: "",
               bannedUntil: 0,
             },
-            lastActivity: timestamp,
           },
         };
       },
@@ -102,17 +122,11 @@ export const useAuthStore = create(
               ...userData,
               createdAt: serverTimestamp(),
               lastLogin: serverTimestamp(),
-              "system.lastActivity": serverTimestamp(),
+              system: { ...userData.system, lastActivity: serverTimestamp() },
             });
             return { isNewUser: true, userData };
           } else {
-            await updateDoc(userRef, {
-              lastLogin: serverTimestamp(),
-              "system.lastActivity": serverTimestamp(),
-              photoURL: userData.photoURL,
-              name: userData.name,
-            });
-            return { isNewUser: false, userData };
+            return { isNewUser: false, userData: userDoc.data() };
           }
         } catch (error) {
           console.error("Firestore sync error:", error);
@@ -126,8 +140,35 @@ export const useAuthStore = create(
         try {
           const result = await signInWithPopup(auth, googleProvider);
           const firebaseUser = result.user;
-          const userModel = get().generateUserModel(firebaseUser, "google");
-          const firestoreResult = await get().syncUserWithFirestore(userModel);
+          const userRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userRef);
+
+          let firestoreResult;
+          if (!userDoc.exists()) {
+            // NEW USER
+            const userModel = get().generateUserModel(
+              firebaseUser,
+              "google.com"
+            );
+            firestoreResult = await get().syncUserWithFirestore(userModel);
+          } else {
+            // EXISTING USER
+            const existingData = userDoc.data();
+            const updates = {
+              providerId: "google.com",
+              lastLogin: serverTimestamp(),
+              "system.lastActivity": serverTimestamp(),
+              photoURL: firebaseUser.photoURL || existingData.photoURL,
+              name: firebaseUser.displayName || existingData.name,
+            };
+
+            await updateDoc(userRef, updates);
+
+            firestoreResult = {
+              isNewUser: false,
+              userData: { ...existingData, ...updates },
+            };
+          }
 
           set({
             user: firestoreResult.userData,
@@ -152,8 +193,35 @@ export const useAuthStore = create(
         try {
           const result = await signInWithPopup(auth, githubProvider);
           const firebaseUser = result.user;
-          const userModel = get().generateUserModel(firebaseUser, "github");
-          const firestoreResult = await get().syncUserWithFirestore(userModel);
+          const userRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userRef);
+
+          let firestoreResult;
+          if (!userDoc.exists()) {
+            // NEW USER
+            const userModel = get().generateUserModel(
+              firebaseUser,
+              "github.com"
+            );
+            firestoreResult = await get().syncUserWithFirestore(userModel);
+          } else {
+            // EXISTING USER
+            const existingData = userDoc.data();
+            const updates = {
+              providerId: "github.com",
+              lastLogin: serverTimestamp(),
+              "system.lastActivity": serverTimestamp(),
+              photoURL: firebaseUser.photoURL || existingData.photoURL,
+              name: firebaseUser.displayName || existingData.name,
+            };
+
+            await updateDoc(userRef, updates);
+
+            firestoreResult = {
+              isNewUser: false,
+              userData: { ...existingData, ...updates },
+            };
+          }
 
           set({
             user: firestoreResult.userData,
@@ -196,12 +264,21 @@ export const useAuthStore = create(
           if (!user) throw new Error("No user logged in");
 
           const userRef = doc(db, "users", user.uid);
-          await updateDoc(userRef, {
+          const combinedUpdates = {
             ...updates,
             "system.lastActivity": serverTimestamp(),
-          });
+          };
 
-          const updatedUser = { ...user, ...updates };
+          await updateDoc(userRef, combinedUpdates);
+
+          const updatedUser = {
+            ...user,
+            ...updates,
+            system: {
+              ...user.system,
+              lastActivity: combinedUpdates["system.lastActivity"],
+            },
+          };
           set({ user: updatedUser });
 
           return { success: true, user: updatedUser };
@@ -216,6 +293,9 @@ export const useAuthStore = create(
         try {
           const { user } = get();
           if (!user) throw new Error("No user logged in");
+          if (user.role === "developer") {
+            return { success: true, user };
+          }
 
           const updates = {
             role: "developer",
@@ -226,11 +306,59 @@ export const useAuthStore = create(
             "developerProfile.website": developerData.website || "",
             "developerProfile.contactEmail":
               developerData.contactEmail || user.email,
-            "system.lastActivity": serverTimestamp(),
           };
 
           return await get().updateUserProfile(updates);
         } catch (error) {
+          set({ error: error.message });
+          return { success: false, error: error.message };
+        }
+      },
+
+      // Delete Account
+      deleteAccount: async () => {
+        const { user } = get();
+        if (!user) {
+          set({ error: "No user logged in" });
+          return { success: false, error: "No user logged in" };
+        }
+
+        try {
+          const firebaseUser = auth.currentUser;
+          if (!firebaseUser) throw new Error("No user found.");
+
+          // Determine provider
+          const providerId = firebaseUser.providerData[0]?.providerId;
+          const provider =
+            providerId === "google.com"
+              ? googleProvider
+              : providerId === "github.com"
+              ? githubProvider
+              : null;
+
+          if (!provider)
+            throw new Error("Unsupported authentication provider.");
+
+          // Reauthenticate the user
+          await reauthenticateWithPopup(firebaseUser, provider);
+
+          // Delete Firestore user document
+          await deleteDoc(doc(db, "users", firebaseUser.uid));
+
+          // Delete Firebase Authentication user
+          await deleteUser(firebaseUser);
+
+          // Clear Zustand state
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
+          });
+
+          return { success: true, message: "Account deleted successfully." };
+        } catch (error) {
+          console.error("Error deleting account:", error);
           set({ error: error.message });
           return { success: false, error: error.message };
         }
@@ -249,15 +377,23 @@ export const useAuthStore = create(
               let userData;
               if (userDoc.exists()) {
                 userData = userDoc.data();
+                await updateDoc(userRef, {
+                  "system.lastActivity": serverTimestamp(),
+                  lastLogin: serverTimestamp(),
+                });
               } else {
-                userData = get().generateUserModel(
-                  firebaseUser,
-                  "email/password"
-                );
+                const provider = getPrimaryProviderId(firebaseUser);
+
+                userData = get().generateUserModel(firebaseUser, provider);
+
                 await setDoc(userRef, {
                   ...userData,
                   createdAt: serverTimestamp(),
                   lastLogin: serverTimestamp(),
+                  system: {
+                    ...userData.system,
+                    lastActivity: serverTimestamp(),
+                  },
                 });
               }
 

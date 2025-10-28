@@ -1,13 +1,29 @@
 import { useState } from "react";
-import { MapPin, Settings, Copy, Globe, Sticker } from "lucide-react";
+import {
+  MapPin,
+  Settings,
+  Copy,
+  Globe,
+  Sticker,
+  CopyCheck,
+} from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
 import numberSuffixer from "../../utils/numberSuffixer";
-import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DevsRepoImport from "../../assets/images/DevsRepoInvert.png";
 import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { toast } from "sonner";
+import {
+  FaFacebook,
+  FaGithub,
+  FaInstagram,
+  FaLinkedin,
+  FaTwitter,
+  FaYoutube,
+} from "react-icons/fa";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("apps");
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const { user } = useAuthStore();
@@ -37,8 +53,8 @@ export default function Profile() {
                       {user.name}
                     </h2>
                   </div>
-                  {user.providerId === "google" && <FcGoogle />}
-                  {user.providerId === "github" && <FaGithub />}
+                  {user.providerId === "google.com" && <FcGoogle />}
+                  {user.providerId === "github.com" && <FaGithub />}
                 </div>
                 {/* Stats */}
                 <div className="w-full justify-between flex gap-8 sm:gap-12 mb-6">
@@ -81,7 +97,7 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Profile Info */}
+            {/* Profile Info and Button */}
             <div className="flex-1">
               {/* Username and Button */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
@@ -91,36 +107,41 @@ export default function Profile() {
                     <span className="text-xl">@</span>
                     {user.username}
                   </div>
-                  <Copy size={18} className="" />
                 </div>
                 {/* Edit and settings btn */}
                 <div className="flex flex-row gap-3">
-                  <button className="sm:ml-auto w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer">
+                  <button
+                    onClick={() => navigate("/edit-profile")}
+                    className="sm:ml-auto w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer"
+                  >
                     Edit Profile
                   </button>
-                  <NavLink
-                    to="/setting"
-                    className="ml-auto w-auto px-2.5 py-2 bg-gray-800 text-gray-100 font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer"
+                  <button
+                    onClick={() => navigate("/setting")}
+                    className="ml-auto w-auto px-2.5 py-2 bg-black text-gray-100 font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer"
                   >
                     <Settings size={22} />
-                  </NavLink>
+                  </button>
                 </div>
               </div>
 
               {/* Bio, Location & Website */}
               <div className="space-y-2">
+                {/* Bio */}
                 <p
                   onClick={() => setIsBioExpanded(!isBioExpanded)}
                   className={`text-gray-800 font-poppins text-sm sm:text-base ${
                     isBioExpanded ? "" : "truncate"
                   }`}
                 >
-                  {user.bio}
+                  {user.bio || "Hey! I am using DevsRepo"}
                 </p>
+                {/* Location */}
                 <div className="w-full flex items-center gap-2 text-gray-700 font-poppins text-sm truncate">
                   <MapPin className="w-4 h-4" />
-                  <span>{user.location}</span>
+                  <span>{user.location || "Anywhere on earth"}</span>
                 </div>
+                {/* Website */}
                 {user.developerProfile.isDeveloper &&
                   user.developerProfile.website && (
                     <a
@@ -131,6 +152,63 @@ export default function Profile() {
                       {user.developerProfile.website}
                     </a>
                   )}
+                {/* Social icons */}
+                <div className="flex flex-row gap-3 items-center text-gray-600">
+                  {user.socialLinks.github && (
+                    <a
+                      href={user.socialLinks.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaGithub size={18} />
+                    </a>
+                  )}
+                  {user.socialLinks.linkedin && (
+                    <a
+                      href={user.socialLinks.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaLinkedin size={18} />
+                    </a>
+                  )}
+                  {user.socialLinks.twitter && (
+                    <a
+                      href={user.socialLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaTwitter size={18} />
+                    </a>
+                  )}
+                  {user.socialLinks.youtube && (
+                    <a
+                      href={user.socialLinks.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaYoutube size={18} />
+                    </a>
+                  )}
+                  {user.socialLinks.instagram && (
+                    <a
+                      href={user.socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaInstagram size={18} />
+                    </a>
+                  )}
+                  {user.socialLinks.facebook && (
+                    <a
+                      href={user.socialLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FaFacebook size={18} />
+                    </a>
+                  )}
+                </div>
               </div>
 
               {/* If Banned */}
@@ -164,7 +242,7 @@ export default function Profile() {
           </div>
 
           {/* Tabs */}
-          <div className="border-t-2 border-gray-200 pt-6">
+          <div className="pt-2">
             <div className="flex border-b-2 border-gray-200 gap-10 sm:gap-12">
               {/* Apps */}
               <button

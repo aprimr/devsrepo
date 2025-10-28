@@ -1,445 +1,299 @@
 import {
-  Settings,
-  User,
-  Shield,
-  Bell,
-  Palette,
-  Globe,
-  HelpCircle,
+  ChevronLeft,
+  LogOut,
+  UserRound,
   Mail,
+  Shield,
+  Code,
   Lock,
-  Trash2,
-  Download,
-  Upload,
-  Eye,
-  EyeOff,
+  Share,
+  Bell,
+  Globe,
   ChevronRight,
-  Save,
-  Moon,
-  Sun,
+  Forward,
+  Info,
+  BadgeAlert,
+  Gauge,
+  Smartphone,
+  Headset,
+  MessageCircle,
+  Sticker,
+  LogOutIcon,
+  Handshake,
+  Binary,
+  Terminal,
 } from "lucide-react";
-import { useState } from "react";
 import { useAuthStore } from "../../store/AuthStore";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 function Setting() {
   const { user, logout } = useAuthStore();
-  const [activeSection, setActiveSection] = useState("profile");
-  const [darkMode, setDarkMode] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [language, setLanguage] = useState("english");
-  const [showOldPassword, setShowOldPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
+  const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // Mock settings data
-  const settingsData = {
-    profile: {
-      username: user?.username || "developer",
-      email: user?.email || "dev@example.com",
-      name: user?.name || "Developer Name",
-      bio:
-        user?.bio || "Passionate app developer creating amazing experiences.",
-      location: "San Francisco, CA",
-      website: "https://myportfolio.dev",
-    },
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
-  const sections = [
-    {
-      id: "profile",
-      name: "Profile",
-      icon: User,
-      description: "Manage your personal information",
-    },
-    {
-      id: "account",
-      name: "Account",
-      icon: Shield,
-      description: "Security and login settings",
-    },
-    {
-      id: "notifications",
-      name: "Notifications",
-      icon: Bell,
-      description: "Control your notifications",
-    },
-    {
-      id: "appearance",
-      name: "Appearance",
-      icon: Palette,
-      description: "Customize the look and feel",
-    },
-    {
-      id: "language",
-      name: "Language & Region",
-      icon: Globe,
-      description: "Language and regional settings",
-    },
-    {
-      id: "privacy",
-      name: "Privacy & Data",
-      icon: Lock,
-      description: "Manage your data and privacy",
-    },
-    {
-      id: "support",
-      name: "Help & Support",
-      icon: HelpCircle,
-      description: "Get help and contact support",
-    },
-  ];
+  const SectionButton = ({ icon: Icon, label, func, redirect }) => (
+    <button
+      onClick={() => (redirect ? navigate(redirect) : func)}
+      className={`flex items-center justify-between w-full p-3 sm:p-4 rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50 border border-transparent`}
+    >
+      <div className="flex gap-3 items-center">
+        <Icon size={18} className="sm:w-5 sm:h-5" />
+        <span className="font-medium font-poppins text-sm sm:text-base">
+          {label}
+        </span>
+      </div>
+      {redirect && <ChevronRight size={16} className="sm:w-4 sm:h-4" />}
+    </button>
+  );
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case "profile":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Profile Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={settingsData.profile.name}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={settingsData.profile.username}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    defaultValue={settingsData.profile.email}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    rows={4}
-                    defaultValue={settingsData.profile.bio}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={settingsData.profile.location}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Website
-                  </label>
-                  <input
-                    type="url"
-                    defaultValue={settingsData.profile.website}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 pt-4">
-              <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors duration-200">
-                Cancel
-              </button>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
-                <Save size={18} />
-                Save Changes
-              </button>
-            </div>
-          </div>
-        );
+  const SectionToggle = ({ icon: Icon, label, value }) => {
+    const [enabled, setEnabled] = useState(value);
 
-      case "account":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Change Password
-              </h3>
-              <div className="space-y-4 max-w-md">
-                <div className="relative">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Current Password
-                  </label>
-                  <input
-                    type={showOldPassword ? "text" : "password"}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 transition-all duration-200"
-                  />
-                  <button
-                    onClick={() => setShowOldPassword(!showOldPassword)}
-                    className="absolute right-3 top-11 text-gray-400 hover:text-gray-600"
-                  >
-                    {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                <div className="relative">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    New Password
-                  </label>
-                  <input
-                    type={showNewPassword ? "text" : "password"}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12 transition-all duration-200"
-                  />
-                  <button
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-11 text-gray-400 hover:text-gray-600"
-                  >
-                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors duration-200">
-                  Update Password
-                </button>
-              </div>
-            </div>
+    return (
+      <button
+        onClick={() => setEnabled(!enabled)}
+        className="flex items-center justify-between w-full p-3 sm:p-4 rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50 border border-transparent"
+      >
+        <div className="flex gap-3 items-center">
+          <Icon size={18} className="sm:w-5 sm:h-5" />
+          <span className="font-medium font-poppins text-sm sm:text-base">
+            {label}
+          </span>
+        </div>
 
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-red-900 mb-4">
-                Danger Zone
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-red-200 rounded-xl bg-red-50">
-                  <div>
-                    <h4 className="font-medium text-red-900">Delete Account</h4>
-                    <p className="text-sm text-red-700 mt-1">
-                      Permanently delete your account and all data
-                    </p>
-                  </div>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 flex items-center gap-2">
-                    <Trash2 size={18} />
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case "notifications":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Notification Preferences
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      Email Notifications
-                    </h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Receive updates about your apps and activity
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={emailNotifications}
-                      onChange={() =>
-                        setEmailNotifications(!emailNotifications)
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      Push Notifications
-                    </h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Get real-time updates on your device
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={pushNotifications}
-                      onChange={() => setPushNotifications(!pushNotifications)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case "appearance":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Theme Settings
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    {darkMode ? (
-                      <Moon size={20} className="text-blue-600" />
-                    ) : (
-                      <Sun size={20} className="text-yellow-600" />
-                    )}
-                    <div>
-                      <h4 className="font-medium text-gray-900">Dark Mode</h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Switch between light and dark themes
-                      </p>
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={darkMode}
-                      onChange={() => setDarkMode(!darkMode)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case "language":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Language & Region
-              </h3>
-              <div className="space-y-4 max-w-md">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Language
-                  </label>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  >
-                    <option value="english">English</option>
-                    <option value="spanish">Spanish</option>
-                    <option value="french">French</option>
-                    <option value="german">German</option>
-                    <option value="japanese">Japanese</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="text-center py-12">
-            <Settings className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Settings
-            </h3>
-            <p className="text-gray-600">
-              Select a category to manage your preferences
-            </p>
-          </div>
-        );
-    }
+        {/* Toggle Button */}
+        <div
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+            enabled ? "bg-green-500" : "bg-gray-300"
+          }`}
+        >
+          <span
+            className={`inline-block h-4.5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${
+              enabled ? "translate-x-5" : "translate-x-1"
+            }`}
+          />
+        </div>
+      </button>
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">
-            Manage your DevsRepo account preferences and settings
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-[1450px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+          {/* Back Btn and Name */}
+          <NavLink to="/profile" className="flex items-center gap-2">
+            <ChevronLeft size={26} className="text-gray-800" />
+            <span className="text-lg sm:text-2xl font-poppins font-medium text-gray-800 tracking-tight">
+              Setting
+            </span>
+          </NavLink>
+
+          {/* Save */}
+          <button
+            onClick={() => navigate("/edit-profile")}
+            className="flex justify-center items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white border-2 border-green-600 hover:bg-green-700 disabled:bg-green-700 disabled:text-gray-200 transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
+          >
+            <Handshake size={18} />
+            <span>Support Dev</span>
+          </button>
         </div>
+      </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar Navigation */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              <nav className="space-y-2">
-                {sections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${
-                      activeSection === section.id
-                        ? "bg-blue-50 text-blue-700 border border-blue-200"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    <section.icon size={20} />
-                    <div className="flex-1">
-                      <div className="font-medium">{section.name}</div>
-                      <div className="text-xs text-gray-500">
-                        {section.description}
-                      </div>
-                    </div>
-                    <ChevronRight
-                      size={16}
-                      className={
-                        activeSection === section.id
-                          ? "text-blue-500"
-                          : "text-gray-400"
-                      }
-                    />
-                  </button>
-                ))}
-              </nav>
-
-              {/* Logout Button */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <button
-                  onClick={() => logout()}
-                  className="w-full flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-200"
-                >
-                  <Lock size={20} />
-                  <span className="font-medium">Sign Out</span>
-                </button>
-              </div>
+      {/* Settings Body */}
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8 my-2">
+        <div className="space-y-5">
+          {/* Account Group */}
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+              Account
+            </h3>
+            <div className="space-y-1.5">
+              <SectionButton
+                icon={UserRound}
+                label="Profile"
+                redirect="/setting-profile"
+              />
+              <SectionButton
+                icon={Shield}
+                label="Security"
+                redirect="/setting-security"
+              />
+              <SectionButton
+                icon={Lock}
+                label="Privacy"
+                redirect="/setting-privacy"
+              />
+              <SectionButton
+                icon={Info}
+                label="Status"
+                redirect="/setting-status"
+              />
+              <SectionButton
+                icon={Forward}
+                label="Share Profile"
+                func={() => showShare()}
+              />
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-              {renderContent()}
+          {/* Preferences Group */}
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+              Preferences
+            </h3>
+            <div className="space-y-1.5">
+              <SectionButton
+                icon={Bell}
+                label="Notifications"
+                redirect="/setting-notifications"
+              />
+              <SectionButton
+                icon={Mail}
+                label="Email Settings"
+                redirect="/setting-email"
+              />
+            </div>
+          </div>
+
+          {/* Developer Group */}
+          {!user?.developerProfile.isDeveloper && (
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+                Developer
+              </h3>
+              <div className="space-y-1.5">
+                <SectionButton
+                  icon={Terminal}
+                  label="Developer Account"
+                  redirect="/setting-developer-account"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Developer Group */}
+          {user?.developerProfile.isDeveloper && (
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+                Developer
+              </h3>
+              <div className="space-y-1.5">
+                <SectionButton
+                  icon={Code}
+                  label="Developer Profile"
+                  redirect="/setting-developer"
+                />
+                <SectionButton
+                  icon={Smartphone}
+                  label="Apps Management"
+                  redirect="/setting-apps"
+                />
+                <SectionButton
+                  icon={BadgeAlert}
+                  label="Verification & Status"
+                  redirect="/setting-verification"
+                />
+
+                <SectionButton
+                  icon={Gauge}
+                  label="Metrics"
+                  redirect="/setting-metrics"
+                />
+                <SectionButton icon={Globe} label="Organization" />
+              </div>
+            </div>
+          )}
+
+          {/* Help & Support Group */}
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+              Help & Support
+            </h3>
+            <div className="space-y-1.5">
+              <SectionButton
+                icon={Headset}
+                label="Support Center"
+                redirect="/suport"
+              />
+              <SectionButton
+                icon={MessageCircle}
+                label="Feedback"
+                redirect="/feedbak"
+              />
+              <SectionButton icon={Sticker} label="About" redirect="/about" />
+            </div>
+          </div>
+
+          {/* Logout */}
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+            <h3 className="text-xs sm:text-sm font-medium text-rose-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+              SignOut
+            </h3>
+            <div className="space-y-1.5">
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="flex items-center justify-between w-full px-3 sm:py-2 rounded-xl transition-all duration-200 text-gray-600 bg-gray-50 hover:bg-gray-100 border border-transparent"
+              >
+                <div className="flex gap-3 items-center py-3.5 sm:py-0">
+                  <LogOutIcon size={18} className="sm:w-5 sm:h-5" />
+                  <span className="font-medium font-poppins text-sm sm:text-base">
+                    Logout
+                  </span>
+                </div>
+                <div className="rounded-full">
+                  <img
+                    src={user.photoURL}
+                    className="h-8 w-8 aspect-square object-cover rounded-xl border-[1.5px] border-white shadow-xs"
+                  />
+                </div>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Logout Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 min-h-screen bg-black/20 backdrop-blur-xs flex items-center justify-center z-50 px-4 select-none">
+          <div className="bg-white rounded-xl shadow-xl p-5 sm:p-6 w-full max-w-xs text-center border border-gray-100">
+            {/* Text Content */}
+            <h2 className="text-lg font-semibold text-gray-800 font-poppins">
+              Ready to leave?
+            </h2>
+            <p className="text-base text-gray-500 font-outfit mt-2">
+              You're about to sign out of DevsRepo. You can always sign in to
+              access your account.
+            </p>
+
+            {/* Buttons */}
+            <div className="mt-5 flex gap-5 justify-center">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-5 py-2 rounded-lg border border-green-700 text-green-700 font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all font-poppins"
+              >
+                Stay Signed In
+              </button>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setShowConfirm(false);
+                }}
+                className="px-5 py-2 rounded-lg border border-rose-600 bg-rose-600 text-white font-semibold text-xs sm:text-sm hover:bg-rose-500 transition-all font-poppins"
+              >
+                Yes, Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

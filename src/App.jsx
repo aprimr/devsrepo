@@ -18,10 +18,22 @@ import PageNotFound from "./pages/others/PageNotFound";
 import Onboarding from "./pages/others/Onboarding";
 import ProtectedRoute from "./pages/auth/ProtectedRoute";
 import Setting from "./pages/settings/Settings";
+import EditProfile from "./pages/profile/EditProfile";
+import SettingsProfile from "./pages/settings/SettingsProfile";
+import SettingsSecurity from "./pages/settings/SettingsSecurity";
+import SettingsPrivacy from "./pages/settings/SettingsPrivacy";
 
 function AppContent() {
   const location = useLocation();
-  const hideNavbarFooterRoutes = ["/login", "/onboarding"];
+  const hideNavbarFooterRoutes = [
+    "/login",
+    "/onboarding",
+    "/edit-profile",
+    "/setting",
+    "/setting-profile",
+    "/setting-security",
+    "/setting-privacy",
+  ];
   const hideNavbarFooter = hideNavbarFooterRoutes.includes(location.pathname);
 
   return (
@@ -38,10 +50,42 @@ function AppContent() {
           }
         />
         <Route
+          path="/edit-profile"
+          element={
+            <ProtectedRoute>
+              <EditProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/setting"
           element={
             <ProtectedRoute>
               <Setting />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-profile"
+          element={
+            <ProtectedRoute>
+              <SettingsProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-security"
+          element={
+            <ProtectedRoute>
+              <SettingsSecurity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-privacy"
+          element={
+            <ProtectedRoute>
+              <SettingsPrivacy />
             </ProtectedRoute>
           }
         />
