@@ -159,8 +159,6 @@ export const useAuthStore = create(
               providerId: "google.com",
               lastLogin: serverTimestamp(),
               "system.lastActivity": serverTimestamp(),
-              photoURL: firebaseUser.photoURL || existingData.photoURL,
-              name: firebaseUser.displayName || existingData.name,
             };
 
             await updateDoc(userRef, updates);
@@ -212,8 +210,6 @@ export const useAuthStore = create(
               providerId: "github.com",
               lastLogin: serverTimestamp(),
               "system.lastActivity": serverTimestamp(),
-              photoURL: firebaseUser.photoURL || existingData.photoURL,
-              name: firebaseUser.displayName || existingData.name,
             };
 
             await updateDoc(userRef, updates);
