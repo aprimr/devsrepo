@@ -7,7 +7,7 @@ import {
   Scroll,
   Loader2,
 } from "lucide-react";
-import { useAuthStore } from "../../store/AuthStore";
+import { useAuthStore } from "../../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";

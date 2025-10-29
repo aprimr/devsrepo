@@ -74,9 +74,7 @@ export default function Profile() {
                   {/* Followers */}
                   <div className="w-auto">
                     <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
-                      {numberSuffixer(
-                        user.developerProfile.social.followersIds.length
-                      )}
+                      {numberSuffixer(user.social.followersIds.length)}
                     </p>
                     <p className="text-gray-800 text-sm font-normal font-poppins">
                       Followers
@@ -85,9 +83,7 @@ export default function Profile() {
                   {/* Following */}
                   <div className="w-auto mr-1">
                     <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
-                      {numberSuffixer(
-                        user.developerProfile.social.followingIds.length
-                      )}
+                      {numberSuffixer(user.social.followingIds.length)}
                     </p>
                     <p className="text-gray-800 text-sm font-normal font-poppins">
                       Following

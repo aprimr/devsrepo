@@ -5,7 +5,6 @@ import {
   AtSign,
   Tag,
   Edit,
-  Mail,
   Calendar,
 } from "lucide-react";
 import {
@@ -16,10 +15,10 @@ import {
   FaTwitter,
   FaYoutube,
 } from "react-icons/fa";
-import { useAuthStore } from "../../store/AuthStore";
+import { useAuthStore } from "../../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
-import { formatDate } from "../../utils/formatDate";
-import DevsRepoInvert from "../../assets/images/DevsRepoInvert.png";
+import { formatDate } from "../../../utils/formatDate";
+import DevsRepoInvert from "../../../assets/images/DevsRepoInvert.png";
 
 function SettingsProfile() {
   const { user } = useAuthStore();

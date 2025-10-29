@@ -14,6 +14,7 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { auth, db, googleProvider, githubProvider } from "../firebase/config";
 
@@ -50,6 +51,10 @@ export const useAuthStore = create(
           role: "user",
           bio: "Hey! I'm using DevsRepo.",
           location: "",
+          social: {
+            followingIds: [],
+            followersIds: [],
+          },
           privacy: {
             privateFollower: false,
             privateFollowing: false,
@@ -78,25 +83,32 @@ export const useAuthStore = create(
           developerProfile: {
             isDeveloper: false,
             developerId: firebaseUser.uid,
-            organizationName: "",
             website: "",
             contactEmail: firebaseUser.email,
-            verifiedDeveloper: false,
-            developerStatus: "pending_review",
+            developerSince: "",
+
+            // Ban Status
+            suspendedStatus: {
+              isSuspended: false,
+              reason: "",
+              bannedUntil: "",
+            },
+
+            // Metrics
             totalDownloadsAcrossApps: 0,
-            developerSince: 0,
             metrics: {
               totalPublishedApps: 0,
               totalReviewsReceived: 0,
+              totalUpdatesPushed: 0,
+              totalReportsReceived: 0,
             },
+
+            // App Management
             apps: {
               submittedAppIds: [],
               publishedAppIds: [],
               rejectedAppIds: [],
-            },
-            social: {
-              followingIds: [],
-              followersIds: [],
+              suspendedAppIds: [],
             },
           },
 
@@ -106,7 +118,7 @@ export const useAuthStore = create(
             banStatus: {
               isBanned: false,
               reason: "",
-              bannedUntil: 0,
+              bannedUntil: "",
             },
           },
         };

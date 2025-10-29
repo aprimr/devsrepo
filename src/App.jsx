@@ -19,12 +19,13 @@ import Onboarding from "./pages/others/Onboarding";
 import ProtectedRoute from "./pages/auth/ProtectedRoute";
 import Setting from "./pages/settings/Settings";
 import EditProfile from "./pages/profile/EditProfile";
-import SettingsProfile from "./pages/settings/SettingsProfile";
-import SettingsSecurity from "./pages/settings/SettingsSecurity";
-import SettingsPrivacy from "./pages/settings/SettingsPrivacy";
-import SettingsStatus from "./pages/settings/SettingsStatus";
-import SettingsNotifications from "./pages/settings/SettingsNotifications";
-import SettingsEmail from "./pages/settings/SettingsEmail";
+import SettingsProfile from "./pages/settings/account/SettingsProfile";
+import SettingsSecurity from "./pages/settings/account/SettingsSecurity";
+import SettingsPrivacy from "./pages/settings/account/SettingsPrivacy";
+import SettingsStatus from "./pages/settings/account/SettingsStatus";
+import SettingsNotifications from "./pages/settings/preferences/SettingsNotifications";
+import SettingsEmail from "./pages/settings/preferences/SettingsEmail";
+import SettingsDeveloperAccount from "./pages/settings/developer/DeveloperAccount";
 
 function AppContent() {
   const location = useLocation();
@@ -39,11 +40,12 @@ function AppContent() {
     "/setting-status",
     "/setting-notifications",
     "/setting-email",
+    "/setting-developer-account",
   ];
   const hideNavbarFooter = hideNavbarFooterRoutes.includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-gray-50 text-gray-900 select-none">
       {!hideNavbarFooter && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
@@ -116,6 +118,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <SettingsEmail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-developer-account"
+          element={
+            <ProtectedRoute>
+              <SettingsDeveloperAccount />
             </ProtectedRoute>
           }
         />

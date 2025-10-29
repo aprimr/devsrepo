@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { useAuthStore } from "../../store/AuthStore";
+import { useAuthStore } from "../../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
-import { formatDate } from "../../utils/formatDate";
+import { formatDate } from "../../../utils/formatDate";
 import { useState } from "react";
 import { toast } from "sonner";
 

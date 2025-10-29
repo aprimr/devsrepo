@@ -9,9 +9,9 @@ import {
   Edit,
   Flag,
 } from "lucide-react";
-import { useAuthStore } from "../../store/AuthStore";
+import { useAuthStore } from "../../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
-import { formatDate } from "../../utils/formatDate";
+import { formatDate } from "../../../utils/formatDate";
 
 function SettingsStatus() {
   const { user } = useAuthStore();

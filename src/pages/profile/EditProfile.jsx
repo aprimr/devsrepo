@@ -18,7 +18,7 @@ import {
 } from "react-icons/fa";
 import { useAuthStore } from "../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DevsRepoInvert from "../../assets/images/DevsRepoInvert.png";
 import { toast } from "sonner";
 
@@ -203,7 +203,7 @@ function EditProfile() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                   placeholder={`${
                     user.developerProfile?.isDeveloper
                       ? "Enter full developer name"
@@ -232,7 +232,7 @@ function EditProfile() {
                   name="username"
                   value={formData.username}
                   onChange={handleLowercaseInputChange}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                   placeholder="Enter username"
                   low
                   maxLength={25}
@@ -257,7 +257,7 @@ function EditProfile() {
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                   placeholder="City, Country"
                   maxLength={50}
                 />
@@ -280,7 +280,7 @@ function EditProfile() {
                   value={formData.bio}
                   onChange={handleInputChange}
                   rows={6}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins resize-none"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins resize-none outline-none"
                   placeholder="Tell us about yourself..."
                   maxLength={200}
                 />
@@ -310,7 +310,7 @@ function EditProfile() {
                     name="github"
                     value={formData.socialLinks.github}
                     onChange={handleSocialInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                     placeholder="https://github.com/username"
                   />
                 </div>
@@ -328,7 +328,7 @@ function EditProfile() {
                     name="linkedin"
                     value={formData.socialLinks.linkedin}
                     onChange={handleSocialInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                     placeholder="https://linkedin.com/in/username"
                   />
                 </div>
@@ -346,7 +346,7 @@ function EditProfile() {
                     name="twitter"
                     value={formData.socialLinks.twitter}
                     onChange={handleSocialInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                     placeholder="https://twitter.com/username"
                   />
                 </div>
@@ -364,7 +364,7 @@ function EditProfile() {
                     name="youtube"
                     value={formData.socialLinks.youtube}
                     onChange={handleSocialInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                     placeholder="https://youtube.com/username"
                   />
                 </div>
@@ -382,7 +382,7 @@ function EditProfile() {
                     name="instagram"
                     value={formData.socialLinks.instagram}
                     onChange={handleSocialInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                     placeholder="https://instagram.com/username"
                   />
                 </div>
@@ -400,7 +400,7 @@ function EditProfile() {
                     name="facebook"
                     value={formData.socialLinks.facebook}
                     onChange={handleSocialInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                     placeholder="https://facebook.com/username"
                   />
                 </div>
