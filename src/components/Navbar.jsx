@@ -1,16 +1,17 @@
 import {
   Sticker,
   Search,
-  FileUp,
   Smartphone,
   Layout,
   Globe,
   Zap,
   GalleryVerticalEnd,
   LayoutDashboard,
+  Upload,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/AuthStore";
+import DevsRepoImg from "../assets/images/favicon.png";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -79,17 +80,14 @@ function Navbar() {
             <Search size={20} className="text-gray-600" />
           </button>
 
-          {/* Dev Dash btn */}
+          {/* Publish btn */}
           {isAuthenticated && user.developerProfile.isDeveloper && (
             <button
-              className="flex justify-center items-center gap-2 px-3 md:px-4 py-2 rounded-full border-2 border-green-600 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all duration-300 font-poppins font-medium text-sm md:text-base"
+              className="flex justify-center items-center gap-2 px-3 md:px-4 py-2 rounded-full border-2 border-green-600 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
               aria-label="Upload"
             >
-              <LayoutDashboard
-                size={16}
-                className="hidden lg:flex md:size-[18px]"
-              />
-              <span className="">Dev Dash</span>
+              <Upload size={16} className="size-[18px]" />
+              <span className="">Publish</span>
             </button>
           )}
 
@@ -100,7 +98,7 @@ function Navbar() {
                 navigate("/profile");
               }}
               src={user?.photoURL}
-              alt="user-icon"
+              alt="image-url"
               className="w-10 h-10 flex items-center justify-center bg-linear-to-br from-green-500 to-green-700 text-white font-semibold rounded-full border-2 border-white shadow-sm cursor-pointer"
             />
           ) : (

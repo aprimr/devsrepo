@@ -7,6 +7,12 @@ import {
   AtSign,
   Tag,
   Loader2,
+  BadgeCheck,
+  Loader,
+  CirclePlus,
+  AppWindow,
+  X,
+  Braces,
 } from "lucide-react";
 import {
   FaFacebook,
@@ -26,7 +32,19 @@ function EditProfile() {
   const { user, updateUserProfile } = useAuthStore();
   const navigate = useNavigate();
 
+  const [skills, setSkills] = useState([
+    ...(user?.developerProfile.skills || []),
+  ]);
+  const [techStacks, setTechStacks] = useState([
+    ...(user?.developerProfile.skills || []),
+  ]);
+  const [skillValue, setSkillValue] = useState("");
+  const [techStackValue, setTechStackValue] = useState("");
+
+  const [website, setWebsite] = useState(user?.developerProfile.website || "");
+
   const [isSaving, setIsSaving] = useState(false);
+  const [isAddingInfo, setIsAddingInfo] = useState("");
   const [formData, setFormData] = useState({
     name: user?.name || "",
     username: user?.username || "",
@@ -107,6 +125,143 @@ function EditProfile() {
       }
     } catch (error) {
       setIsSaving(false);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleUpdateWebsite = async (e) => {
+    setIsAddingInfo("website");
+    e.preventDefault();
+    try {
+      const updateWebsitePayload = {
+        ...user,
+        developerProfile: {
+          ...user.developerProfile,
+          website,
+        },
+      };
+      const res = await updateUserProfile(updateWebsitePayload);
+      if (res.success) {
+        setIsAddingInfo("");
+      } else {
+        setIsAddingInfo("");
+        toast.error("An error occured while saving. Please try again.");
+      }
+    } catch (error) {
+      setIsAddingInfo("");
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleAddSkill = async (e) => {
+    setIsAddingInfo("skills");
+    e.preventDefault();
+    try {
+      const updatedSkills = [...skills, skillValue];
+      setSkills(updatedSkills);
+      const updateSkillPayload = {
+        ...user,
+        developerProfile: {
+          ...user.developerProfile,
+          skills: updatedSkills,
+        },
+      };
+      const res = await updateUserProfile(updateSkillPayload);
+      if (res.success) {
+        setIsAddingInfo("");
+        setSkillValue("");
+      } else {
+        setIsAddingInfo("");
+        toast.error("An error occured while adding. Please try again.");
+      }
+    } catch (error) {
+      setIsAddingInfo("");
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleRemoveSkill = async (e, id) => {
+    setIsAddingInfo("skills");
+    e.preventDefault();
+    try {
+      const updatedSkills = skills.filter((_, index) => index !== id);
+      setSkills(updatedSkills);
+      const updateSkillPayload = {
+        ...user,
+        developerProfile: {
+          ...user.developerProfile,
+          skills: updatedSkills,
+        },
+      };
+      const res = await updateUserProfile(updateSkillPayload);
+      if (res.success) {
+        setIsAddingInfo("");
+        setSkillValue("");
+      } else {
+        setIsAddingInfo("");
+        toast.error("An error occured while removing. Please try again.");
+      }
+    } catch (error) {
+      setIsAddingInfo("");
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleAddTechstack = async (e) => {
+    setIsAddingInfo("techstack");
+    e.preventDefault();
+    try {
+      const updatedTechstack = [...techStacks, techStackValue];
+      setTechStacks(updatedTechstack);
+      const updateTechStackPayload = {
+        ...user,
+        developerProfile: {
+          ...user.developerProfile,
+          techStacks: updatedTechstack,
+        },
+      };
+      const res = await updateUserProfile(updateTechStackPayload);
+      if (res.success) {
+        setIsAddingInfo("");
+        setTechStackValue("");
+      } else {
+        setIsAddingInfo("");
+        toast.error("An error occured while adding. Please try again.");
+      }
+    } catch (error) {
+      setIsAddingInfo("");
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleRemoveTechstack = async (e, id) => {
+    setIsAddingInfo("techstack");
+    e.preventDefault();
+    try {
+      const updatedTechstack = techStacks.filter((_, index) => index !== id);
+      setTechStacks(updatedTechstack);
+      const updateTechStackPayload = {
+        ...user,
+        developerProfile: {
+          ...user.developerProfile,
+          techStacks: updatedTechstack,
+        },
+      };
+      const res = await updateUserProfile(updateTechStackPayload);
+      if (res.success) {
+        setIsAddingInfo("");
+        setTechStackValue("");
+      } else {
+        setIsAddingInfo("");
+        toast.error("An error occured while removing. Please try again.");
+      }
+    } catch (error) {
+      setIsAddingInfo("");
+      console.log(error);
       toast.error("Something went wrong");
     }
   };
@@ -291,8 +446,149 @@ function EditProfile() {
             </div>
           </div>
 
+          {/* Developer Section */}
+          {user?.developerProfile.isDeveloper && (
+            <div className="pt-6">
+              <h3 className="text-lg font-semibold text-green-600 font-poppins mb-4">
+                Developer Info
+              </h3>
+
+              <div className="grid grid-cols-1 gap-4">
+                {/* Website */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 font-poppins">
+                    Website
+                  </label>
+                  <div className="relative">
+                    <AppWindow className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="url"
+                      name="website"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
+                      placeholder="https://yourwebsite.com"
+                    />
+                    {isAddingInfo === "website" ? (
+                      <Loader className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 animate-spin" />
+                    ) : (
+                      user.developerProfile.website !== website && (
+                        <CirclePlus
+                          onClick={handleUpdateWebsite}
+                          className={`absolute right-0.5 top-1/2 py-3.5 transform -translate-y-1/2 rounded-r-xl ${
+                            !website ? "text-gray-400" : "text-green-500"
+                          } w-12 h-12`}
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Skills */}
+                <div className="space-y-2">
+                  <label className="flex items-baseline gap-1 text-sm font-medium text-gray-700 font-poppins">
+                    Skills{" "}
+                    <span className="text-xs text-gray-500 font-outfit">
+                      {`(${user.developerProfile.skills.length}/10) ${
+                        user.developerProfile.skills.length === 10
+                          ? "Max skills"
+                          : ""
+                      }`}
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <BadgeCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      name="skills"
+                      value={skillValue}
+                      disabled={user.developerProfile.skills.length === 10}
+                      onChange={(e) => setSkillValue(e.target.value)}
+                      className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
+                      placeholder="App / Web / Cloud Developer"
+                    />
+                    {isAddingInfo === "skills" ? (
+                      <Loader className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 animate-spin" />
+                    ) : (
+                      skillValue && (
+                        <CirclePlus
+                          onClick={handleAddSkill}
+                          className={`absolute right-0.5 top-1/2 py-3.5 text-green-500 transform -translate-y-1/2 rounded-r-xl w-12 h-12`}
+                        />
+                      )
+                    )}
+                  </div>
+                  {/* Chips */}
+                  {user.developerProfile.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {user.developerProfile.skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          onClick={(e) => handleRemoveSkill(e, index)}
+                          className="flex justify-center items-center gap-1 pl-2 pr-1 py-0.5 bg-green-50 text-green-600 rounded-md text-xs font-normal font-poppins border border-green-600"
+                        >
+                          {skill}
+                          <X
+                            size={13}
+                            className="text-green-700 cursor-pointer hover:text-green-900 transition"
+                          />
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Languages / Tech Stacks */}
+                <div className="space-y-2">
+                  <label className="flex items-baseline gap-1 text-sm font-medium text-gray-700 font-poppins">
+                    Languages / Tech
+                  </label>
+                  <div className="relative">
+                    <Braces className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      name="techstacks"
+                      value={techStackValue}
+                      onChange={(e) => setTechStackValue(e.target.value)}
+                      className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
+                      placeholder="Java / Go / Flutter , Docker / Github "
+                    />
+                    {isAddingInfo === "techstack" ? (
+                      <Loader className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 animate-spin" />
+                    ) : (
+                      techStackValue && (
+                        <CirclePlus
+                          onClick={handleAddTechstack}
+                          className="absolute right-0.5 top-1/2 py-3.5 text-green-500 transform -translate-y-1/2 rounded-r-xl w-12 h-12"
+                        />
+                      )
+                    )}
+                  </div>
+                  {/* Chips */}
+                  {user.developerProfile.techStacks.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {user.developerProfile.techStacks.map((tech, index) => (
+                        <span
+                          key={index}
+                          onClick={(e) => handleRemoveTechstack(e, index)}
+                          className="flex justify-center items-center gap-1 pl-2 pr-1 py-0.5 bg-green-50 text-green-600 rounded-md text-xs font-normal font-poppins border border-green-600"
+                        >
+                          {tech}
+                          <X
+                            size={13}
+                            className="text-green-700 cursor-pointer hover:text-green-900 transition"
+                          />
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Social Links Section */}
-          <div className="pt-6">
+          <div className="pt-2 ">
             <h3 className="text-lg font-semibold text-green-600 font-poppins mb-4">
               Social Links
             </h3>

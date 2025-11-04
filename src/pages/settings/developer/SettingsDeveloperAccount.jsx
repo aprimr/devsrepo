@@ -98,7 +98,7 @@ function SettingsDeveloperAccount() {
 
         <div className="max-w-2xl mx-auto px-1 sm:px-4 py-3">
           <div className="max-w-md mx-auto px-8 py-12 text-center animate-fadeIn">
-            <div className="w-56 h-56 mx-auto mb-4">
+            <div className="w-72 h-72 mx-auto mb-4">
               <Lottie animationData={devAnimation} loop />
             </div>
             <h1 className="text-3xl font-poppins font-semibold text-gray-900 mb-3">
@@ -111,7 +111,7 @@ function SettingsDeveloperAccount() {
             </p>
             <button
               onClick={() => setCurrentStep(2)}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-poppins font-medium text-base transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
+              className="bottom-0 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-poppins font-medium text-base transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
             >
               Create Developer Account
             </button>

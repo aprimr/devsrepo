@@ -85,6 +85,8 @@ export const useAuthStore = create(
             developerId: firebaseUser.uid,
             website: "",
             contactEmail: firebaseUser.email,
+            skills: [],
+            techStacks: [],
             developerSince: "",
 
             // Ban Status

@@ -19,6 +19,7 @@ import {
   LogOutIcon,
   Handshake,
   Terminal,
+  RotateCw,
 } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -167,7 +168,7 @@ function Setting() {
             </div>
           </div>
 
-          {/* Developer Group */}
+          {/* Developer Account Group */}
           {!user?.developerProfile.isDeveloper && (
             <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
               <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
@@ -193,7 +194,7 @@ function Setting() {
                 <SectionButton
                   icon={Code}
                   label="Developer Profile"
-                  redirect="/setting-developer"
+                  redirect="/setting-developer-profile"
                 />
                 <SectionButton
                   icon={Smartphone}
@@ -233,6 +234,14 @@ function Setting() {
                 redirect="/feedbak"
               />
               <SectionButton icon={Sticker} label="About" redirect="/about" />
+              <SectionButton
+                icon={RotateCw}
+                label="Refresh App"
+                func={() => {
+                  navigate("/", { replace: true });
+                  window.location.reload();
+                }}
+              />
             </div>
           </div>
 

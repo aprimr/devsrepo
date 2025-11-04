@@ -1,8 +1,9 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuthStore } from "../../store/AuthStore";
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuthStore();
+function DeveloperRoute({ children }) {
+  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const isDeveloper = user.developerProfile.isDeveloper;
 
   if (isLoading) {
     return (
@@ -13,11 +14,11 @@ function ProtectedRoute({ children }) {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (!isAuthenticated || !isDeveloper) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
 }
 
-export default ProtectedRoute;
+export default DeveloperRoute;

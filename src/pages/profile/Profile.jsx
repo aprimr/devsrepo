@@ -1,18 +1,10 @@
 import { useState } from "react";
-import {
-  MapPin,
-  Settings,
-  Copy,
-  Globe,
-  Sticker,
-  CopyCheck,
-} from "lucide-react";
+import { MapPin, Settings, Globe, Sticker } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
 import numberSuffixer from "../../utils/numberSuffixer";
 import { useNavigate } from "react-router-dom";
 import DevsRepoImport from "../../assets/images/DevsRepoInvert.png";
 import { FcGoogle } from "react-icons/fc";
-import { toast } from "sonner";
 import {
   FaFacebook,
   FaGithub,
@@ -122,7 +114,7 @@ export default function Profile() {
               </div>
 
               {/* Bio, Location & Website */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {/* Bio */}
                 <p
                   onClick={() => setIsBioExpanded(!isBioExpanded)}
@@ -142,10 +134,14 @@ export default function Profile() {
                   user.developerProfile.website && (
                     <a
                       href={user.developerProfile.website}
-                      className="w-full flex items-center gap-2 text-gray-700 font-poppins text-sm truncate"
+                      target="_blank"
+                      className="w-full flex items-center gap-2 text-green-600 font-poppins text-sm truncate"
                     >
                       <Globe className="w-4 h-4" />
-                      {user.developerProfile.website}
+                      {user.developerProfile.website.replace(
+                        /^(https?:\/\/)?(www\.)?/,
+                        ""
+                      )}
                     </a>
                   )}
                 {/* Social icons */}

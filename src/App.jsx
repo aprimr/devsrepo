@@ -13,10 +13,11 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Profile from "./pages/profile/Profile";
 import Login from "./pages/auth/Login";
+import ProtectedRoute from "./pages/auth/ProtectedRoute";
+import DeveloperRoute from "./pages/auth/DeveloperRoute";
 import Footer from "./components/Footer";
 import PageNotFound from "./pages/others/PageNotFound";
 import Onboarding from "./pages/others/Onboarding";
-import ProtectedRoute from "./pages/auth/ProtectedRoute";
 import Setting from "./pages/settings/Settings";
 import EditProfile from "./pages/profile/EditProfile";
 import SettingsProfile from "./pages/settings/account/SettingsProfile";
@@ -25,7 +26,8 @@ import SettingsPrivacy from "./pages/settings/account/SettingsPrivacy";
 import SettingsStatus from "./pages/settings/account/SettingsStatus";
 import SettingsNotifications from "./pages/settings/preferences/SettingsNotifications";
 import SettingsEmail from "./pages/settings/preferences/SettingsEmail";
-import SettingsDeveloperAccount from "./pages/settings/developer/DeveloperAccount";
+import SettingsDeveloperAccount from "./pages/settings/developer/SettingsDeveloperAccount";
+import SettingsDeveloperProfile from "./pages/settings/developer/SettingsDeveloperProfile";
 
 function AppContent() {
   const location = useLocation();
@@ -41,6 +43,7 @@ function AppContent() {
     "/setting-notifications",
     "/setting-email",
     "/setting-developer-account",
+    "/setting-developer-profile",
   ];
   const hideNavbarFooter = hideNavbarFooterRoutes.includes(location.pathname);
 
@@ -127,6 +130,14 @@ function AppContent() {
             <ProtectedRoute>
               <SettingsDeveloperAccount />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-developer-profile"
+          element={
+            <DeveloperRoute>
+              <SettingsDeveloperProfile />
+            </DeveloperRoute>
           }
         />
         <Route path="/onboarding" element={<Onboarding />} />
