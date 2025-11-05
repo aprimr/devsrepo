@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Settings, Globe, Sticker } from "lucide-react";
+import { MapPin, Settings, Globe, Sticker, BadgeCheck } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
 import numberSuffixer from "../../utils/numberSuffixer";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,8 @@ import {
   FaTwitter,
   FaYoutube,
 } from "react-icons/fa";
+import { BsFillPatchCheckFill } from "react-icons/bs";
+import { HiBadgeCheck } from "react-icons/hi";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -36,7 +38,7 @@ export default function Profile() {
                   className="w-24 h-24 aspect-square sm:w-40 sm:h-40 rounded-full object-cover"
                 />
               </div>
-              {/* Username & Stats */}
+              {/* Name & Stats */}
               <div className="flex-1">
                 {/* Name */}
                 <div className="w-full flex gap-4 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
@@ -89,12 +91,20 @@ export default function Profile() {
             <div className="flex-1">
               {/* Username and Button */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-                {/* Username */}
-                <div className="w-full flex gap-4 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
-                  <div className="w-full truncate">
+                <div className="w-full flex gap-2 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
+                  {/* Username */}
+                  <div className="truncate">
                     <span className="text-xl">@</span>
                     {user.username}
                   </div>
+                  {/* Verified Badge */}
+                  {user?.developerProfile.verifiedDeveloper && (
+                    <BadgeCheck
+                      size={22}
+                      fill="#3B82F6"
+                      className="text-white"
+                    />
+                  )}
                 </div>
                 {/* Edit and settings btn */}
                 <div className="flex flex-row gap-3">
@@ -137,7 +147,7 @@ export default function Profile() {
                       target="_blank"
                       className="w-full flex items-center gap-2 text-green-600 font-poppins text-sm truncate"
                     >
-                      <Globe className="w-4 h-4" />
+                      <Globe className="w-4 h-4 text-gray-700" />
                       {user.developerProfile.website.replace(
                         /^(https?:\/\/)?(www\.)?/,
                         ""

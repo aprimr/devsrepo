@@ -82,6 +82,7 @@ export const useAuthStore = create(
           // Developer Information
           developerProfile: {
             isDeveloper: false,
+            verifiedDeveloper: false,
             developerId: firebaseUser.uid,
             website: "",
             contactEmail: firebaseUser.email,
@@ -89,7 +90,7 @@ export const useAuthStore = create(
             techStacks: [],
             developerSince: "",
 
-            // Ban Status
+            // Suspension Status
             suspendedStatus: {
               isSuspended: false,
               reason: "",
@@ -101,7 +102,6 @@ export const useAuthStore = create(
             metrics: {
               totalPublishedApps: 0,
               totalReviewsReceived: 0,
-              totalUpdatesPushed: 0,
               totalReportsReceived: 0,
             },
 
@@ -287,7 +287,7 @@ export const useAuthStore = create(
             ...updates,
             system: {
               ...user.system,
-              lastActivity: combinedUpdates["system.lastActivity"],
+              lastActivity: new Date(),
             },
           };
           set({ user: updatedUser });

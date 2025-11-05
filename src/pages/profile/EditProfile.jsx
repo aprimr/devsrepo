@@ -13,6 +13,8 @@ import {
   AppWindow,
   X,
   Braces,
+  Check,
+  Mail,
 } from "lucide-react";
 import {
   FaFacebook,
@@ -32,6 +34,10 @@ function EditProfile() {
   const { user, updateUserProfile } = useAuthStore();
   const navigate = useNavigate();
 
+  const [contactEmail, setContactEmail] = useState(
+    user?.developerProfile.contactEmail
+  );
+  const [website, setWebsite] = useState(user?.developerProfile.website || "");
   const [skills, setSkills] = useState([
     ...(user?.developerProfile.skills || []),
   ]);
@@ -40,8 +46,6 @@ function EditProfile() {
   ]);
   const [skillValue, setSkillValue] = useState("");
   const [techStackValue, setTechStackValue] = useState("");
-
-  const [website, setWebsite] = useState(user?.developerProfile.website || "");
 
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingInfo, setIsAddingInfo] = useState("");
@@ -70,9 +74,13 @@ function EditProfile() {
     }));
   };
 
-  const handleLowercaseInputChange = (e) => {
+  const handleUsernameInputChange = (e) => {
     const { name, value } = e.target;
-    const formattedValue = value.toLowerCase().replace(/\s+/g, "_");
+    const formattedValue = value
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_.]/g, "")
+      .replace(/^\.*/, "");
 
     setFormData((prev) => ({
       ...prev,
@@ -125,6 +133,31 @@ function EditProfile() {
       }
     } catch (error) {
       setIsSaving(false);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleUpdateContactEmail = async (e) => {
+    setIsAddingInfo("contact-email");
+    e.preventDefault();
+    try {
+      const updateContactEmailPayload = {
+        ...user,
+        developerProfile: {
+          ...user.developerProfile,
+          contactEmail,
+        },
+      };
+      const res = await updateUserProfile(updateContactEmailPayload);
+      if (res.success) {
+        setIsAddingInfo("");
+      } else {
+        setIsAddingInfo("");
+        toast.error("An error occured while saving. Please try again.");
+      }
+    } catch (error) {
+      setIsAddingInfo("");
+      console.log(error);
       toast.error("Something went wrong");
     }
   };
@@ -386,7 +419,7 @@ function EditProfile() {
                   type="text"
                   name="username"
                   value={formData.username}
-                  onChange={handleLowercaseInputChange}
+                  onChange={handleUsernameInputChange}
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
                   placeholder="Enter username"
                   low
@@ -454,6 +487,37 @@ function EditProfile() {
               </h3>
 
               <div className="grid grid-cols-1 gap-4">
+                {/* Contact Email */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 font-poppins">
+                    Contact Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="email"
+                      name="contactEmail"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-poppins outline-none"
+                      placeholder="aprimr@devsrepo.com"
+                    />
+                    {isAddingInfo === "contact-email" ? (
+                      <Loader className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 animate-spin" />
+                    ) : (
+                      user.developerProfile.contactEmail !== contactEmail && (
+                        <button
+                          onClick={handleUpdateContactEmail}
+                          className="absolute right-1 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-xl font-medium font-poppins disabled:bg-gray-200 disabled:text-gray-400 bg-green-500 text-white hover:bg-green-600"
+                          disabled={!contactEmail}
+                        >
+                          Save
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+
                 {/* Website */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 font-poppins">

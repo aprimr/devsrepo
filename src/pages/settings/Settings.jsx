@@ -20,6 +20,7 @@ import {
   Handshake,
   Terminal,
   RotateCw,
+  BrickWallShield,
 } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -203,16 +204,31 @@ function Setting() {
                 />
                 <SectionButton
                   icon={BadgeAlert}
-                  label="Verification & Status"
-                  redirect="/setting-verification"
+                  label="Suspension Status"
+                  redirect="/setting-developer-suspension"
                 />
 
                 <SectionButton
                   icon={Gauge}
                   label="Metrics"
-                  redirect="/setting-metrics"
+                  redirect="/setting-developer-metrics"
                 />
-                <SectionButton icon={Globe} label="Organization" />
+              </div>
+            </div>
+          )}
+
+          {/* Admin Group */}
+          {user?.system.isAdmin && (
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+                Admin
+              </h3>
+              <div className="space-y-1.5">
+                <SectionButton
+                  icon={BrickWallShield}
+                  label="Admin"
+                  func={() => {}}
+                />
               </div>
             </div>
           )}
@@ -290,9 +306,9 @@ function Setting() {
             <div className="mt-5 flex gap-5 justify-center">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-5 py-2 rounded-lg border-2 border-green-700 text-green-700 font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all font-poppins"
+                className="px-5 py-2 rounded-lg border-2 border-gray-500 text-gray-700 font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all font-poppins"
               >
-                Stay Signed In
+                Cancle
               </button>
               <button
                 onClick={() => {

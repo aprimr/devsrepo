@@ -11,6 +11,7 @@ import {
   Code2,
   Terminal,
   AppWindow,
+  Mail,
 } from "lucide-react";
 import {
   FaReact,
@@ -123,6 +124,21 @@ function DeveloperProfile() {
             </div>
           </div>
 
+          {/* Support Email */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 font-poppins">
+              Support Email
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                value={user?.developerProfile.contactEmail}
+                disabled
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 text-gray-500 font-medium rounded-xl font-poppins"
+              />
+            </div>
+          </div>
+
           {/* Website */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 font-poppins">
@@ -137,6 +153,21 @@ function DeveloperProfile() {
                     ""
                   ) || "No Website Provided"
                 }
+                disabled
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 text-gray-500 font-medium rounded-xl font-poppins"
+              />
+            </div>
+          </div>
+
+          {/*  Developer Since */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 font-poppins">
+              Developer Since
+            </label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                value={formatDate(user?.developerProfile.developerSince)}
                 disabled
                 className="w-full pl-12 pr-4 py-3 border border-gray-300 text-gray-500 font-medium rounded-xl font-poppins"
               />
@@ -188,13 +219,18 @@ function DeveloperProfile() {
                   {skill}
                 </span>
               ))}
+              {user?.developerProfile.skills.length === 0 && (
+                <label className="text-sm font-medium text-gray-400 font-poppins">
+                  No skills added.
+                </label>
+              )}
             </div>
           </div>
 
           {/* Tech Stack */}
           <div>
             <label className="text-sm font-medium text-gray-700 font-poppins">
-              Tech Stack
+              Language / Tech
             </label>
             <div className="flex flex-wrap gap-2.5 mt-2">
               {user?.developerProfile.techStacks.map((tech, i) => (
@@ -205,6 +241,11 @@ function DeveloperProfile() {
                   {tech}
                 </span>
               ))}
+              {user?.developerProfile.techStacks.length === 0 && (
+                <label className="text-sm font-medium text-gray-400 font-poppins">
+                  No Languages / Tech added.
+                </label>
+              )}
             </div>
           </div>
         </div>

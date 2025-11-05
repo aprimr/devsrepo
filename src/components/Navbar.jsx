@@ -6,12 +6,10 @@ import {
   Globe,
   Zap,
   GalleryVerticalEnd,
-  LayoutDashboard,
   Upload,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/AuthStore";
-import DevsRepoImg from "../assets/images/favicon.png";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -83,6 +81,7 @@ function Navbar() {
           {/* Publish btn */}
           {isAuthenticated && user.developerProfile.isDeveloper && (
             <button
+              onClick={() => navigate("/publish")}
               className="flex justify-center items-center gap-2 px-3 md:px-4 py-2 rounded-full border-2 border-green-600 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
               aria-label="Upload"
             >

@@ -1,12 +1,10 @@
 import {
   ChevronLeft,
-  Shield,
   AlertCircle,
   Clock,
   LogIn,
   Calendar,
   ShieldUser,
-  Edit,
   Flag,
 } from "lucide-react";
 import { useAuthStore } from "../../../store/AuthStore";
@@ -15,7 +13,6 @@ import { formatDate } from "../../../utils/formatDate";
 
 function SettingsStatus() {
   const { user } = useAuthStore();
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-white">

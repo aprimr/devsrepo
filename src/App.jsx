@@ -28,6 +28,9 @@ import SettingsNotifications from "./pages/settings/preferences/SettingsNotifica
 import SettingsEmail from "./pages/settings/preferences/SettingsEmail";
 import SettingsDeveloperAccount from "./pages/settings/developer/SettingsDeveloperAccount";
 import SettingsDeveloperProfile from "./pages/settings/developer/SettingsDeveloperProfile";
+import SettingsDeveloperStatus from "./pages/settings/developer/SettingsDeveloperStatus";
+import SettingsDeveloperMetrics from "./pages/settings/developer/SettingsDeveloperMetrics";
+import Publish from "./pages/settings/developer/Publish";
 
 function AppContent() {
   const location = useLocation();
@@ -35,6 +38,7 @@ function AppContent() {
     "/login",
     "/onboarding",
     "/edit-profile",
+    "/publish",
     "/setting",
     "/setting-profile",
     "/setting-security",
@@ -44,6 +48,8 @@ function AppContent() {
     "/setting-email",
     "/setting-developer-account",
     "/setting-developer-profile",
+    "/setting-developer-suspension",
+    "/setting-developer-metrics",
   ];
   const hideNavbarFooter = hideNavbarFooterRoutes.includes(location.pathname);
 
@@ -52,6 +58,14 @@ function AppContent() {
       {!hideNavbarFooter && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route
+          path="/publish"
+          element={
+            <ProtectedRoute>
+              <Publish />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/profile"
           element={
@@ -137,6 +151,22 @@ function AppContent() {
           element={
             <DeveloperRoute>
               <SettingsDeveloperProfile />
+            </DeveloperRoute>
+          }
+        />
+        <Route
+          path="/setting-developer-suspension"
+          element={
+            <DeveloperRoute>
+              <SettingsDeveloperStatus />
+            </DeveloperRoute>
+          }
+        />
+        <Route
+          path="/setting-developer-metrics"
+          element={
+            <DeveloperRoute>
+              <SettingsDeveloperMetrics />
             </DeveloperRoute>
           }
         />
