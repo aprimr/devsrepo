@@ -14,7 +14,6 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
-  Timestamp,
 } from "firebase/firestore";
 import { auth, db, googleProvider, githubProvider } from "../firebase/config";
 
