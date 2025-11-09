@@ -49,7 +49,7 @@ function Navbar() {
         </div>
 
         {/* Categories - desktop */}
-        <div className="hidden md:flex items-center gap-4 lg:gap-6">
+        <div className="hidden xl:flex items-center gap-4 lg:gap-6">
           {categories.map((cat) => (
             <NavLink
               key={cat.name}
@@ -113,7 +113,7 @@ function Navbar() {
 
       {/* Menu chips - mobile */}
       {!hideMobileMenu && (
-        <div className="md:hidden bg-white border-t border-gray-200 px-3 sm:px-4 py-2">
+        <div className="xl:hidden bg-white border-t border-gray-200 px-3 sm:px-4 py-2">
           <div className="flex gap-3 sm:gap-2 overflow-x-auto no-scrollbar">
             {categories.map((cat) => (
               <NavLink
