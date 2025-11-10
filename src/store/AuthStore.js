@@ -47,7 +47,6 @@ export const useAuthStore = create(
 
           // Basic custom fields
           username,
-          role: "user",
           bio: "Hey! I'm using DevsRepo.",
           location: "",
           social: {

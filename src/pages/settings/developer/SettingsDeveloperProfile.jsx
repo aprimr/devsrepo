@@ -6,39 +6,20 @@ import {
   Tag,
   Edit,
   Calendar,
-  Award,
-  Code,
-  Code2,
   Terminal,
   AppWindow,
   Mail,
+  IdCard,
 } from "lucide-react";
-import {
-  FaReact,
-  FaNodeJs,
-  FaGithub,
-  FaJs,
-  FaHtml5,
-  FaCss3Alt,
-  FaPython,
-} from "react-icons/fa";
 import { useAuthStore } from "../../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
 import { formatDate } from "../../../utils/formatDate";
 import DevsRepoInvert from "../../../assets/images/DevsRepoInvert.png";
+import { useEffect } from "react";
 
 function DeveloperProfile() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-
-  const skills = user?.skills || ["Frontend", "Backend", "UI/UX"];
-  const techStacks = user?.techStacks || [
-    { name: "React", icon: <FaReact className="w-5 h-5" /> },
-    { name: "NodeJS", icon: <FaNodeJs className="w-5 h-5" /> },
-    { name: "JavaScript", icon: <FaJs className="w-5 h-5" /> },
-    { name: "HTML5", icon: <FaHtml5 className="w-5 h-5" /> },
-    { name: "CSS3", icon: <FaCss3Alt className="w-5 h-5" /> },
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -118,6 +99,21 @@ function DeveloperProfile() {
               <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 value={user?.username}
+                disabled
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 text-gray-500 font-medium rounded-xl font-poppins"
+              />
+            </div>
+          </div>
+
+          {/* Username */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 font-poppins">
+              Developer Id
+            </label>
+            <div className="relative">
+              <IdCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                value={user?.developerProfile.developerId}
                 disabled
                 className="w-full pl-12 pr-4 py-3 border border-gray-300 text-gray-500 font-medium rounded-xl font-poppins"
               />

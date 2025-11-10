@@ -31,6 +31,8 @@ import SettingsDeveloperProfile from "./pages/settings/developer/SettingsDevelop
 import SettingsDeveloperStatus from "./pages/settings/developer/SettingsDeveloperStatus";
 import SettingsDeveloperMetrics from "./pages/settings/developer/SettingsDeveloperMetrics";
 import Publish from "./pages/settings/developer/Publish";
+import SettingsAppsManagement from "./pages/settings/developer/SettingsAppsManagement";
+import SettingsSuspendedApps from "./pages/settings/developer/SettingsSuspendedApps";
 
 function AppContent() {
   const location = useLocation();
@@ -50,6 +52,8 @@ function AppContent() {
     "/setting-developer-profile",
     "/setting-developer-suspension",
     "/setting-developer-metrics",
+    "/setting-apps-management",
+    "/setting-suspended-apps",
   ];
   const hideNavbarFooter = hideNavbarFooterRoutes.includes(location.pathname);
 
@@ -151,6 +155,22 @@ function AppContent() {
           element={
             <DeveloperRoute>
               <SettingsDeveloperProfile />
+            </DeveloperRoute>
+          }
+        />
+        <Route
+          path="/setting-apps-management"
+          element={
+            <DeveloperRoute>
+              <SettingsAppsManagement />
+            </DeveloperRoute>
+          }
+        />
+        <Route
+          path="/setting-suspended-apps"
+          element={
+            <DeveloperRoute>
+              <SettingsSuspendedApps />
             </DeveloperRoute>
           }
         />

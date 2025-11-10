@@ -29,7 +29,6 @@ export const useAppStore = create(
         appId: "",
         createdAt: "",
         updatedAt: "",
-        publishedAt: serverTimestamp(),
 
         developer: {
           name: appData.developer?.name,
@@ -81,7 +80,7 @@ export const useAppStore = create(
 
         status: {
           stage: "in-review",
-          isApproved: false,
+          approval: { isApproved: false, approvedAt: "" },
           rejection: { isRejected: false, reason: "", rejectedAt: "" },
           removal: { isRemoved: false, reason: "", removedAt: "" },
         },

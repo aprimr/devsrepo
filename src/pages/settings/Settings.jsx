@@ -21,6 +21,7 @@ import {
   Terminal,
   RotateCw,
   BrickWallShield,
+  Ban,
 } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -200,18 +201,22 @@ function Setting() {
                 <SectionButton
                   icon={Smartphone}
                   label="Apps Management"
-                  redirect="/setting-apps"
+                  redirect="/setting-apps-management"
+                />
+                <SectionButton
+                  icon={Ban}
+                  label="Suspended Apps"
+                  redirect="/setting-suspended-apps"
+                />
+                <SectionButton
+                  icon={Gauge}
+                  label="Metrics"
+                  redirect="/setting-developer-metrics"
                 />
                 <SectionButton
                   icon={BadgeAlert}
                   label="Suspension Status"
                   redirect="/setting-developer-suspension"
-                />
-
-                <SectionButton
-                  icon={Gauge}
-                  label="Metrics"
-                  redirect="/setting-developer-metrics"
                 />
               </div>
             </div>

@@ -11,7 +11,7 @@ import {
 import Lottie from "lottie-react";
 import { useAuthStore } from "../../../store/AuthStore";
 import { useNavigate } from "react-router-dom";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { serverTimestamp } from "firebase/firestore";
 import devAnimation from "../../../assets/animations/developer.json";
@@ -20,8 +20,19 @@ import { toast } from "sonner";
 function SettingsDeveloperAccount() {
   const { user, updateUserProfile } = useAuthStore();
   const navigate = useNavigate();
+
+  // If user is already a developer
+  useEffect(() => {
+    if (user.developerProfile.isDeveloper) {
+      navigate(-1, { replace: true });
+    }
+  }, []);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const developerId = user?.uid
+    ? "dev_" + user.uid.slice(0, 9) + user.uid.slice(18)
+    : "";
 
   const [github, setGithub] = useState(user?.socialLinks?.github || "");
   const [linkedin, setLinkedin] = useState(user?.socialLinks?.linkedin || "");
@@ -46,6 +57,7 @@ function SettingsDeveloperAccount() {
       developerProfile: {
         ...user.developerProfile,
         isDeveloper: true,
+        developerId: developerId,
         developerSince: serverTimestamp(),
         website,
       },
@@ -166,7 +178,7 @@ function SettingsDeveloperAccount() {
             <DisabledTextArea
               title="Developer Id"
               icon={IdCardLanyard}
-              value={user?.uid ? "dev_" + user.uid.slice(14) : ""}
+              value={developerId}
             />
             <DisabledTextArea
               title="Contact Email"

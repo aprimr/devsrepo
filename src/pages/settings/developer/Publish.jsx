@@ -159,7 +159,7 @@ export default function Publish() {
     if (!file) return;
 
     // Max file size allowed
-    const MAX_SIZE_MB = 0.5;
+    const MAX_SIZE_MB = 1;
     const fileSizeMB = file.size / (1024 * 1024);
 
     if (fileSizeMB > MAX_SIZE_MB) {
@@ -178,7 +178,7 @@ export default function Publish() {
     if (!file) return;
 
     // Max file size allowed
-    const MAX_SIZE_MB = 0.5;
+    const MAX_SIZE_MB = 1;
     const fileSizeMB = file.size / (1024 * 1024);
 
     if (fileSizeMB > MAX_SIZE_MB) {
@@ -197,7 +197,7 @@ export default function Publish() {
     if (!file) return;
 
     // Max file size allowed
-    const MAX_SIZE_MB = 0.5;
+    const MAX_SIZE_MB = 1;
     const fileSizeMB = file.size / (1024 * 1024);
 
     if (fileSizeMB > MAX_SIZE_MB) {
@@ -518,6 +518,7 @@ export default function Publish() {
                     onClick={(e) => {
                       e.preventDefault();
                       setIconFile(null);
+                      setIconFilePreview(null);
                     }}
                     className="absolute top-1.5 right-1.5 p-1 rounded-sm bg-white"
                   >
@@ -534,7 +535,7 @@ export default function Publish() {
                     Tap to upload icon
                   </span>
                   <span className="text-[10px] mt-0.5 font-poppins">
-                    0.5 MB max
+                    1 MB max
                   </span>
                 </div>
               )}
@@ -572,6 +573,7 @@ export default function Publish() {
                     onClick={(e) => {
                       e.preventDefault();
                       setBannerFile(null);
+                      setBannerFilePreview(null);
                     }}
                     className="absolute top-1.5 right-1.5 p-1 rounded-sm bg-white"
                   >
@@ -588,7 +590,7 @@ export default function Publish() {
                     Tap to upload banner
                   </span>
                   <span className="text-[10px] mt-0.5 font-poppins">
-                    0.5 MB max
+                    1 MB max
                   </span>
                 </div>
               )}
@@ -649,7 +651,7 @@ export default function Publish() {
                           Tap to upload Screenshot
                         </span>
                         <span className="text-[10px] mt-0.5 font-poppins">
-                          0.5 MB max
+                          1 MB max
                         </span>
                       </div>
                     )}
@@ -694,6 +696,7 @@ export default function Publish() {
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* App Name */}
             <div>
               <label className="block text-sm text-gray-600 font-poppins mb-2">
                 App Name
@@ -701,24 +704,34 @@ export default function Publish() {
               <input
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
-                required
+                maxLength={60}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your app name"
               />
+              <p className="text-xs text-gray-500 font-outfit text-right px-1 mt-0.5 ">
+                {appName.length}/60 Characters
+              </p>
             </div>
 
+            {/* Version */}
             <div>
               <label className="block text-sm text-gray-600 font-poppins mb-2">
                 Current Version
               </label>
               <input
                 value={currentVersion}
-                onChange={(e) => setCurrentVersion(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d{0,2}(\.\d{0,2}){0,2}$/.test(value)) {
+                    setCurrentVersion(value);
+                  }
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="1.0.0"
               />
             </div>
 
+            {/* Project Source Link */}
             <div>
               <label className="block text-sm text-gray-600 font-poppins mb-2">
                 Project Source Code
@@ -726,6 +739,21 @@ export default function Publish() {
               <input
                 value={projectSourceLink}
                 onChange={(e) => setProjectSourceLink(e.target.value)}
+                onBlur={(e) => {
+                  let value = e.target.value.trim();
+                  // If link doesn’t start with https://www. fix it
+                  if (!/^https:\/\/www\./.test(value)) {
+                    if (/^https?:\/\//.test(value)) {
+                      value = value.replace(/^https?:\/\//, "https://www.");
+                    } else if (/^www\./.test(value)) {
+                      value = "https://" + value;
+                    } else {
+                      value = "https://www." + value;
+                    }
+                  }
+
+                  setProjectSourceLink(value);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your project link"
               />
@@ -812,7 +840,8 @@ export default function Publish() {
                 <button
                   type="button"
                   onClick={addTag}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-5 py-2 rounded-lg font-poppins font-semibold text-white bg-green-500 text-sm"
+                  disabled={tags.length === 10}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-5 py-2 rounded-lg font-poppins font-semibold text-white bg-green-500 disabled:bg-green-600 text-sm"
                 >
                   Add
                 </button>
@@ -827,9 +856,13 @@ export default function Publish() {
               <input
                 value={shortDesc}
                 onChange={(e) => setShortDesc(e.target.value)}
+                maxLength={100}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="One-line pitch"
               />
+              <p className="text-xs text-gray-500 font-outfit text-right px-1 mt-0.5 ">
+                {shortDesc.length}/100 Characters
+              </p>
             </div>
 
             {/* Long Description */}
@@ -841,9 +874,13 @@ export default function Publish() {
                 value={longDesc}
                 onChange={(e) => setLongDesc(e.target.value)}
                 rows={5}
+                maxLength={400}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
                 placeholder="Explain features and usage"
               ></textarea>
+              <p className="text-xs text-gray-500 font-outfit text-right px-1 mt-0.5 ">
+                {shortDesc.length}/400 Characters
+              </p>
             </div>
 
             {/* Feature Bullets */}
@@ -942,8 +979,24 @@ export default function Publish() {
               <input
                 value={privacyPolicyUrl}
                 onChange={(e) => setPrivacyPolicyUrl(e.target.value)}
+                onBlur={(e) => {
+                  let value = e.target.value.trim();
+                  if (!value) return;
+
+                  if (!/^https:\/\/www\./.test(value)) {
+                    if (/^https?:\/\//.test(value)) {
+                      value = value.replace(/^https?:\/\//, "https://www.");
+                    } else if (/^www\./.test(value)) {
+                      value = "https://" + value;
+                    } else {
+                      value = "https://www." + value;
+                    }
+                  }
+
+                  setPrivacyPolicyUrl(value);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="https://example.com/privacy"
+                placeholder="https://www.example.com/privacy"
               />
             </div>
 
@@ -955,8 +1008,24 @@ export default function Publish() {
               <input
                 value={termsUrl}
                 onChange={(e) => setTermsUrl(e.target.value)}
+                onBlur={(e) => {
+                  let value = e.target.value.trim();
+                  if (!value) return;
+
+                  if (!/^https:\/\/www\./.test(value)) {
+                    if (/^https?:\/\//.test(value)) {
+                      value = value.replace(/^https?:\/\//, "https://www.");
+                    } else if (/^www\./.test(value)) {
+                      value = "https://" + value;
+                    } else {
+                      value = "https://www." + value;
+                    }
+                  }
+
+                  setTermsUrl(value);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="https://example.com/terms"
+                placeholder="https://www.example.com/terms"
               />
             </div>
 
@@ -975,7 +1044,6 @@ export default function Publish() {
                 <option>Adults Only 18+</option>
               </select>
             </div>
-            <div />
           </div>
         </section>
 

@@ -13,8 +13,6 @@ import {
   FaTwitter,
   FaYoutube,
 } from "react-icons/fa";
-import { BsFillPatchCheckFill } from "react-icons/bs";
-import { HiBadgeCheck } from "react-icons/hi";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -91,7 +89,7 @@ export default function Profile() {
             <div className="flex-1">
               {/* Username and Button */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-                <div className="w-full flex gap-2 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
+                <div className="w-full h-5 flex gap-2 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
                   {/* Username */}
                   <div className="truncate">
                     <span className="text-xl">@</span>
@@ -100,7 +98,7 @@ export default function Profile() {
                   {/* Verified Badge */}
                   {user?.developerProfile.verifiedDeveloper && (
                     <BadgeCheck
-                      size={22}
+                      size={18}
                       fill="#3B82F6"
                       className="text-white"
                     />
