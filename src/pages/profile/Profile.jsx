@@ -280,7 +280,7 @@ export default function Profile() {
 
                     {/* Location */}
                     <div className="flex items-center gap-2 text-gray-700 font-poppins text-sm truncate">
-                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      <MapPin className="w-4 h-4 shrink-0" />
                       <span>{user.location || "Anywhere on earth"}</span>
                     </div>
 
@@ -293,7 +293,7 @@ export default function Profile() {
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 text-green-600 font-poppins text-sm truncate hover:underline"
                         >
-                          <Globe className="w-4 h-4 text-gray-700 flex-shrink-0" />
+                          <Globe className="w-4 h-4 text-gray-700 shrink-0" />
                           {user.developerProfile.website.replace(
                             /^(https?:\/\/)?(www\.)?/,
                             ""
