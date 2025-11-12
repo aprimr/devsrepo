@@ -33,6 +33,9 @@ import SettingsDeveloperMetrics from "./pages/settings/developer/SettingsDevelop
 import Publish from "./pages/settings/developer/Publish";
 import SettingsAppsManagement from "./pages/settings/developer/SettingsAppsManagement";
 import SettingsSuspendedApps from "./pages/settings/developer/SettingsSuspendedApps";
+import AdminRoute from "./pages/auth/AdminRoute";
+import Admin from "./pages/settings/admin/Admin";
+import AdminUserManagement from "./pages/settings/admin/AdminUserManagement";
 
 function AppContent() {
   const location = useLocation();
@@ -41,6 +44,8 @@ function AppContent() {
     "/onboarding",
     "/edit-profile",
     "/publish",
+    "/admin",
+    "/admin-user-management",
     "/setting",
     "/setting-profile",
     "/setting-security",
@@ -84,6 +89,22 @@ function AppContent() {
             <ProtectedRoute>
               <EditProfile />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <Admin />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin-user-management"
+          element={
+            <AdminRoute>
+              <AdminUserManagement />
+            </AdminRoute>
           }
         />
         <Route

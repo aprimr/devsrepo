@@ -232,7 +232,7 @@ function Setting() {
                 <SectionButton
                   icon={BrickWallShield}
                   label="Admin"
-                  func={() => {}}
+                  redirect="/admin"
                 />
               </div>
             </div>

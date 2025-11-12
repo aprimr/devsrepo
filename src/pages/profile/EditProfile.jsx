@@ -303,14 +303,17 @@ function EditProfile() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-[1450px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
-          {/* Back Btn and Name */}
-          <NavLink to={-1} className="flex items-center gap-2">
+        <div className="max-w-[1450px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3 gap-2">
+          {/* Back Btn */}
+          <div
+            onClick={() => navigate(-1)}
+            className="flex flex-1 items-center gap-2 min-w-0"
+          >
             <ChevronLeft size={26} className="text-gray-800" />
-            <span className="text-lg sm:text-2xl font-poppins font-medium text-gray-800 tracking-tight">
+            <span className="text-lg sm:text-2xl font-poppins font-medium text-gray-800 tracking-tight truncate block max-w-[70vw] sm:max-w-[500px]">
               {user.name}
             </span>
-          </NavLink>
+          </div>
 
           {/* Save */}
           <button
@@ -320,14 +323,14 @@ function EditProfile() {
               formData.username.length < 8 ||
               formData.name.length < 6
             }
-            className="flex justify-center items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white border-2 border-green-600 hover:bg-green-700 disabled:bg-green-700 disabled:text-gray-200 transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white border-2 border-green-600 hover:bg-green-700 disabled:bg-green-700 disabled:text-gray-200 transition-all duration-300 font-poppins font-medium text-sm md:text-base"
           >
             {isSaving ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (
               <Save size={18} />
             )}
-            {isSaving ? <span>Saving</span> : <span>Save</span>}
+            <span>{isSaving ? "Saving" : "Save"}</span>
           </button>
         </div>
       </nav>
@@ -398,13 +401,13 @@ function EditProfile() {
                       : "Enter your full name"
                   }`}
                   minLength={6}
-                  maxLength={40}
+                  maxLength={30}
                 />
               </div>
 
               <div className="flex justify-between text-xs text-gray-500 font-outfit text-right">
                 <p>Must be atleast 6 characters long</p>
-                <p>{formData.name.length}/40 characters</p>
+                <p>{formData.name.length}/30 characters</p>
               </div>
             </div>
 

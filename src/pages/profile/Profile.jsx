@@ -21,63 +21,62 @@ export default function Profile() {
   const { user } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-white select-none">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* User Profile*/}
-        <div className="mb-12">
-          {/*  */}
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-12 mb-4">
-            <div className="flex flex-row gap-5">
+    <div
+      className={`min-h-screen bg-white select-none ${
+        user.system.banStatus.isbanned && "pointer-events-none"
+      }`}
+    >
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        {/* User Profile - Mobile*/}
+        <div className="mb-6 md:hidden">
+          <div className="flex flex-col">
+            {/* Avatar & Name/Stats */}
+            <div className="flex flex-row gap-5 items-start min-w-0">
               {/* Avatar */}
-              <div className="flex justify-start">
+              <div className="shrink-0">
                 <img
                   src={user.photoURL}
                   alt={user.name}
-                  className="w-24 h-24 aspect-square sm:w-40 sm:h-40 rounded-full object-cover"
+                  className="w-24 h-24 sm:w-36 sm:h-36 rounded-full object-cover border border-gray-200"
                 />
               </div>
+
               {/* Name & Stats */}
-              <div className="flex-1">
-                {/* Name */}
-                <div className="w-full flex gap-4 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
-                  <div className="w-full truncate">
-                    <h2 className="text-lg sm:text-3xl font-medium font-poppins text-gray-800 line-clamp-1">
-                      {user.name}
-                    </h2>
-                  </div>
-                  {user.providerId === "google.com" && <FcGoogle />}
-                  {user.providerId === "github.com" && <FaGithub />}
+              <div className="flex flex-col flex-1 min-w-0">
+                {/* Name & Provider */}
+                <div className="flex items-center justify-between gap-3 mb-2 mr-2 min-w-0">
+                  <h2 className="text-lg sm:text-2xl font-poppins font-medium text-gray-900 truncate max-w-[60vw]">
+                    {user.name}
+                  </h2>
+                  {user.providerId === "google.com" && <FcGoogle size={16} />}
+                  {user.providerId === "github.com" && <FaGithub size={16} />}
                 </div>
+
                 {/* Stats */}
-                <div className="w-full justify-between flex gap-8 sm:gap-12 mb-6">
-                  {/* Apps */}
-                  <div className="w-auto">
-                    <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
+                <div className="flex justify-between gap-6 sm:gap-12">
+                  <div className="text-left ">
+                    <p className="text-lg sm:text-2xl font-outfit text-gray-800">
                       {user.developerProfile.isDeveloper
                         ? numberSuffixer(
                             user.developerProfile.apps.publishedAppIds.length
                           )
                         : "NaD"}
                     </p>
-                    <p className="text-gray-800 text-sm font-normal font-poppins">
-                      Apps
-                    </p>
+                    <p className="text-sm text-gray-600 font-poppins">Apps</p>
                   </div>
-                  {/* Followers */}
-                  <div className="w-auto">
-                    <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
+                  <div className="text-left ">
+                    <p className="text-lg sm:text-2xl font-outfit text-gray-800">
                       {numberSuffixer(user.social.followersIds.length)}
                     </p>
-                    <p className="text-gray-800 text-sm font-normal font-poppins">
+                    <p className="text-sm text-gray-600 font-poppins">
                       Followers
                     </p>
                   </div>
-                  {/* Following */}
-                  <div className="w-auto mr-1">
-                    <p className="text-lg sm:text-2xl text-left font-normal font-outfit text-gray-700">
+                  <div className="text-left">
+                    <p className="text-lg sm:text-2xl font-outfit text-gray-800">
                       {numberSuffixer(user.social.followingIds.length)}
                     </p>
-                    <p className="text-gray-800 text-sm font-normal font-poppins">
+                    <p className="text-sm text-gray-600 font-poppins">
                       Following
                     </p>
                   </div>
@@ -85,75 +84,72 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Profile Info and Button */}
-            <div className="flex-1">
-              {/* Username and Button */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-                <div className="w-full h-5 flex gap-2 items-center text-lg font-normal font-outfit text-gray-700 line-clamp-1">
-                  {/* Username */}
-                  <div className="truncate">
-                    <span className="text-xl">@</span>
-                    {user.username}
-                  </div>
-                  {/* Verified Badge */}
+            {/* Profile Info & Buttons */}
+            <div className="mt-2 min-w-0">
+              {/* Username & Buttons */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 min-w-0">
+                <div className="flex items-center text-gray-800 font-outfit text-lg sm:text-xl truncate max-w-full">
+                  <span className="text-xl">@</span>
+                  <span className="truncate">{user.username}</span>
                   {user?.developerProfile.verifiedDeveloper && (
-                    <BadgeCheck
-                      size={18}
-                      fill="#3B82F6"
-                      className="text-white"
-                    />
+                    <BadgeCheck size={18} fill="#3B82F6" color="white" />
                   )}
                 </div>
-                {/* Edit and settings btn */}
-                <div className="flex flex-row gap-3">
+
+                {/* Buttons */}
+                <div className="flex flex-row gap-3 sm:ml-auto">
                   <button
                     onClick={() => navigate("/edit-profile")}
-                    className="sm:ml-auto w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer"
+                    className="w-full px-5 py-2 bg-green-600 text-white font-poppins rounded-lg font-medium hover:bg-green-700 transition"
                   >
                     Edit Profile
                   </button>
                   <button
                     onClick={() => navigate("/setting")}
-                    className="ml-auto w-auto px-2.5 py-2 bg-black text-gray-100 font-poppins rounded-lg font-medium opacity-90 hover:opacity-100 transition-opacity cursor-pointer"
+                    className="px-3 py-2 bg-black text-gray-100 rounded-lg hover:bg-gray-900 transition"
                   >
                     <Settings size={22} />
                   </button>
                 </div>
               </div>
 
-              {/* Bio, Location & Website */}
+              {/* Bio, Location, Website, Social Icons */}
               <div className="space-y-2.5">
                 {/* Bio */}
                 <p
                   onClick={() => setIsBioExpanded(!isBioExpanded)}
                   className={`text-gray-800 font-poppins text-sm sm:text-base ${
-                    isBioExpanded ? "" : "truncate"
+                    isBioExpanded ? "" : "line-clamp-2"
                   }`}
                 >
                   {user.bio || "Hey! I am using DevsRepo"}
                 </p>
+
                 {/* Location */}
-                <div className="w-full flex items-center gap-2 text-gray-700 font-poppins text-sm truncate">
-                  <MapPin className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-gray-700 font-poppins text-sm truncate">
+                  <MapPin className="w-4 h-4 shrink-0" />
                   <span>{user.location || "Anywhere on earth"}</span>
                 </div>
+
                 {/* Website */}
                 {user.developerProfile.isDeveloper &&
                   user.developerProfile.website && (
                     <a
                       href={user.developerProfile.website}
                       target="_blank"
-                      className="w-full flex items-center gap-2 text-green-600 font-poppins text-sm truncate"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-green-600 font-poppins text-sm truncate"
                     >
-                      <Globe className="w-4 h-4 text-gray-700" />
+                      <Globe className="w-4 h-4 text-gray-700 shrink-0" />
                       {user.developerProfile.website.replace(
                         /^(https?:\/\/)?(www\.)?/,
                         ""
                       )}
                     </a>
                   )}
-                {/* Social icons */}
-                <div className="flex flex-row gap-3 items-center text-gray-600">
+
+                {/* Social Icons */}
+                <div className="flex flex-row flex-wrap gap-3 items-center text-gray-600">
                   {user.socialLinks.github && (
                     <a
                       href={user.socialLinks.github}
@@ -211,16 +207,13 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* If Banned */}
+              {/* Banned Section (Mobile/Small) */}
               {user.system.banStatus.isbanned && (
                 <div className="w-full max-w-md mx-auto mt-6">
                   <div className="bg-rose-50 border border-rose-300 rounded-xl shadow-sm overflow-hidden">
-                    {/* Header */}
                     <div className="bg-rose-500 text-white px-4 py-3 font-poppins font-semibold">
                       Your Account is Banned
                     </div>
-
-                    {/* Body */}
                     <div className="px-4 py-3 space-y-2 text-sm font-outfit text-gray-700">
                       <p>
                         <span className="font-medium">Reason:</span>{" "}
@@ -232,7 +225,7 @@ export default function Profile() {
                       </p>
                       <p className="text-xs text-gray-500">
                         If you believe this is a mistake, contact support for
-                        further assistance.
+                        assistance.
                       </p>
                     </div>
                   </div>
@@ -240,44 +233,233 @@ export default function Profile() {
               )}
             </div>
           </div>
+        </div>
 
-          {/* Tabs */}
-          <div className="pt-2">
-            <div className="flex border-b-2 border-gray-200 gap-10 sm:gap-12">
-              {/* Apps */}
-              <button
-                onClick={() => setActiveTab("apps")}
-                className={`pb-4 text-sm font-medium font-poppins border-b-2 transition-colors ${
-                  activeTab === "apps"
-                    ? "text-gray-800 border-green-600"
-                    : "text-gray-600 border-white"
-                }`}
-              >
-                Apps
-              </button>
-              {/* Pending Apps */}
-              <button
-                onClick={() => setActiveTab("pending-apps")}
-                className={`pb-4 text-sm font-medium font-poppins border-b-2 transition-colors ${
-                  activeTab === "pending-apps"
-                    ? "text-gray-800 border-green-600"
-                    : "text-gray-600 border-white"
-                }`}
-              >
-                Pending Apps
-              </button>
-              {/* Reviews */}
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`pb-4 text-sm font-medium font-poppins border-b-2 transition-colors ${
-                  activeTab === "reviews"
-                    ? "text-gray-800 border-green-600"
-                    : "text-gray-600 border-white"
-                }`}
-              >
-                Reviews
-              </button>
+        {/* User Profile - Desktop */}
+        <div className="hidden md:block mb-8">
+          <div className="flex flex-col lg:flex-row gap-10">
+            {/* Left Section */}
+            <div className="flex-1">
+              <div className="flex gap-6 items-start">
+                {/* Avatar */}
+                <div className="shrink-0">
+                  <img
+                    src={user.photoURL}
+                    alt={user.name}
+                    className="w-36 h-36 rounded-full object-cover border border-gray-200"
+                  />
+                </div>
+
+                {/* Details */}
+                <div className="flex flex-col flex-1 min-w-0">
+                  {/* Name & Provider */}
+                  <div className="flex items-center gap-3 mb-1 min-w-0">
+                    <h2 className="text-2xl font-poppins text-gray-900 truncate">
+                      {user.name}
+                    </h2>
+                    {user.providerId === "google.com" && <FcGoogle size={16} />}
+                    {user.providerId === "github.com" && <FaGithub size={16} />}
+                  </div>
+
+                  {/* Username */}
+                  <div className="flex items-center text-gray-600 font-outfit text-lg mb-3 truncate">
+                    <span className="text-xl">@</span>
+                    <span className="truncate">{user.username}</span>
+                    {user?.developerProfile.verifiedDeveloper && (
+                      <BadgeCheck size={18} fill="#3B82F6" color="white" />
+                    )}
+                  </div>
+
+                  {/* Bio, Location, Website, Social Icons */}
+                  <div className="space-y-3 text-left w-full">
+                    {/* Bio */}
+                    <p
+                      onClick={() => setIsBioExpanded(!isBioExpanded)}
+                      className={`text-gray-800 font-poppins text-base leading-relaxed ${
+                        isBioExpanded ? "" : "line-clamp-3"
+                      }`}
+                    >
+                      {user.bio || "Hey! I am using DevsRepo"}
+                    </p>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-2 text-gray-700 font-poppins text-sm truncate">
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
+                      <span>{user.location || "Anywhere on earth"}</span>
+                    </div>
+
+                    {/* Website */}
+                    {user.developerProfile.isDeveloper &&
+                      user.developerProfile.website && (
+                        <a
+                          href={user.developerProfile.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-green-600 font-poppins text-sm truncate hover:underline"
+                        >
+                          <Globe className="w-4 h-4 text-gray-700 flex-shrink-0" />
+                          {user.developerProfile.website.replace(
+                            /^(https?:\/\/)?(www\.)?/,
+                            ""
+                          )}
+                        </a>
+                      )}
+
+                    {/* Social Icons */}
+                    <div className="flex flex-wrap gap-4 items-center text-gray-600 pt-1">
+                      {user.socialLinks.github && (
+                        <a
+                          href={user.socialLinks.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaGithub size={18} />
+                        </a>
+                      )}
+                      {user.socialLinks.linkedin && (
+                        <a
+                          href={user.socialLinks.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaLinkedin size={18} />
+                        </a>
+                      )}
+                      {user.socialLinks.twitter && (
+                        <a
+                          href={user.socialLinks.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaTwitter size={18} />
+                        </a>
+                      )}
+                      {user.socialLinks.youtube && (
+                        <a
+                          href={user.socialLinks.youtube}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaYoutube size={18} />
+                        </a>
+                      )}
+                      {user.socialLinks.instagram && (
+                        <a
+                          href={user.socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaInstagram size={18} />
+                        </a>
+                      )}
+                      {user.socialLinks.facebook && (
+                        <a
+                          href={user.socialLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaFacebook size={18} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Right Section */}
+            <div className="flex flex-col gap-4 w-full lg:w-80 shrink-0">
+              {/* Stats Box */}
+              <div className="bg-white py-6">
+                <div className="flex justify-between">
+                  <div className="text-center flex-1">
+                    <p className="text-2xl font-outfit font-semibold text-gray-800">
+                      {user.developerProfile.isDeveloper
+                        ? numberSuffixer(
+                            user.developerProfile.apps.publishedAppIds.length
+                          )
+                        : "NaD"}
+                    </p>
+                    <p className="text-sm text-gray-600 font-poppins mt-1">
+                      Apps
+                    </p>
+                  </div>
+                  <div className="text-center flex-1">
+                    <p className="text-2xl font-outfit font-semibold text-gray-800">
+                      {numberSuffixer(user.social.followersIds.length)}
+                    </p>
+                    <p className="text-sm text-gray-600 font-poppins mt-1">
+                      Followers
+                    </p>
+                  </div>
+                  <div className="text-center flex-1">
+                    <p className="text-2xl font-outfit font-semibold text-gray-800">
+                      {numberSuffixer(user.social.followingIds.length)}
+                    </p>
+                    <p className="text-sm text-gray-600 font-poppins mt-1">
+                      Following
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buttons Box */}
+              <div className="bg-white ">
+                <div className="flex flex-row gap-3">
+                  <button
+                    onClick={() => navigate("/edit-profile")}
+                    className="flex-1 px-5 py-2 bg-green-600 text-white font-poppins rounded-lg font-medium hover:bg-green-700 transition"
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    onClick={() => navigate("/setting")}
+                    className="px-3 py-2 bg-black text-gray-100 rounded-lg hover:bg-gray-900 transition"
+                  >
+                    <Settings size={22} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Banned Section Ribbon */}
+          {user.system.banStatus.isbanned && (
+            <div className="w-full mt-6 bg-rose-500 text-white px-6 py-3 font-poppins font-semibold rounded-xl shadow-sm border border-rose-400">
+              <p>Your Account is Banned</p>
+              <p className="text-sm font-normal mt-1">
+                <span className="font-medium">Reason:</span>{" "}
+                {user.system.banStatus.reason}
+                {" | "}
+                <span className="font-medium">Ban Lift Date:</span>{" "}
+                {user.system.banStatus.bannedUntil}
+              </p>
+              <p className="text-xs text-rose-100 mt-1">
+                If you believe this is a mistake, contact support for
+                assistance.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div>
+          <div className="flex border-b-2 border-gray-200 gap-10 sm:gap-12 overflow-x-auto">
+            {["apps", "pending-apps", "reviews"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-4 text-sm font-medium font-poppins border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tab
+                    ? "text-gray-800 border-green-600"
+                    : "text-gray-600 border-transparent hover:text-gray-800"
+                }`}
+              >
+                {tab === "apps" && "Apps"}
+                {tab === "pending-apps" && "Pending Apps"}
+                {tab === "reviews" && "Reviews"}
+              </button>
+            ))}
           </div>
         </div>
 
