@@ -20,10 +20,22 @@ import {
   ArrowUpRight,
   Users,
   EllipsisVertical,
+  Undo,
+  Loader2,
 } from "lucide-react";
+import {
+  FaFacebook,
+  FaGithub,
+  FaInstagram,
+  FaLinkedin,
+  FaTwitter,
+  FaYoutube,
+} from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { formatDate } from "../../../utils/formatDate";
 import { useSystemStore } from "../../../store/SystemStore";
+import numberSuffixer from "../../../utils/numberSuffixer";
+import { toast } from "sonner";
 
 const AdminUserManagement = () => {
   const { userIds, getUserDetailsById } = useSystemStore();
@@ -33,6 +45,10 @@ const AdminUserManagement = () => {
   const [isOptionsOpen, setIsOptionsOpen] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
+
+  // Popup States
+  const [viewingDetails, setViewingDetails] = useState(""); // store the user's id
+  const [editingDetails, setEditingDetails] = useState(""); // store the user's id
 
   const usersMapRef = useRef(new Map());
 
@@ -247,6 +263,8 @@ const AdminUserManagement = () => {
                       index={i}
                       isOptionsOpen={isOptionsOpen}
                       setIsOptionsOpen={setIsOptionsOpen}
+                      setViewingDetails={setViewingDetails}
+                      setEditingDetails={setEditingDetails}
                     />
                   ))}
                 </tbody>
@@ -262,6 +280,8 @@ const AdminUserManagement = () => {
                 user={user}
                 isOptionsOpen={isOptionsOpen}
                 setIsOptionsOpen={setIsOptionsOpen}
+                setViewingDetails={setViewingDetails}
+                setEditingDetails={setEditingDetails}
               />
             ))}
           </div>
@@ -284,6 +304,220 @@ const AdminUserManagement = () => {
               <p className="text-sm text-gray-500">
                 End of list. Showing {usersToDisplay.length} users.
               </p>
+            </div>
+          )}
+
+          {/* View Details */}
+          {viewingDetails && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md z-50 px-4">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-5 sm:p-8 font-poppins relative animate-in fade-in duration-200 overflow-y-auto max-h-[90vh] sm:max-h-[85vh]">
+                {/* Header */}
+                <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
+                  <h2 className="text-xl font-medium font-poppins text-gray-900">
+                    User Details
+                  </h2>
+                  <button
+                    onClick={() => setViewingDetails("")}
+                    className="p-1.5 bg-gray-200/70 text-gray-600 rounded-lg transition"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Data */}
+                <div className="flex flex-col lg:flex-row gap-8">
+                  {/* Profile Section */}
+                  <div className="flex flex-col items-center lg:items-start lg:w-2/5 text-center lg:text-left border-b lg:border-b-0 lg:border-r border-gray-200 pb-4 lg:pb-0 lg:pr-6">
+                    {/* Profile */}
+                    <img
+                      src={viewingDetails?.photoURL}
+                      alt="User Avatar"
+                      className="w-28 h-28 rounded-full object-cover border-2 border-gray-300 shadow-sm"
+                    />
+
+                    {/* Info */}
+                    <div className="mt-4 space-y-0.5">
+                      <p className="text-lg font-medium text-gray-800">
+                        {viewingDetails?.name}
+                      </p>
+                      <p className="text-base text-gray-500 font-outfit">
+                        @{viewingDetails?.username}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {viewingDetails?.email}
+                      </p>
+                    </div>
+
+                    {/* Social */}
+                    <div className="mt-4 flex gap-4 space-y-0.5">
+                      {viewingDetails?.socialLinks.github && (
+                        <a
+                          href={viewingDetails?.socialLinks.github}
+                          title={viewingDetails?.socialLinks.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaGithub size={16} />
+                        </a>
+                      )}
+                      {viewingDetails?.socialLinks.linkedin && (
+                        <a
+                          href={viewingDetails?.socialLinks.linkedin}
+                          title={viewingDetails?.socialLinks.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaLinkedin size={16} />
+                        </a>
+                      )}
+                      {viewingDetails?.socialLinks.twitter && (
+                        <a
+                          href={viewingDetails?.socialLinks.twitter}
+                          title={viewingDetails?.socialLinks.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaTwitter size={16} />
+                        </a>
+                      )}
+                      {viewingDetails?.socialLinks.youtube && (
+                        <a
+                          href={viewingDetails?.socialLinks.youtube}
+                          title={viewingDetails?.socialLinks.youtube}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaYoutube size={16} />
+                        </a>
+                      )}
+                      {viewingDetails?.socialLinks.instagram && (
+                        <a
+                          href={viewingDetails?.socialLinks.instagram}
+                          title={viewingDetails?.socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaInstagram size={16} />
+                        </a>
+                      )}
+                      {viewingDetails?.socialLinks.facebook && (
+                        <a
+                          href={viewingDetails?.socialLinks.facebook}
+                          title={viewingDetails?.socialLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaFacebook size={16} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Details Section */}
+                  <div className="flex-1 space-y-2 text-gray-700 text-sm overflow-y-auto pr-1">
+                    <p>
+                      <span className="font-medium text-gray-800">
+                        User ID:
+                      </span>{" "}
+                      <code className="ml-1 px-1.5 py-1 text-gray-500 bg-gray-100 rounded-sm break-all">
+                        {viewingDetails?.uid}
+                      </code>
+                    </p>
+
+                    <div className="flex flex-row items-center gap-8 mt-3">
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-gray-800">
+                          Followers:
+                        </span>
+                        <span className="text-gray-500 font-outfit">
+                          {numberSuffixer(
+                            viewingDetails?.social.followersIds.length
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-gray-800">
+                          Following:
+                        </span>
+                        <span className="text-gray-500 font-outfit">
+                          {numberSuffixer(
+                            viewingDetails?.social.followingIds.length
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p>
+                      <span className="font-medium text-gray-800">
+                        Provider:
+                      </span>{" "}
+                      <span className="pl-1 text-gray-500 capitalize">
+                        {viewingDetails?.providerId.split(".")[0]}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-800">
+                        Join Date:
+                      </span>{" "}
+                      <span className="pl-1 text-gray-500">
+                        {formatDate(viewingDetails?.createdAt)}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-800">
+                        Last Login:
+                      </span>{" "}
+                      <span className="pl-1 text-gray-500">
+                        {formatDate(viewingDetails?.lastLogin)}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-800">
+                        Location:
+                      </span>{" "}
+                      <span className="pl-1 text-gray-500">
+                        {viewingDetails?.location || "No location added."}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-800">Banned:</span>{" "}
+                      <span className="pl-1 text-gray-500">
+                        {viewingDetails?.system.banStatus.isBanned
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </p>
+
+                    <p>
+                      <span className="font-medium text-gray-800">Bio:</span>{" "}
+                      <span className="pl-1 text-gray-500">
+                        {viewingDetails?.bio}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Editing Details */}
+          {editingDetails && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md z-50 px-4">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8 font-poppins relative animate-in fade-in duration-200 overflow-y-auto max-h-[90vh]">
+                {/* Header */}
+                <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
+                  <h2 className="text-xl font-medium text-gray-900">
+                    Edit User Details
+                  </h2>
+                  <button
+                    onClick={() => setEditingDetails("")}
+                    className="p-1.5 bg-gray-200/70 text-gray-600 rounded-lg transition hover:bg-gray-300"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -330,7 +564,7 @@ const AdminActions = () => {
           </div>
           <button
             onClick={handleBannedUsersClick}
-            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/50 transition-colors duration-200 rounded-b-xl"
+            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm pl-1 text-red-500 hover:bg-red-50/50 transition-colors duration-200 rounded-b-xl"
           >
             <Slash size={16} className="text-red-500" />
             <span className="font-medium">Banned Users</span>
@@ -484,7 +718,14 @@ const SearchAndFilter = ({
   </div>
 );
 
-const UserTableRow = ({ user, index, isOptionsOpen, setIsOptionsOpen }) => (
+const UserTableRow = ({
+  user,
+  index,
+  isOptionsOpen,
+  setIsOptionsOpen,
+  setViewingDetails,
+  setEditingDetails,
+}) => (
   <tr
     className={`hover:bg-green-50/90 transition-colors duration-150 ${
       index % 2 !== 0 && "bg-green-50/50"
@@ -530,12 +771,20 @@ const UserTableRow = ({ user, index, isOptionsOpen, setIsOptionsOpen }) => (
         user={user}
         isOptionsOpen={isOptionsOpen}
         setIsOptionsOpen={setIsOptionsOpen}
+        setViewingDetails={setViewingDetails}
+        setEditingDetails={setEditingDetails}
       />
     </td>
   </tr>
 );
 
-const UserCard = ({ user, isOptionsOpen, setIsOptionsOpen }) => (
+const UserCard = ({
+  user,
+  isOptionsOpen,
+  setIsOptionsOpen,
+  setViewingDetails,
+  setEditingDetails,
+}) => (
   <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
     <div className="flex items-start gap-3">
       <img
@@ -577,7 +826,10 @@ const UserCard = ({ user, isOptionsOpen, setIsOptionsOpen }) => (
     </div>
 
     <div className="relative flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-      <button className="bg-green-500 text-white hover:bg-green-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200">
+      <button
+        onClick={() => setViewingDetails(user)}
+        className="bg-green-500 text-white hover:bg-green-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+      >
         View Details
       </button>
 
@@ -585,6 +837,8 @@ const UserCard = ({ user, isOptionsOpen, setIsOptionsOpen }) => (
         user={user}
         isOptionsOpen={isOptionsOpen}
         setIsOptionsOpen={setIsOptionsOpen}
+        setViewingDetails={setViewingDetails}
+        setEditingDetails={setEditingDetails}
         isMobile={true}
       />
     </div>
@@ -595,46 +849,148 @@ const Actions = ({
   user,
   isOptionsOpen,
   setIsOptionsOpen,
+  setViewingDetails,
+  setEditingDetails,
   isMobile = false,
-}) => (
-  <div className="relative">
-    <button
-      onClick={() => {
-        isOptionsOpen === user.uid
-          ? setIsOptionsOpen("")
-          : setIsOptionsOpen(user.uid);
-      }}
-      className="text-gray-600 bg-gray-100 hover:text-gray-800 p-1.5 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-    >
-      {isOptionsOpen === user.uid ? (
-        <X size={16} />
-      ) : (
-        <MoreVertical size={16} />
-      )}
-    </button>
+}) => {
+  const { deleteUserById, setUserBanStatusById } = useSystemStore();
 
-    {isOptionsOpen === user.uid && (
-      <div
-        className={`absolute ${
-          isMobile ? "right-0 -top-36" : "right-18 -top-2"
-        } mt-2 w-40 bg-white/20 backdrop-blur-sm border border-gray-200/70 rounded-xl shadow-sm z-50 flex flex-col divide-y divide-gray-200/40`}
+  // Loading states
+  const [isDeleting, setIsDeleting] = useState("");
+  const [isTogglingBan, setIsTogglingBan] = useState("");
+
+  const handleDeleteUser = async (user) => {
+    if (!user?.uid) return toast.error("Invalid user data");
+
+    setIsDeleting(user.uid);
+
+    try {
+      const res = await deleteUserById(user.uid);
+
+      if (res?.success) {
+        toast.success("User deleted successfully");
+        setIsDeleting("");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Error deleting user.");
+    } finally {
+      setIsDeleting("");
+    }
+  };
+
+  const toggleUserBan = async (user) => {
+    if (!user?.uid) return toast.error("Invalid user data");
+
+    const isCurrentlyBanned = user.system?.banStatus?.isBanned;
+    let reason = "";
+
+    // Ask reason only while banning
+    if (!isCurrentlyBanned) {
+      reason = prompt("Enter the ban reason")?.trim();
+      if (!reason) {
+        toast.info("Ban cancelled — no reason provided.");
+        return;
+      }
+    }
+
+    setIsTogglingBan(user.uid);
+
+    try {
+      const res = await setUserBanStatusById(user.uid, reason);
+
+      if (res?.success) {
+        toast.success(isCurrentlyBanned ? "User unbanned" : "User banned");
+        setIsTogglingBan("");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Error toggling user ban.");
+    } finally {
+      setIsTogglingBan("");
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => {
+          isOptionsOpen === user.uid
+            ? setIsOptionsOpen("")
+            : setIsOptionsOpen(user.uid);
+        }}
+        className="text-gray-600 bg-gray-100 hover:text-gray-800 p-1.5 rounded-lg hover:bg-gray-200 transition-colors duration-200"
       >
-        <button className="hidden md:flex items-center gap-2 px-4 py-2 pt-3 text-sm text-gray-800 rounded-t-xl hover:bg-gray-300/20 transition-colors duration-200">
-          <ArrowUpRight size={16} /> View Details
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 pt-3 md:pt-2 text-sm text-gray-800 hover:bg-gray-300/20 transition-colors duration-200">
-          <Edit2 size={16} /> Edit
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-300/20 transition-colors duration-200">
-          <Trash2 size={16} /> Delete
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 pb-3 text-sm text-gray-800 rounded-b-xl hover:bg-gray-300/20 transition-colors duration-200">
-          <Slash size={16} /> Ban User
-        </button>
-      </div>
-    )}
-  </div>
-);
+        {isOptionsOpen === user.uid ? (
+          <X size={16} />
+        ) : (
+          <MoreVertical size={16} />
+        )}
+      </button>
+
+      {isOptionsOpen === user.uid && (
+        <div
+          className={`absolute ${
+            isMobile ? "right-0 -top-36" : "right-18 -top-2"
+          } mt-2 w-40 bg-white/20 backdrop-blur-sm border border-gray-200/70 rounded-xl shadow-sm z-50 flex flex-col divide-y divide-gray-200/40`}
+        >
+          <button
+            onClick={() => setViewingDetails(user)}
+            className="hidden md:flex items-center gap-2 px-4 py-2 pt-3 text-sm text-gray-800 rounded-t-xl hover:bg-gray-300/20 transition-colors duration-200"
+          >
+            <ArrowUpRight size={16} /> View Details
+          </button>
+          <button
+            onClick={() => setEditingDetails(user)}
+            className="flex items-center gap-2 px-4 py-2 pt-3 md:pt-2 text-sm text-gray-800 hover:bg-gray-300/20 transition-colors duration-200"
+          >
+            <Edit2 size={16} /> Edit
+          </button>
+          <button
+            onClick={() => handleDeleteUser(user)}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-300/20 transition-colors duration-200"
+          >
+            {isDeleting !== user.id ? (
+              <Trash2 size={16} />
+            ) : (
+              <Loader2 size={16} className="animate-spin" />
+            )}
+            <p>Delete</p>
+          </button>
+          <button
+            onClick={() => toggleUserBan(user)}
+            className="flex items-center gap-2 px-4 py-2 pb-3 text-sm text-gray-800 rounded-b-xl hover:bg-gray-300/20 transition-colors duration-200"
+          >
+            {isTogglingBan === user.uid ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <p>
+                  {user.system.banStatus.isBanned
+                    ? "UnBan User..."
+                    : "Ban User"}
+                </p>
+              </>
+            ) : (
+              <>
+                {user.system.banStatus.isBanned ? (
+                  <>
+                    <Undo size={16} />
+                    <p>Unban User</p>
+                  </>
+                ) : (
+                  <>
+                    <Slash size={16} />
+                    <p>Ban User</p>
+                  </>
+                )}
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const LoadingSkeletonSearch = () => (
   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 font-poppins">

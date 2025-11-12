@@ -23,7 +23,7 @@ export default function Profile() {
   return (
     <div
       className={`min-h-screen bg-white select-none ${
-        user.system.banStatus.isbanned && "pointer-events-none"
+        user.system.banStatus.isBanned && "pointer-events-none"
       }`}
     >
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
@@ -207,8 +207,8 @@ export default function Profile() {
                 </div>
               </div>
 
-              {/* Banned Section (Mobile/Small) */}
-              {user.system.banStatus.isbanned && (
+              {/* Banned Section */}
+              {user.system.banStatus.isBanned && (
                 <div className="w-full max-w-md mx-auto mt-6">
                   <div className="bg-rose-50 border border-rose-300 rounded-xl shadow-sm overflow-hidden">
                     <div className="bg-rose-500 text-white px-4 py-3 font-poppins font-semibold">
@@ -218,10 +218,6 @@ export default function Profile() {
                       <p>
                         <span className="font-medium">Reason:</span>{" "}
                         {user.system.banStatus.reason}
-                      </p>
-                      <p>
-                        <span className="font-medium">Ban Lift Date:</span>{" "}
-                        {user.system.banStatus.bannedUntil}
                       </p>
                       <p className="text-xs text-gray-500">
                         If you believe this is a mistake, contact support for
@@ -424,20 +420,35 @@ export default function Profile() {
           </div>
 
           {/* Banned Section Ribbon */}
-          {user.system.banStatus.isbanned && (
-            <div className="w-full mt-6 bg-rose-500 text-white px-6 py-3 font-poppins font-semibold rounded-xl shadow-sm border border-rose-400">
-              <p>Your Account is Banned</p>
-              <p className="text-sm font-normal mt-1">
-                <span className="font-medium">Reason:</span>{" "}
-                {user.system.banStatus.reason}
-                {" | "}
-                <span className="font-medium">Ban Lift Date:</span>{" "}
-                {user.system.banStatus.bannedUntil}
-              </p>
-              <p className="text-xs text-rose-100 mt-1">
-                If you believe this is a mistake, contact support for
-                assistance.
-              </p>
+          {user.system.banStatus.isBanned && (
+            <div className="w-full max-w-7xl mx-auto mt-6">
+              <div className="bg-rose-50 border border-rose-300 rounded-xl shadow-sm overflow-hidden font-poppins">
+                {/* Header Ribbon */}
+                <div className="bg-rose-500 text-white px-6 py-3 font-semibold text-center md:text-left">
+                  Your Account is Banned
+                </div>
+
+                {/* Details Section */}
+                <div className="px-6 py-4 text-gray-700 font-outfit text-sm flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                  <div className="space-y-1 md:space-y-0">
+                    <p>
+                      <span className="font-medium">Reason:</span>{" "}
+                      {user.system.banStatus.reason || "Not specified"}
+                    </p>
+                    {user.system.banStatus.bannedUntil && (
+                      <p>
+                        <span className="font-medium">Ban Lift Date:</span>{" "}
+                        {user.system.banStatus.bannedUntil}
+                      </p>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-500 md:text-right">
+                    If you believe this is a mistake, contact support for
+                    assistance.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>

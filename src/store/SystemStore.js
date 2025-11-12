@@ -7,6 +7,9 @@ import {
   query,
   where,
   getDocs,
+  deleteDoc,
+  updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -102,6 +105,55 @@ export const useSystemStore = create((set, get) => ({
       set({ error: err.message });
       console.error("Error fetching user details:", err);
       return null;
+    }
+  },
+
+  // Delete user by ID
+  deleteUserById: async (uid) => {
+    try {
+      // Delete the user document from Firestore
+      const userDocRef = doc(db, "users", uid);
+      await deleteDoc(userDocRef);
+
+      // Remove the user from the local state
+      set((state) => ({
+        userIds: state.userIds.filter((id) => id !== uid),
+        developerIds: state.developerIds.filter((id) => id !== uid),
+      }));
+
+      return {
+        success: true,
+      };
+    } catch (err) {
+      set({ error: err.message });
+      return { success: false, error: err.message };
+    }
+  },
+
+  // Ban or Unban user by ID
+  setUserBanStatusById: async (uid, reason) => {
+    try {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        console.error("User not found");
+        return;
+      }
+
+      const banStatus = userSnap.data().system?.banStatus?.isBanned || false;
+
+      await updateDoc(userRef, {
+        "system.banStatus.isBanned": !banStatus,
+        "system.banStatus.updatedAt": serverTimestamp(),
+        "system.banStatus.reason": !banStatus ? reason : "",
+      });
+      return {
+        success: true,
+      };
+    } catch (err) {
+      set({ error: err.message });
+      return { success: false, error: err.message };
     }
   },
 

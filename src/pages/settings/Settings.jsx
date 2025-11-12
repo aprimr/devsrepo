@@ -311,7 +311,7 @@ function Setting() {
             <div className="mt-5 flex gap-5 justify-center">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-5 py-2 rounded-lg border-2 border-gray-500 text-gray-700 font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all font-poppins"
+                className="px-5 py-2 rounded-lg border-2 border-gray-300 text-gray-600 font-semibold text-xs sm:text-sm hover:bg-gray-100 transition-all font-poppins"
               >
                 Cancle
               </button>
