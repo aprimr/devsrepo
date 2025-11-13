@@ -117,7 +117,7 @@ function Admin() {
               <SectionButton
                 icon={CodeXml}
                 label="Developer Management"
-                redirect="/admin"
+                redirect="/admin-developer-management"
               />
               <SectionButton
                 icon={Smartphone}

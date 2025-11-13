@@ -22,7 +22,12 @@ import {
   EllipsisVertical,
   Undo,
   Loader2,
+  Code2,
+  Laptop,
   BadgeCheck,
+  ShieldUser,
+  Shield,
+  UserRoundCheck,
 } from "lucide-react";
 import {
   FaFacebook,
@@ -38,29 +43,39 @@ import { useSystemStore } from "../../../store/SystemStore";
 import numberSuffixer from "../../../utils/numberSuffixer";
 import { toast } from "sonner";
 
-const AdminUserManagement = () => {
-  const { userIds, getUserDetailsById } = useSystemStore();
+const AdminDeveloperManagement = () => {
+  const {
+    developerIds,
+    getUserDetailsById,
+    toggleDevVerifyStatus,
+    toggleAdminStatus,
+  } = useSystemStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTerm, setFilterTerm] = useState("no_filter");
   const [isOptionsOpen, setIsOptionsOpen] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState([]);
+  const [allDevelopers, setAllDevelopers] = useState([]);
 
   // Popup States
-  const [viewingDetails, setViewingDetails] = useState(""); // store the user's id
-  const [editingDetails, setEditingDetails] = useState(""); // store the user's id
+  const [viewingDetails, setViewingDetails] = useState(""); // store the developer's id
+  const [editingDetails, setEditingDetails] = useState(""); // store the developer's id
+  const [veifyingUser, setVerifyingUser] = useState(false);
+  const [togglingAdmin, setTogglingAdmin] = useState(false);
 
-  const usersMapRef = useRef(new Map());
+  const developersMapRef = useRef(new Map());
 
   useEffect(() => {
-    if (!userIds || (userIds.length === 0 && allUsers.length === 0)) {
-      if (!userIds || userIds.length === 0) setIsLoading(false);
+    if (
+      !developerIds ||
+      (developerIds.length === 0 && allDevelopers.length === 0)
+    ) {
+      if (!developerIds || developerIds.length === 0) setIsLoading(false);
       return;
     }
 
-    const currentUidsSet = new Set(userIds);
-    const existingUidsMap = usersMapRef.current;
+    const currentUidsSet = new Set(developerIds);
+    const existingUidsMap = developersMapRef.current;
     let didCancel = false;
 
     const uidsToRemove = [];
@@ -71,63 +86,66 @@ const AdminUserManagement = () => {
     });
 
     if (uidsToRemove.length > 0) {
-      setAllUsers((prevUsers) => {
-        const updatedUsers = prevUsers.filter(
-          (user) => !uidsToRemove.includes(user.uid)
+      setAllDevelopers((prevDevelopers) => {
+        const updatedDevelopers = prevDevelopers.filter(
+          (developer) => !uidsToRemove.includes(developer.uid)
         );
         uidsToRemove.forEach((uid) => existingUidsMap.delete(uid));
-        return updatedUsers;
+        return updatedDevelopers;
       });
     }
 
-    const newUids = userIds.filter((uid) => !existingUidsMap.has(uid));
+    const newUids = developerIds.filter((uid) => !existingUidsMap.has(uid));
 
     if (newUids.length > 0) {
-      if (allUsers.length === 0) setIsLoading(true);
+      if (allDevelopers.length === 0) setIsLoading(true);
 
-      const loadNewUsers = async () => {
+      const loadNewDevelopers = async () => {
         try {
-          const userDetailsList = await Promise.all(
+          const developerDetailsList = await Promise.all(
             newUids.map((uid) => getUserDetailsById(uid))
           );
 
           if (didCancel) return;
 
-          const validNewUsers = userDetailsList.filter((user) => user !== null);
+          const validNewDevelopers = developerDetailsList.filter(
+            (developer) => developer !== null
+          );
 
-          setAllUsers((prevUsers) => {
-            const finalUsers = [...prevUsers];
+          setAllDevelopers((prevDevelopers) => {
+            const finalDevelopers = [...prevDevelopers];
 
-            validNewUsers.forEach((newUser) => {
-              existingUidsMap.set(newUser.uid, newUser);
-              finalUsers.push(newUser);
+            validNewDevelopers.forEach((newDeveloper) => {
+              existingUidsMap.set(newDeveloper.uid, newDeveloper);
+              finalDevelopers.push(newDeveloper);
             });
 
-            return finalUsers;
+            return finalDevelopers;
           });
         } catch (error) {
-          console.error("Error fetching new users:", error);
+          console.error("Error fetching new developers:", error);
         } finally {
-          if (!didCancel && allUsers.length === 0) {
+          if (!didCancel && allDevelopers.length === 0) {
             setIsLoading(false);
           }
         }
       };
 
-      loadNewUsers();
+      loadNewDevelopers();
     }
 
-    if (!isLoading && userIds.length > 0) {
+    if (!isLoading && developerIds.length > 0) {
       const updateChecks = [];
-      existingUidsMap.forEach((existingUser, uid) => {
+      existingUidsMap.forEach((existingDeveloper, uid) => {
         if (currentUidsSet.has(uid)) {
           updateChecks.push(
-            getUserDetailsById(uid).then((latestUser) => {
+            getUserDetailsById(uid).then((latestDeveloper) => {
               if (
-                latestUser &&
-                JSON.stringify(latestUser) !== JSON.stringify(existingUser)
+                latestDeveloper &&
+                JSON.stringify(latestDeveloper) !==
+                  JSON.stringify(existingDeveloper)
               ) {
-                return latestUser;
+                return latestDeveloper;
               }
               return null;
             })
@@ -135,52 +153,55 @@ const AdminUserManagement = () => {
         }
       });
 
-      Promise.all(updateChecks).then((updatedUsers) => {
+      Promise.all(updateChecks).then((updatedDevelopers) => {
         if (didCancel) return;
-        const validUpdates = updatedUsers.filter((u) => u !== null);
+        const validUpdates = updatedDevelopers.filter((u) => u !== null);
 
         if (validUpdates.length > 0) {
-          setAllUsers((prevUsers) => {
-            const nextUsers = [...prevUsers];
+          setAllDevelopers((prevDevelopers) => {
+            const nextDevelopers = [...prevDevelopers];
 
-            validUpdates.forEach((updatedUser) => {
-              const index = nextUsers.findIndex(
-                (u) => u.uid === updatedUser.uid
+            validUpdates.forEach((updatedDeveloper) => {
+              const index = nextDevelopers.findIndex(
+                (u) => u.uid === updatedDeveloper.uid
               );
               if (index !== -1) {
-                nextUsers[index] = updatedUser;
-                existingUidsMap.set(updatedUser.uid, updatedUser);
+                nextDevelopers[index] = updatedDeveloper;
+                existingUidsMap.set(updatedDeveloper.uid, updatedDeveloper);
               }
             });
-            return nextUsers;
+            return nextDevelopers;
           });
         }
       });
     }
 
-    if (userIds.length > 0 && allUsers.length === userIds.length) {
+    if (
+      developerIds.length > 0 &&
+      allDevelopers.length === developerIds.length
+    ) {
       setIsLoading(false);
     }
 
     return () => {
       didCancel = true;
     };
-  }, [userIds, getUserDetailsById]);
+  }, [developerIds, getUserDetailsById]);
 
-  const usersToDisplay = useMemo(() => {
-    let list = allUsers;
+  const developersToDisplay = useMemo(() => {
+    let list = allDevelopers;
     const lowerCaseSearchTerm = searchTerm.toLowerCase().trim();
 
     // Search Filtering
     if (lowerCaseSearchTerm) {
-      list = list.filter((user) => {
-        const nameMatch = user.name
+      list = list.filter((developer) => {
+        const nameMatch = developer.name
           ?.toLowerCase()
           .includes(lowerCaseSearchTerm);
-        const emailMatch = user.email
+        const emailMatch = developer.email
           ?.toLowerCase()
           .includes(lowerCaseSearchTerm);
-        const usernameMatch = user.username
+        const usernameMatch = developer.username
           ?.toLowerCase()
           .includes(lowerCaseSearchTerm);
 
@@ -191,10 +212,12 @@ const AdminUserManagement = () => {
     // Sorting
     return list.slice().sort((a, b) => {
       switch (filterTerm) {
-        case "banned_users":
+        case "admin":
+          return (b.system?.isAdmin ? 1 : 0) - (a.system?.isAdmin ? 1 : 0);
+        case "verified":
           return (
-            (b.system?.banStatus.isBanned ? 1 : 0) -
-            (a.system?.banStatus.isBanned ? 1 : 0)
+            (b.developerProfile?.verifiedDeveloper ? 1 : 0) -
+            (a.developerProfile?.verifiedDeveloper ? 1 : 0)
           );
         case "join_new":
           return (b.createdAt || 0) - (a.createdAt || 0);
@@ -216,7 +239,41 @@ const AdminUserManagement = () => {
           return 0;
       }
     });
-  }, [allUsers, searchTerm, filterTerm]);
+  }, [allDevelopers, searchTerm, filterTerm]);
+
+  const toggleDevVerification = async (userId) => {
+    setVerifyingUser(true);
+    try {
+      const res = await toggleDevVerifyStatus(userId);
+      if (res.success) {
+        setVerifyingUser(false);
+        setViewingDetails();
+      }
+      setVerifyingUser();
+      setViewingDetails();
+    } catch (error) {
+      setVerifyingUser();
+      setViewingDetails();
+      toast.error("Error toggling admin status");
+    }
+  };
+
+  const toggleAdmin = async (userId) => {
+    setTogglingAdmin(true);
+    try {
+      const res = await toggleAdminStatus(userId);
+      if (res.success) {
+        setTogglingAdmin(false);
+        setViewingDetails();
+      }
+      setTogglingAdmin();
+      setViewingDetails();
+    } catch (error) {
+      setTogglingAdmin();
+      setViewingDetails();
+      toast.error("Error toggling admin status");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -242,7 +299,7 @@ const AdminUserManagement = () => {
           setSearchTerm={setSearchTerm}
           filterTerm={filterTerm}
           setFilterTerm={setFilterTerm}
-          totalUsers={usersToDisplay.length}
+          totalDevelopers={developersToDisplay.length}
           isFiltering={isFilterActive}
         />
 
@@ -251,21 +308,21 @@ const AdminUserManagement = () => {
           <div className="hidden md:block">
             <div className="bg-white rounded-xl border-3 border-gray-100 overflow-x-auto">
               <table className="w-full min-w-[900px] text-sm text-left">
-                <thead className="bg-green-100 text-green-700 uppercase text-xs tracking-wider">
+                <thead className="bg-blue-100 text-blue-700 uppercase text-xs tracking-wider">
                   <tr>
-                    <th className="px-6 py-4">User</th>
+                    <th className="px-6 py-4">Developer</th>
                     <th className="px-6 py-4">Email</th>
-                    <th className="px-6 py-4">User ID</th>
-                    <th className="px-6 py-4">Joined At</th>
-                    <th className="px-6 py-4">Last Activity</th>
-                    <th className="px-6 py-4">Actions</th>
+                    <th className="px-6 py-4">Website</th>
+                    <th className="px-6 py-4">Developer ID</th>
+                    <th className="px-6 py-4">Developer Since</th>
+                    <th className="px-6 py-4">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {usersToDisplay.map((user, i) => (
-                    <UserTableRow
-                      key={user.uid}
-                      user={user}
+                  {developersToDisplay.map((developer, i) => (
+                    <DeveloperTableRow
+                      key={developer.uid}
+                      developer={developer}
                       index={i}
                       isOptionsOpen={isOptionsOpen}
                       setIsOptionsOpen={setIsOptionsOpen}
@@ -280,10 +337,10 @@ const AdminUserManagement = () => {
 
           {/* Card View for Mobile */}
           <div className="md:hidden space-y-3">
-            {usersToDisplay.map((user) => (
-              <UserCard
-                key={user.uid}
-                user={user}
+            {developersToDisplay.map((developer) => (
+              <DeveloperCard
+                key={developer.uid}
+                developer={developer}
                 isOptionsOpen={isOptionsOpen}
                 setIsOptionsOpen={setIsOptionsOpen}
                 setViewingDetails={setViewingDetails}
@@ -293,22 +350,22 @@ const AdminUserManagement = () => {
           </div>
 
           {/* Empty States */}
-          {usersToDisplay.length === 0 && (
+          {developersToDisplay.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
                 {searchTerm
                   ? `No results found for "${searchTerm}". Please try a different term.`
-                  : allUsers.length > 0
-                  ? "No users matched the current filter criteria."
-                  : "No users found in the system."}
+                  : allDevelopers.length > 0
+                  ? "No developers matched the current filter criteria."
+                  : "No developers found in the system."}
               </p>
             </div>
           )}
 
-          {usersToDisplay.length > 0 && (
+          {developersToDisplay.length > 0 && (
             <div className="text-center pt-2">
               <p className="text-sm text-gray-500">
-                End of list. Showing {usersToDisplay.length} users.
+                End of list. Showing {developersToDisplay.length} developers.
               </p>
             </div>
           )}
@@ -320,7 +377,7 @@ const AdminUserManagement = () => {
                 {/* Header */}
                 <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
                   <h2 className="text-xl font-medium font-poppins text-gray-900">
-                    User Details
+                    Developer Details
                   </h2>
                   <button
                     onClick={() => setViewingDetails("")}
@@ -337,13 +394,13 @@ const AdminUserManagement = () => {
                     {/* Profile */}
                     <img
                       src={viewingDetails?.photoURL}
-                      alt="User Avatar"
+                      alt="Developer Avatar"
                       className="w-28 h-28 rounded-full object-cover border-2 border-gray-300 shadow-sm"
                     />
 
                     {/* Info */}
                     <div className="mt-4 space-y-0.5">
-                      <p className="flex items-center justify-center md:max-w-[200px] text-sm font-medium text-gray-900 truncate">
+                      <p className="flex items-center md:max-w-[200px] text-sm font-medium text-gray-900 truncate">
                         <span title={viewingDetails?.name} className="truncate">
                           {viewingDetails?.name}
                         </span>
@@ -365,9 +422,17 @@ const AdminUserManagement = () => {
                       </p>
                     </div>
 
+                    {/* Admin Badge */}
+                    {viewingDetails.system.isAdmin && (
+                      <div className="mt-3 flex items-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-lg">
+                        <Shield size={14} />
+                        <span className="text-sm font-medium">Admin</span>
+                      </div>
+                    )}
+
                     {/* Social */}
                     <div className="mt-4 flex gap-4 space-y-0.5">
-                      {viewingDetails?.socialLinks.github && (
+                      {viewingDetails?.socialLinks?.github && (
                         <a
                           href={viewingDetails?.socialLinks.github}
                           title={viewingDetails?.socialLinks.github}
@@ -377,7 +442,7 @@ const AdminUserManagement = () => {
                           <FaGithub size={16} />
                         </a>
                       )}
-                      {viewingDetails?.socialLinks.linkedin && (
+                      {viewingDetails?.socialLinks?.linkedin && (
                         <a
                           href={viewingDetails?.socialLinks.linkedin}
                           title={viewingDetails?.socialLinks.linkedin}
@@ -387,7 +452,7 @@ const AdminUserManagement = () => {
                           <FaLinkedin size={16} />
                         </a>
                       )}
-                      {viewingDetails?.socialLinks.twitter && (
+                      {viewingDetails?.socialLinks?.twitter && (
                         <a
                           href={viewingDetails?.socialLinks.twitter}
                           title={viewingDetails?.socialLinks.twitter}
@@ -397,7 +462,7 @@ const AdminUserManagement = () => {
                           <FaTwitter size={16} />
                         </a>
                       )}
-                      {viewingDetails?.socialLinks.youtube && (
+                      {viewingDetails?.socialLinks?.youtube && (
                         <a
                           href={viewingDetails?.socialLinks.youtube}
                           title={viewingDetails?.socialLinks.youtube}
@@ -407,7 +472,7 @@ const AdminUserManagement = () => {
                           <FaYoutube size={16} />
                         </a>
                       )}
-                      {viewingDetails?.socialLinks.instagram && (
+                      {viewingDetails?.socialLinks?.instagram && (
                         <a
                           href={viewingDetails?.socialLinks.instagram}
                           title={viewingDetails?.socialLinks.instagram}
@@ -417,7 +482,7 @@ const AdminUserManagement = () => {
                           <FaInstagram size={16} />
                         </a>
                       )}
-                      {viewingDetails?.socialLinks.facebook && (
+                      {viewingDetails?.socialLinks?.facebook && (
                         <a
                           href={viewingDetails?.socialLinks.facebook}
                           title={viewingDetails?.socialLinks.facebook}
@@ -434,10 +499,10 @@ const AdminUserManagement = () => {
                   <div className="flex-1 space-y-2 text-gray-700 text-sm overflow-y-auto pr-1">
                     <p>
                       <span className="font-medium text-gray-800">
-                        User ID:
+                        Developer ID:
                       </span>{" "}
                       <code className="ml-1 px-1.5 py-1 text-gray-500 bg-gray-100 rounded-sm break-all">
-                        {viewingDetails?.uid}
+                        {viewingDetails?.developerProfile.developerId}
                       </code>
                     </p>
 
@@ -448,7 +513,7 @@ const AdminUserManagement = () => {
                         </span>
                         <span className="text-gray-500 font-outfit">
                           {numberSuffixer(
-                            viewingDetails?.social.followersIds.length
+                            viewingDetails?.social?.followersIds?.length || 0
                           )}
                         </span>
                       </div>
@@ -459,7 +524,57 @@ const AdminUserManagement = () => {
                         </span>
                         <span className="text-gray-500 font-outfit">
                           {numberSuffixer(
-                            viewingDetails?.social.followingIds.length
+                            viewingDetails?.social?.followingIds?.length || 0
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-row items-center gap-8 mt-3">
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-gray-800">
+                          Apps Published:
+                        </span>
+                        <span className="text-gray-500 font-outfit">
+                          {numberSuffixer(
+                            viewingDetails?.developerProfile.apps
+                              .publishedAppIds.length || 0
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-gray-800">
+                          Apps Submitted:
+                        </span>
+                        <span className="text-gray-500 font-outfit">
+                          {numberSuffixer(
+                            viewingDetails?.developerProfile.apps
+                              .submittedAppIds.length || 0
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-row items-center gap-8 mt-3">
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-gray-800">
+                          Rejected Apps:
+                        </span>
+                        <span className="text-gray-500 font-outfit">
+                          {numberSuffixer(
+                            viewingDetails?.developerProfile.apps.rejectedAppIds
+                              .length || 0
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium text-gray-800">
+                          Suspended Apps:
+                        </span>
+                        <span className="text-gray-500 font-outfit">
+                          {numberSuffixer(
+                            viewingDetails?.developerProfile.apps
+                              .suspendedAppIds.length || 0
                           )}
                         </span>
                       </div>
@@ -467,18 +582,31 @@ const AdminUserManagement = () => {
 
                     <p>
                       <span className="font-medium text-gray-800">
-                        Provider:
-                      </span>{" "}
-                      <span className="pl-1 text-gray-500 capitalize">
-                        {viewingDetails?.providerId.split(".")[0]}
+                        Website:
+                      </span>
+                      <span className="pl-1 text-gray-500">
+                        {viewingDetails?.developerProfile.website.replace(
+                          /^(https?:\/\/)?(www\.)?/i,
+                          ""
+                        ) || "No website added."}
                       </span>
                     </p>
                     <p>
                       <span className="font-medium text-gray-800">
-                        Join Date:
+                        Contact Email:
+                      </span>
+                      <span className="pl-1 text-gray-500">
+                        {viewingDetails?.developerProfile.contactEmail}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-800">
+                        Developer Since:
                       </span>{" "}
                       <span className="pl-1 text-gray-500">
-                        {formatDate(viewingDetails?.createdAt)}
+                        {formatDate(
+                          viewingDetails?.developerProfile.developerSince
+                        )}
                       </span>
                     </p>
                     <p>
@@ -489,30 +617,72 @@ const AdminUserManagement = () => {
                         {formatDate(viewingDetails?.lastLogin)}
                       </span>
                     </p>
-                    <p>
-                      <span className="font-medium text-gray-800">
-                        Location:
-                      </span>{" "}
-                      <span className="pl-1 text-gray-500">
-                        {viewingDetails?.location || "No location added."}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="font-medium text-gray-800">Banned:</span>{" "}
-                      <span className="pl-1 text-gray-500">
-                        {viewingDetails?.system.banStatus.isBanned
-                          ? "Yes"
-                          : "No"}
-                      </span>
-                    </p>
-
-                    <p>
-                      <span className="font-medium text-gray-800">Bio:</span>{" "}
-                      <span className="pl-1 text-gray-500">
-                        {viewingDetails?.bio}
-                      </span>
-                    </p>
                   </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-between items-center border-t border-gray-200 pt-3 mt-3">
+                  {/* Verify / Unverify Button */}
+                  <button
+                    onClick={() =>
+                      !veifyingUser && toggleDevVerification(viewingDetails.uid)
+                    }
+                    disabled={veifyingUser}
+                    className={`flex items-center gap-2 py-1.5 px-3 rounded-lg transition font-poppins text-sm
+                      ${
+                        veifyingUser
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : viewingDetails.developerProfile.verifiedDeveloper
+                          ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
+                          : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                      }`}
+                  >
+                    {veifyingUser ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Updating...</span>
+                      </>
+                    ) : viewingDetails.developerProfile.verifiedDeveloper ? (
+                      <>
+                        <span>Unverify</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Verify</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Make / Remove Admin Button */}
+                  <button
+                    onClick={() =>
+                      !togglingAdmin && toggleAdmin(viewingDetails.uid)
+                    }
+                    disabled={togglingAdmin}
+                    className={`flex items-center gap-2 py-1.5 px-3 rounded-lg transition font-poppins text-sm
+                    ${
+                      togglingAdmin
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : viewingDetails.system.isAdmin
+                        ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
+                        : "bg-green-100 text-green-600 hover:bg-green-200"
+                    }`}
+                  >
+                    {togglingAdmin ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Updating...</span>
+                      </>
+                    ) : viewingDetails.system.isAdmin ? (
+                      <>
+                        <span>Remove Admin</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Make Admin</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -525,7 +695,7 @@ const AdminUserManagement = () => {
                 {/* Header */}
                 <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
                   <h2 className="text-xl font-medium text-gray-900">
-                    Edit User Details
+                    Edit Developer Details
                   </h2>
                   <button
                     onClick={() => setEditingDetails("")}
@@ -551,7 +721,7 @@ const Header = () => (
       <NavLink to={-1} className="flex items-center gap-2 text-gray-800">
         <ChevronLeft size={26} />
         <span className="text-lg sm:text-2xl py-1.5 font-medium tracking-tight">
-          User Management
+          Developer Management
         </span>
       </NavLink>
     </div>
@@ -563,7 +733,7 @@ const SearchAndFilter = ({
   setSearchTerm,
   filterTerm,
   setFilterTerm,
-  totalUsers,
+  totalDevelopers,
   isFiltering,
 }) => (
   <div className="flex flex-col gap-4 mb-4 font-poppins">
@@ -580,7 +750,7 @@ const SearchAndFilter = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by Name, Email, or Username..."
-          className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white transition-all duration-200"
+          className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200"
         />
         <X
           onClick={() => setSearchTerm("")}
@@ -589,12 +759,12 @@ const SearchAndFilter = ({
         />
       </div>
 
-      {/* Total Users / Results */}
+      {/* Total Developers / Results */}
       <div className="flex items-center gap-2 font-medium text-sm sm:text-base">
         <span className="text-gray-700">
-          {isFiltering ? "Results Shown:" : "Total Users:"}
+          {isFiltering ? "Results Shown:" : "Total Developers:"}
         </span>
-        <span className="text-gray-900 font-outfit">{totalUsers}</span>
+        <span className="text-gray-900 font-outfit">{totalDevelopers}</span>
         {isFiltering && (
           <span className="text-xs text-gray-500 ml-1">(active view)</span>
         )}
@@ -616,9 +786,14 @@ const SearchAndFilter = ({
               icon: <CircleSlash size={13} className="text-gray-500" />,
             },
             {
-              label: "Banned Users",
-              value: "banned_users",
-              icon: <CircleSlash size={13} className="text-gray-500" />,
+              label: "Admin",
+              value: "admin",
+              icon: <Shield size={13} className="text-gray-500" />,
+            },
+            {
+              label: "Verified",
+              value: "verified",
+              icon: <UserRoundCheck size={13} className="text-gray-500" />,
             },
             {
               label: "Join Date (Newest)",
@@ -661,12 +836,12 @@ const SearchAndFilter = ({
               onClick={() => setFilterTerm(chip.value)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-nowrap rounded-lg text-[11px] md:text-[11px] border ${
                 chip.value === filterTerm
-                  ? "bg-green-50/50 border-green-300"
+                  ? "bg-blue-50/50 border-blue-300"
                   : "border-gray-300 bg-white text-gray-700"
               } transition-all duration-200 shrink-0`}
             >
               {chip.value === filterTerm ? (
-                <CheckCheck size={14} className="text-green-500" />
+                <CheckCheck size={14} className="text-blue-500" />
               ) : (
                 <span>{chip.icon}</span>
               )}
@@ -683,8 +858,8 @@ const SearchAndFilter = ({
   </div>
 );
 
-const UserTableRow = ({
-  user,
+const DeveloperTableRow = ({
+  developer,
   index,
   isOptionsOpen,
   setIsOptionsOpen,
@@ -692,58 +867,68 @@ const UserTableRow = ({
   setEditingDetails,
 }) => (
   <tr
-    className={`hover:bg-green-50/90 transition-colors duration-150 ${
-      index % 2 !== 0 && "bg-green-50/50"
+    className={`hover:bg-blue-50/90 transition-colors duration-150 ${
+      index % 2 !== 0 && "bg-blue-50/50"
     }`}
   >
     <td className="pl-6 py-4">
       <div className="flex items-center gap-3 ">
         <div className="relative w-12 h-12">
           <img
-            src={user.photoURL}
+            src={developer.photoURL}
             onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "https://placehold.co/48x48/CCCCCC/333333?text=U";
+              e.currentTarget.onerror = null; // prevent infinite loop
+              e.currentTarget.src =
+                "https://placehold.co/48x48/CCCCCC/333333?text=D";
             }}
-            alt={user.uid}
-            className="w-12 h-12 rounded-xl border border-gray-200 shadow-sm"
+            alt={developer.name || "Developer"}
+            className="w-full h-full rounded-xl border border-gray-200 shadow-sm object-cover"
           />
           {/* Status Dot */}
-          {user.system.banStatus.isBanned && (
-            <div className="absolute h-3 w-3 -top-1 -left-1 bg-rose-500 border-2 border-white rounded-full" />
+          {developer.system.isAdmin && (
+            <div className="absolute h-3 w-3 -top-1 -left-1 bg-green-500 border-2 border-white rounded-full" />
           )}
         </div>
 
         <div className="max-w-[300px]">
-          <div
-            title={user.name}
-            className="text-base font-medium font-poppins text-gray-900 max-w-[200px] truncate"
-          >
-            {user.name}
+          <div className="flex items-center text-base font-medium font-poppins text-gray-900 max-w-[200px]">
+            <p className="truncate">{developer.name}</p>
+            {developer.developerProfile.verifiedDeveloper && (
+              <BadgeCheck
+                size={16}
+                fill="#3B82F6"
+                stroke="white"
+                className="ml-1 shrink-0"
+              />
+            )}
           </div>
+
           <div className="text-gray-500 text-[15px] font-outfit w-[200px] truncate">
-            @{user.username}
+            @{developer.username}
           </div>
         </div>
       </div>
     </td>
     <td className="pl-6 py-4 text-gray-600 max-w-[200px] truncate">
-      {user.email}
+      {developer.email}
+    </td>
+    <td className="pl-6 py-4 text-gray-600 max-w-[200px] truncate">
+      {developer.developerProfile.website.replace(
+        /^(https?:\/\/)?(www\.)?/i,
+        ""
+      ) || "No website added."}
     </td>
     <td className="pl-6 py-4">
       <code className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg font-mono">
-        {user.uid}
+        {developer.developerProfile.developerId}
       </code>
     </td>
     <td className="pl-6 py-4 text-gray-600 max-w-[200px] truncate">
-      {formatDate(user.createdAt).split(", ").slice(0, 2).join(", ")}
+      {formatDate(developer.developerProfile.developerSince)}
     </td>
-    <td className="pl-6 py-4 text-gray-600 max-w-[200px] truncate">
-      {formatDate(user.system?.lastActivity || user.createdAt)}
-    </td>
-    <td className="pl-6 py-4">
+    <td className="px-6 py-4">
       <Actions
-        user={user}
+        developer={developer}
         isOptionsOpen={isOptionsOpen}
         setIsOptionsOpen={setIsOptionsOpen}
         setViewingDetails={setViewingDetails}
@@ -753,8 +938,8 @@ const UserTableRow = ({
   </tr>
 );
 
-const UserCard = ({
-  user,
+const DeveloperCard = ({
+  developer,
   isOptionsOpen,
   setIsOptionsOpen,
   setViewingDetails,
@@ -764,23 +949,24 @@ const UserCard = ({
     <div className="flex items-start gap-3">
       <div className="relative">
         <img
-          src={user.photoURL}
+          src={developer.photoURL}
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = "https://placehold.co/56x56/CCCCCC/333333?text=U";
+            e.target.src = "https://placehold.co/56x56/CCCCCC/333333?text=D";
           }}
-          alt={user.uid}
-          className="w-14 h-14 rounded-xl border border-gray-200 shadow-sm"
+          alt={developer.developerProfile.developerId}
+          className="w-14 h-14 shrink-0 rounded-xl border border-gray-200 shadow-sm"
         />
-        {user.system.banStatus.isBanned && (
-          <div className="absolute h-3 w-3 -top-1 -left-1 bg-rose-500 border-2 border-white rounded-full" />
+        {/* Status Dot */}
+        {developer.system.isAdmin && (
+          <div className="absolute h-3 w-3 -top-1 -left-1 bg-green-500 border-2 border-white rounded-full" />
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div>
           <h3 className="flex items-center gap-1 text-sm font-medium font-poppins text-gray-900">
-            <p className="truncate">{user.name}</p>
-            {user.developerProfile.verifiedDeveloper && (
+            <p className="truncate">{developer.name}</p>
+            {developer.developerProfile.verifiedDeveloper && (
               <BadgeCheck
                 size={17}
                 fill="#3B82F6"
@@ -789,25 +975,35 @@ const UserCard = ({
               />
             )}
           </h3>
+
           <p className="text-gray-500 text-base font-outfit">
-            @{user.username}
+            @{developer.username}
           </p>
         </div>
 
         <div className="mt-1 space-y-1.5 text-sm text-gray-600">
           <div className="flex items-center gap-2">
-            <span className="truncate">{user.email}</span>
+            <span className="truncate">{developer.email}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="truncate">
+              {developer.developerProfile.website.replace(
+                /^(https?:\/\/)?(www\.)?/i,
+                ""
+              ) || "No website added."}
+            </span>
           </div>
           <div className="flex text-[13px] items-center gap-2">
             <span className="font-medium">Joined At:</span>{" "}
-            {formatDate(user.createdAt)}
+            {formatDate(developer.createdAt)}
           </div>
           <div className="flex text-[13px] items-center gap-2">
-            <span className="font-medium">Last activity: </span>
-            {formatDate(user.system?.lastActivity || user.createdAt)}
+            <span className="font-medium">Developer Since: </span>
+            {formatDate(developer.developerProfile.developerSince)}
           </div>
           <code className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded-sm">
-            <span className="font-semibold">ID:</span> {user.uid}
+            <span className="font-semibold">DevID:</span>{" "}
+            {developer.developerProfile.developerId}
           </code>
         </div>
       </div>
@@ -815,14 +1011,14 @@ const UserCard = ({
 
     <div className="relative flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
       <button
-        onClick={() => setViewingDetails(user)}
-        className="bg-green-500 text-white hover:bg-green-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+        onClick={() => setViewingDetails(developer)}
+        className="bg-blue-500 text-white hover:bg-blue-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
       >
         View Details
       </button>
 
       <Actions
-        user={user}
+        developer={developer}
         isOptionsOpen={isOptionsOpen}
         setIsOptionsOpen={setIsOptionsOpen}
         setViewingDetails={setViewingDetails}
@@ -834,143 +1030,160 @@ const UserCard = ({
 );
 
 const Actions = ({
-  user,
+  developer,
   isOptionsOpen,
   setIsOptionsOpen,
   setViewingDetails,
   setEditingDetails,
   isMobile = false,
 }) => {
-  const { deleteUserById, setUserBanStatusById } = useSystemStore();
+  const { deleteUserById, setDevSuspensionStatusById } = useSystemStore();
 
   // Loading states
-  const [isDeleting, setIsDeleting] = useState("");
-  const [isTogglingBan, setIsTogglingBan] = useState("");
+  const [loading, setLoading] = useState({
+    deleting: "",
+    suspending: "",
+  });
 
-  const handleDeleteUser = async (user) => {
-    if (!user?.uid) return toast.error("Invalid user data");
+  // Delete developer
+  const handleDeleteDeveloper = async (developer) => {
+    if (!developer?.uid) return toast.error("Invalid developer data");
 
-    setIsDeleting(user.uid);
+    setLoading((prev) => ({ ...prev, deleting: developer.uid }));
 
     try {
-      const res = await deleteUserById(user.uid);
-
+      const res = await deleteUserById(developer.uid);
       if (res?.success) {
-        toast.success("User deleted successfully");
-        setIsDeleting("");
+        toast.success("Developer deleted successfully");
+      } else {
+        toast.error("Failed to delete developer.");
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Error deleting user.");
+      console.error(error);
+      toast.error("Error deleting developer.");
     } finally {
-      setIsDeleting("");
+      setLoading((prev) => ({ ...prev, deleting: "" }));
     }
   };
 
-  const toggleUserBan = async (user) => {
-    if (!user?.uid) return toast.error("Invalid user data");
+  // Suspend / Unsuspend developer
+  const toggleDeveloperBan = async (developer) => {
+    if (!developer?.uid) return toast.error("Invalid developer data");
 
-    const isCurrentlyBanned = user.system?.banStatus?.isBanned;
+    const isCurrentlyBanned =
+      developer.developerProfile.suspendedStatus.isSuspended;
     let reason = "";
 
-    // Ask reason only while banning
     if (!isCurrentlyBanned) {
       reason = prompt("Enter the ban reason")?.trim();
-      if (!reason) {
-        toast.info("Ban cancelled — no reason provided.");
-        return;
-      }
+      if (!reason) return toast.info("Ban cancelled — no reason provided.");
     }
 
-    setIsTogglingBan(user.uid);
+    setLoading((prev) => ({ ...prev, suspending: developer.uid }));
 
     try {
-      const res = await setUserBanStatusById(user.uid, reason);
-
+      const res = await setDevSuspensionStatusById(developer.uid, reason);
       if (res?.success) {
-        toast.success(isCurrentlyBanned ? "User unbanned" : "User banned");
-        setIsTogglingBan("");
+        toast.success(
+          isCurrentlyBanned ? "Developer unsuspended" : "Developer suspended"
+        );
+      } else {
+        toast.error("Action failed. Please try again.");
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Error toggling user ban.");
+      console.error(error);
+      toast.error("Error updating suspension status.");
     } finally {
-      setIsTogglingBan("");
+      setLoading((prev) => ({ ...prev, suspending: "" }));
     }
   };
 
   return (
     <div className="relative">
       <button
-        onClick={() => {
-          isOptionsOpen === user.uid
-            ? setIsOptionsOpen("")
-            : setIsOptionsOpen(user.uid);
-        }}
+        onClick={() =>
+          setIsOptionsOpen(isOptionsOpen === developer.uid ? "" : developer.uid)
+        }
         className="text-gray-600 bg-gray-100 hover:text-gray-800 p-1.5 rounded-lg hover:bg-gray-200 transition-colors duration-200"
       >
-        {isOptionsOpen === user.uid ? (
+        {isOptionsOpen === developer.uid ? (
           <X size={16} />
         ) : (
           <MoreVertical size={16} />
         )}
       </button>
 
-      {isOptionsOpen === user.uid && (
+      {isOptionsOpen === developer.uid && (
         <div
           className={`absolute ${
-            isMobile ? "right-0 -top-36" : "right-24 -top-2"
+            isMobile ? "right-0 -top-36" : "-left-42 -top-2"
           } mt-2 w-40 bg-white/20 backdrop-blur-sm border border-gray-200/70 rounded-xl shadow-sm z-50 flex flex-col divide-y divide-gray-200/40`}
         >
           <button
-            onClick={() => setViewingDetails(user)}
+            onClick={() => setViewingDetails(developer)}
             className="hidden md:flex items-center gap-2 px-4 py-2 pt-3 text-sm text-gray-800 rounded-t-xl hover:bg-gray-300/20 transition-colors duration-200"
           >
             <ArrowUpRight size={16} /> View Details
           </button>
+
           <button
-            onClick={() => setEditingDetails(user)}
+            onClick={() => setEditingDetails(developer)}
             className="flex items-center gap-2 px-4 py-2 pt-3 md:pt-2 text-sm text-gray-800 hover:bg-gray-300/20 transition-colors duration-200"
           >
             <Edit2 size={16} /> Edit
           </button>
+
+          {/* Delete */}
           <button
-            onClick={() => handleDeleteUser(user)}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-300/20 transition-colors duration-200"
+            disabled={loading.deleting === developer.uid}
+            onClick={() => handleDeleteDeveloper(developer)}
+            className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors duration-200 ${
+              loading.deleting === developer.uid
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-red-600 hover:bg-gray-300/20"
+            }`}
           >
-            {isDeleting !== user.id ? (
-              <Trash2 size={16} />
-            ) : (
-              <Loader2 size={16} className="animate-spin" />
-            )}
-            <p>Delete</p>
-          </button>
-          <button
-            onClick={() => toggleUserBan(user)}
-            className="flex items-center gap-2 px-4 py-2 pb-3 text-sm text-gray-800 rounded-b-xl hover:bg-gray-300/20 transition-colors duration-200"
-          >
-            {isTogglingBan === user.uid ? (
+            {loading.deleting === developer.uid ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                <p>
-                  {user.system.banStatus.isBanned
-                    ? "UnBan User..."
-                    : "Ban User"}
-                </p>
+                <p>Deleting...</p>
               </>
             ) : (
               <>
-                {user.system.banStatus.isBanned ? (
-                  <>
-                    <Undo size={16} />
-                    <p>Unban User</p>
-                  </>
-                ) : (
-                  <>
-                    <Slash size={16} />
-                    <p>Ban User</p>
-                  </>
-                )}
+                <Trash2 size={16} />
+                <p>Delete</p>
+              </>
+            )}
+          </button>
+
+          {/* Suspend / Unsuspend */}
+          <button
+            disabled={loading.suspending === developer.uid}
+            onClick={() => toggleDeveloperBan(developer)}
+            className={`flex items-center gap-2 px-4 py-2 pb-3 text-sm rounded-b-xl transition-colors duration-200 ${
+              loading.suspending === developer.uid
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-800 hover:bg-gray-300/20"
+            }`}
+          >
+            {loading.suspending === developer.uid ? (
+              <>
+                <Loader2 size={16} className="animate-spin shrink-0" />
+                <p>
+                  {developer.developerProfile.suspendedStatus.isSuspended
+                    ? "Unsuspending..."
+                    : "Suspending..."}
+                </p>
+              </>
+            ) : developer.developerProfile.suspendedStatus.isSuspended ? (
+              <>
+                <Undo size={16} />
+                <p>Unsuspend</p>
+              </>
+            ) : (
+              <>
+                <Slash size={16} />
+                <p>Suspend</p>
               </>
             )}
           </button>
@@ -995,18 +1208,18 @@ const LoadingSkeleton = () => (
     <div className="hidden md:block">
       <div className="bg-white rounded-xl border-3 border-gray-100 overflow-x-auto">
         <table className="w-full min-w-[900px] text-sm text-left">
-          <thead className="bg-green-100 text-green-700 uppercase text-xs tracking-wider">
+          <thead className="bg-blue-100 text-blue-700 uppercase text-xs tracking-wider">
             <tr>
               {[
-                "User",
+                "Developer",
                 "Email",
-                "User ID",
+                "Developer ID",
                 "Joined At",
                 "Last Activity",
                 "Actions",
               ].map((_, idx) => (
                 <th key={idx} className="px-6 py-4">
-                  <div className="h-4 my-1 bg-green-200 rounded w-16 animate-pulse"></div>
+                  <div className="h-4 my-1 bg-blue-200 rounded w-16 animate-pulse"></div>
                 </th>
               ))}
             </tr>
@@ -1015,8 +1228,8 @@ const LoadingSkeleton = () => (
             {[...Array(7)].map((_, i) => (
               <tr
                 key={i}
-                className={`hover:bg-green-50/90 h-20 transition-colors duration-150 ${
-                  i % 2 !== 0 && "bg-green-50/50"
+                className={`hover:bg-blue-50/90 h-20 transition-colors duration-150 ${
+                  i % 2 !== 0 && "bg-blue-50/50"
                 }`}
               >
                 {[...Array(6)].map((__, j) => (
@@ -1054,7 +1267,7 @@ const LoadingSkeleton = () => (
             </div>
           </div>
           <div className="flex justify-between mt-4 pt-3 border-t border-gray-200 space-x-2">
-            <div className="h-6 w-20 bg-green-200 rounded animate-pulse"></div>
+            <div className="h-6 w-20 bg-blue-200 rounded animate-pulse"></div>
             <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
           </div>
         </div>
@@ -1063,4 +1276,4 @@ const LoadingSkeleton = () => (
   </>
 );
 
-export default AdminUserManagement;
+export default AdminDeveloperManagement;

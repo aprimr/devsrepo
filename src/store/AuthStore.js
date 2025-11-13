@@ -92,7 +92,6 @@ export const useAuthStore = create(
             suspendedStatus: {
               isSuspended: false,
               reason: "",
-              bannedUntil: "",
             },
 
             // Metrics
@@ -118,7 +117,6 @@ export const useAuthStore = create(
             banStatus: {
               isBanned: false,
               reason: "",
-              bannedUntil: "",
             },
           },
         };

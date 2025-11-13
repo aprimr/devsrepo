@@ -14,8 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { useState, useCallback, useEffect } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { serverTimestamp } from "firebase/firestore";
-import devAnimation from "../../../assets/animations/developer.json";
 import { toast } from "sonner";
+import { generateDeveloperId } from "../../../utils/generateDeveloperId";
+import devAnimation from "../../../assets/animations/developer.json";
 
 function SettingsDeveloperAccount() {
   const { user, updateUserProfile } = useAuthStore();
@@ -30,10 +31,8 @@ function SettingsDeveloperAccount() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const developerId = user?.uid
-    ? "dev_" + user.uid.slice(0, 9) + user.uid.slice(18)
-    : "";
 
+  const developerId = generateDeveloperId(user.uid);
   const [github, setGithub] = useState(user?.socialLinks?.github || "");
   const [linkedin, setLinkedin] = useState(user?.socialLinks?.linkedin || "");
   const [website, setWebsite] = useState(user?.developerProfile?.website || "");
@@ -174,11 +173,6 @@ function SettingsDeveloperAccount() {
               icon={AtSign}
               value={user?.username}
               description="This username will be used as your developer handle."
-            />
-            <DisabledTextArea
-              title="Developer Id"
-              icon={IdCardLanyard}
-              value={developerId}
             />
             <DisabledTextArea
               title="Contact Email"

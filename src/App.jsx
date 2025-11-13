@@ -36,6 +36,7 @@ import SettingsSuspendedApps from "./pages/settings/developer/SettingsSuspendedA
 import AdminRoute from "./pages/auth/AdminRoute";
 import Admin from "./pages/settings/admin/Admin";
 import AdminUserManagement from "./pages/settings/admin/AdminUserManagement";
+import AdminDeveloperManagement from "./pages/settings/admin/AdminDeveloperManagement";
 
 function AppContent() {
   const location = useLocation();
@@ -46,6 +47,7 @@ function AppContent() {
     "/publish",
     "/admin",
     "/admin-user-management",
+    "/admin-developer-management",
     "/setting",
     "/setting-profile",
     "/setting-security",
@@ -104,6 +106,14 @@ function AppContent() {
           element={
             <AdminRoute>
               <AdminUserManagement />
+            </AdminRoute>
+          }
+        />{" "}
+        <Route
+          path="/admin-developer-management"
+          element={
+            <AdminRoute>
+              <AdminDeveloperManagement />
             </AdminRoute>
           }
         />

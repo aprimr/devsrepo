@@ -484,7 +484,44 @@ export default function Publish() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      {/* Suspension Status */}
+      {(user.developerProfile?.suspendedStatus?.isSuspended ||
+        user.system.banStatus.isBanned) && (
+        <div className="w-full max-w-4xl mx-auto mt-6 px-4 sm:px-6">
+          <div className="bg-rose-50 border border-rose-300 rounded-xl shadow-sm overflow-hidden">
+            {/* Header */}
+            <div className="bg-rose-500 text-white px-4 py-3 font-poppins font-semibold text-center sm:text-left">
+              {user.developerProfile?.suspendedStatus?.isSuspended
+                ? "Your Developer Account is Suspended"
+                : "Your Account is Banned"}
+            </div>
+
+            {/* Content */}
+            <div className="px-4 py-3 space-y-2 text-sm font-outfit text-gray-700">
+              <p>
+                <span className="font-medium">Reason:</span>{" "}
+                {user.developerProfile?.suspendedStatus?.isSuspended
+                  ? user.developerProfile.suspendedStatus.reason ||
+                    "No reason provided."
+                  : user.system.banStatus.reason || "No reason provided."}
+              </p>
+              <p className="text-xs text-gray-500">
+                {user.developerProfile?.suspendedStatus?.isSuspended
+                  ? "Please contact the developer if you believe this is an error or for further assistance."
+                  : "If you believe this is a mistake, contact support for assistance."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`max-w-4xl mx-auto px-4 sm:px-6 py-6 ${
+          user.developerProfile.suspendedStatus.isSuspended ||
+          (user.system.banStatus.isBanned &&
+            "pointer-events-none cursor-not-allowed")
+        }`}
+      >
         {/* App Media */}
         <section
           className={`bg-white border border-gray-200 rounded-2xl p-6 mb-6 ${

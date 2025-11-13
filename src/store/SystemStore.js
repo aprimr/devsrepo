@@ -69,32 +69,6 @@ export const useSystemStore = create((set, get) => ({
     };
   },
 
-  // Search for UIDs
-  searchUserIdsByTerm: async (term) => {
-    if (!term) return [];
-
-    const lowerCaseTerm = term.toLowerCase();
-
-    const usersRef = collection(db, "users");
-    const q = query(
-      usersRef,
-      where(SEARCH_FIELD, ">=", lowerCaseTerm),
-      where(SEARCH_FIELD, "<=", lowerCaseTerm + "\uf8ff")
-    );
-
-    try {
-      const snapshot = await getDocs(q);
-
-      const resultIds = snapshot.docs.map((doc) => doc.id);
-
-      return resultIds.slice(0, 50);
-    } catch (err) {
-      set({ error: err.message });
-      console.error("Error executing server search:", err);
-      return [];
-    }
-  },
-
   // Fetch user details by ID
   getUserDetailsById: async (uid) => {
     try {
@@ -145,8 +119,87 @@ export const useSystemStore = create((set, get) => ({
 
       await updateDoc(userRef, {
         "system.banStatus.isBanned": !banStatus,
-        "system.banStatus.updatedAt": serverTimestamp(),
         "system.banStatus.reason": !banStatus ? reason : "",
+      });
+      return {
+        success: true,
+      };
+    } catch (err) {
+      set({ error: err.message });
+      return { success: false, error: err.message };
+    }
+  },
+
+  // Suspend developer by ID
+  setDevSuspensionStatusById: async (uid, reason) => {
+    try {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        console.error("User not found");
+        return;
+      }
+
+      const suspensionStatus =
+        userSnap.data().developerProfile?.suspendedStatus?.isSuspended || false;
+
+      await updateDoc(userRef, {
+        "developerProfile.suspendedStatus.isSuspended": !suspensionStatus,
+        "developerProfile.suspendedStatus.reason": !suspensionStatus
+          ? reason
+          : "",
+      });
+      return {
+        success: true,
+      };
+    } catch (err) {
+      set({ error: err.message });
+      return { success: false, error: err.message };
+    }
+  },
+
+  // Dev verification status
+  toggleDevVerifyStatus: async (uid) => {
+    try {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        console.error("User not found");
+        return;
+      }
+
+      const devVerifyStatus =
+        userSnap.data().developerProfile.verifiedDeveloper;
+
+      await updateDoc(userRef, {
+        "developerProfile.verifiedDeveloper": !devVerifyStatus,
+      });
+      return {
+        success: true,
+      };
+    } catch (err) {
+      set({ error: err.message });
+      return { success: false, error: err.message };
+    }
+  },
+
+  // Toggle Admin Status
+  toggleAdminStatus: async (uid) => {
+    try {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        console.error("User not found");
+        return;
+      }
+
+      const adminStatus = userSnap.data().system?.isAdmin;
+
+      await updateDoc(userRef, {
+        "system.isAdmin": !adminStatus,
       });
       return {
         success: true,
