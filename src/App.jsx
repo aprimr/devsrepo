@@ -37,6 +37,7 @@ import AdminRoute from "./pages/auth/AdminRoute";
 import Admin from "./pages/settings/admin/Admin";
 import AdminUserManagement from "./pages/settings/admin/AdminUserManagement";
 import AdminDeveloperManagement from "./pages/settings/admin/AdminDeveloperManagement";
+import AdminAppManagement from "./pages/settings/admin/AdminAppManagement";
 
 function AppContent() {
   const location = useLocation();
@@ -48,6 +49,7 @@ function AppContent() {
     "/admin",
     "/admin-user-management",
     "/admin-developer-management",
+    "/admin-app-management",
     "/setting",
     "/setting-profile",
     "/setting-security",
@@ -108,12 +110,20 @@ function AppContent() {
               <AdminUserManagement />
             </AdminRoute>
           }
-        />{" "}
+        />
         <Route
           path="/admin-developer-management"
           element={
             <AdminRoute>
               <AdminDeveloperManagement />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin-app-management"
+          element={
+            <AdminRoute>
+              <AdminAppManagement />
             </AdminRoute>
           }
         />

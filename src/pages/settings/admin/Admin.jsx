@@ -9,7 +9,6 @@ import {
   Clock,
   Computer,
 } from "lucide-react";
-import { useAuthStore } from "../../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
 import numberSuffixer from "../../../utils/numberSuffixer";
 import { RiApps2AiLine } from "react-icons/ri";
@@ -122,7 +121,7 @@ function Admin() {
               <SectionButton
                 icon={Smartphone}
                 label="Apps Management"
-                redirect="/admin"
+                redirect="/admin-app-management"
               />
               <SectionButton icon={Flag} label="Reports" redirect="/admin" />
               <SectionButton icon={Info} label="System" redirect="/admin" />

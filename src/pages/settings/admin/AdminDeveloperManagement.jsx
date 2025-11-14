@@ -400,20 +400,25 @@ const AdminDeveloperManagement = () => {
 
                     {/* Info */}
                     <div className="mt-4 space-y-0.5">
-                      <p className="flex items-center md:max-w-[200px] text-sm font-medium text-gray-900 truncate">
-                        <span title={viewingDetails?.name} className="truncate">
-                          {viewingDetails?.name}
-                        </span>
-                        {viewingDetails?.developerProfile
-                          ?.verifiedDeveloper && (
-                          <BadgeCheck
-                            size={18}
-                            fill="#3B82F6"
-                            stroke="white"
-                            className="ml-1 shrink-0"
-                          />
-                        )}
-                      </p>
+                      <div className="w-full flex justify-center md:justify-start">
+                        <p className="flex text-center items-center md:max-w-[200px] text-sm font-medium text-gray-900 truncate">
+                          <span
+                            title={viewingDetails?.name}
+                            className="truncate"
+                          >
+                            {viewingDetails?.name}
+                          </span>
+                          {viewingDetails?.developerProfile
+                            ?.verifiedDeveloper && (
+                            <BadgeCheck
+                              size={18}
+                              fill="#3B82F6"
+                              stroke="white"
+                              className="ml-1 shrink-0"
+                            />
+                          )}
+                        </p>
+                      </div>
                       <p className="text-base text-gray-500 font-outfit">
                         @{viewingDetails?.username}
                       </p>

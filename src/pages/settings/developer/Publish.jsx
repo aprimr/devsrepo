@@ -282,7 +282,7 @@ export default function Publish() {
       screenshot3: screenshotFiles[2],
       appName,
       currentVersion,
-      projectSourceLink,
+      sourceCodeLink: projectSourceLink,
       type,
       category,
       tags,
