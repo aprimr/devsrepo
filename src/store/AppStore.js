@@ -32,6 +32,7 @@ export const useAppStore = create(
 
         developer: {
           name: appData.developer?.name,
+          userId: appData.developer.userId,
           developerId: appData.developer?.developerId,
           email: appData.developer?.email || "",
         },
@@ -41,7 +42,7 @@ export const useAppStore = create(
           type: appData.details?.type || "Mobile App",
           category: appData.details?.category || "Social",
           tags: appData.details?.tags || [],
-          sourceCodeLink: appData.details?.sourceCodeLink || "",
+          sourceCodeLink: appData.details?.projectSourceLink || "",
           hasAds: appData.details?.hasAds || false,
           inAppPurchases: appData.details?.inAppPurchases || false,
           ageRating: appData.details?.ageRating,
@@ -79,10 +80,10 @@ export const useAppStore = create(
         },
 
         status: {
-          stage: "in-review",
+          isActive: false,
           approval: { isApproved: false, approvedAt: "" },
           rejection: { isRejected: false, reason: "", rejectedAt: "" },
-          removal: { isRemoved: false, reason: "", removedAt: "" },
+          suspension: { isSuspended: false, reason: "", suspendedAt: "" },
         },
 
         metrics: {

@@ -186,6 +186,22 @@ function Setting() {
             </div>
           )}
 
+          {/* Admin Group */}
+          {user?.system.isAdmin && (
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
+                Admin
+              </h3>
+              <div className="space-y-1.5">
+                <SectionButton
+                  icon={BrickWallShield}
+                  label="Admin"
+                  redirect="/admin"
+                />
+              </div>
+            </div>
+          )}
+
           {/* Developer Group */}
           {user?.developerProfile.isDeveloper && (
             <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
@@ -217,22 +233,6 @@ function Setting() {
                   icon={BadgeAlert}
                   label="Suspension Status"
                   redirect="/setting-developer-suspension"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Admin Group */}
-          {user?.system.isAdmin && (
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4">
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 font-poppins">
-                Admin
-              </h3>
-              <div className="space-y-1.5">
-                <SectionButton
-                  icon={BrickWallShield}
-                  label="Admin"
-                  redirect="/admin"
                 />
               </div>
             </div>

@@ -23,7 +23,7 @@ function AdminRoute({ children }) {
   const isAdmin = user?.system?.isAdmin;
 
   if (!isAuthenticated || !isAdmin) {
-    return <Navigate to={-1} replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

@@ -13,7 +13,9 @@ function Footer() {
           <span className="text-gray-400">|</span>
 
           {/* Other content */}
-          <span className="text-sm text-gray-600">Open Source App Library</span>
+          <span className="text-sm text-gray-600">
+            Publish Apps. Explore Freely
+          </span>
         </div>
       </div>
     </nav>

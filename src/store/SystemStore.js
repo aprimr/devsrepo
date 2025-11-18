@@ -3,12 +3,19 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   deleteDoc,
   updateDoc,
+  serverTimestamp,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  query,
+  where,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { getFileURL, deleteFile } from "../services/appwriteStorage";
+import { deleteFile } from "../services/appwriteStorage";
 
 export const useSystemStore = create((set, get) => ({
   userIds: [],
@@ -21,11 +28,10 @@ export const useSystemStore = create((set, get) => ({
   isListening: false,
   error: null,
 
-  // Initialize Realtime Listeners
+  // --- Realtime Listeners ---
   startRealtimeSystem: () => {
     if (get().isListening) return;
 
-    // Users Listener
     const usersUnsub = onSnapshot(
       collection(db, "users"),
       (snapshot) => {
@@ -33,13 +39,11 @@ export const useSystemStore = create((set, get) => ({
         const developers = snapshot.docs
           .filter((doc) => doc.data().developerProfile?.isDeveloper)
           .map((doc) => doc.id);
-
         set({ userIds: users, developerIds: developers });
       },
       (err) => set({ error: err.message })
     );
 
-    // Apps Listener
     const appsUnsub = onSnapshot(
       collection(db, "apps"),
       (snapshot) => {
@@ -52,7 +56,6 @@ export const useSystemStore = create((set, get) => ({
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
           const id = doc.id;
-
           all.push(id);
 
           if (
@@ -65,7 +68,6 @@ export const useSystemStore = create((set, get) => ({
           } else if (data.status?.suspension?.isSuspended) {
             suspended.push(id);
           } else {
-            // Everything else is pending/submitted
             pending.push(id);
           }
         });
@@ -90,7 +92,7 @@ export const useSystemStore = create((set, get) => ({
     };
   },
 
-  // Fetch user details by ID
+  // --- Fetch Details ---
   getUserDetailsById: async (uid) => {
     try {
       const userDoc = await getDoc(doc(db, "users", uid));
@@ -103,15 +105,11 @@ export const useSystemStore = create((set, get) => ({
     }
   },
 
-  // Fetch app details by ID
   getAppDetailsById: async (appId) => {
     try {
       const appDoc = await getDoc(doc(db, "apps", appId));
       if (!appDoc.exists()) return null;
-
-      const appData = { appId: appDoc.id, ...appDoc.data() };
-
-      return appData;
+      return { appId: appDoc.id, ...appDoc.data() };
     } catch (err) {
       set({ error: err.message });
       console.error("Error fetching app details:", err);
@@ -119,138 +117,217 @@ export const useSystemStore = create((set, get) => ({
     }
   },
 
-  // Delete app
-  deleteAppById: async (appId) => {
+  // Delete App
+  onDelete: async (app) => {
     try {
-      const appDoc = await getDoc(doc(db, "apps", appId));
-      if (!appDoc.exists()) {
-        return { success: false, error: "App not found" };
-      }
+      const appRef = doc(db, "apps", app.appId);
+      const appSnap = await getDoc(appRef);
+      if (!appSnap.exists()) return { success: false, error: "App not found" };
+      const appData = appSnap.data();
 
-      const appData = appDoc.data();
-
-      // Delete associated files from AppWrite
+      // Delete media files from AppWrite
       const deletePromises = [];
-
       if (appData.media) {
-        const media = appData.media;
-
-        // Delete icon
-        if (media.icon) {
+        if (appData.media.icon)
           deletePromises.push(
-            deleteFile(media.icon).catch((error) =>
-              console.error("Error deleting icon:", error)
-            )
+            deleteFile(appData.media.icon).catch(console.error)
           );
-        }
-
-        // Delete banner
-        if (media.banner) {
+        if (appData.media.banner)
           deletePromises.push(
-            deleteFile(media.banner).catch((error) =>
-              console.error("Error deleting banner:", error)
-            )
+            deleteFile(appData.media.banner).catch(console.error)
           );
-        }
-
-        // Delete screenshots
-        if (media.screenshots && media.screenshots.length > 0) {
-          media.screenshots.forEach((screenshotId) => {
-            deletePromises.push(
-              deleteFile(screenshotId).catch((error) =>
-                console.error("Error deleting screenshot:", error)
-              )
-            );
-          });
+        if (appData.media.screenshots?.length) {
+          appData.media.screenshots.forEach((id) =>
+            deletePromises.push(deleteFile(id).catch(console.error))
+          );
         }
       }
-
-      // Delete APK file
       if (appData.details?.appDetails?.androidApk) {
         deletePromises.push(
-          deleteFile(appData.details.appDetails.androidApk).catch((error) =>
-            console.error("Error deleting APK:", error)
-          )
+          deleteFile(appData.details.appDetails.androidApk).catch(console.error)
         );
       }
-
-      // Wait for all file deletions to complete
       await Promise.all(deletePromises);
 
-      // Delete the app document from Firestore
-      await deleteDoc(doc(db, "apps", appId));
+      // Delete Firestore doc
+      await deleteDoc(appRef);
 
-      // Remove the app from the local state
+      // ***OPTIMIZED USER LOOKUP (Direct by userId)***
+      const userRef = doc(db, "users", app.developer.userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists())
+        return { success: false, error: "User not found" };
+
+      // Update user: remove app from all lists
+      await updateDoc(userRef, {
+        "developerProfile.apps.publishedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.rejectedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.suspendedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.submittedAppIds": arrayRemove(app.appId),
+      });
+
+      // Remove from store
       set((state) => ({
-        appIds: state.appIds.filter((id) => id !== appId),
-        publishedAppIds: state.publishedAppIds.filter((id) => id !== appId),
-        pendingAppIds: state.pendingAppIds.filter((id) => id !== appId),
-        rejectedAppIds: state.rejectedAppIds.filter((id) => id !== appId),
-        suspendedAppIds: state.suspendedAppIds.filter((id) => id !== appId),
+        appIds: state.appIds.filter((id) => id !== app.appId),
+        publishedAppIds: state.publishedAppIds.filter((id) => id !== app.appId),
+        pendingAppIds: state.pendingAppIds.filter((id) => id !== app.appId),
+        rejectedAppIds: state.rejectedAppIds.filter((id) => id !== app.appId),
+        suspendedAppIds: state.suspendedAppIds.filter((id) => id !== app.appId),
       }));
 
       return { success: true };
     } catch (err) {
-      set({ error: err.message });
+      console.error("Delete app error:", err);
       return { success: false, error: err.message };
     }
   },
 
-  // Update app status
-  updateAppStatus: async (appId, status, reason = "") => {
+  // Approve App
+  onApprove: async (app) => {
     try {
-      const appRef = doc(db, "apps", appId);
+      const appRef = doc(db, "apps", app.appId);
       const appSnap = await getDoc(appRef);
+      if (!appSnap.exists()) return { success: false, error: "App not found" };
 
-      if (!appSnap.exists()) {
-        return { success: false, error: "App not found" };
-      }
+      // Update App document status
+      await updateDoc(appRef, {
+        "status.approval.isApproved": true,
+        "status.approval.approvedAt": serverTimestamp(),
+        "status.isActive": true,
+      });
 
-      const updateData = {
-        "status.approval.isApproved": false,
-        "status.rejection.isRejected": false,
-        "status.suspension.isSuspended": false,
-        "status.rejection.reason": "",
-        "status.suspension.reason": "",
-      };
+      // Get Uer
+      const userRef = doc(db, "users", app.developer.userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists())
+        return { success: false, error: "User not found" };
 
-      const now = new Date();
+      // Update user
+      await updateDoc(userRef, {
+        "developerProfile.apps.submittedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.publishedAppIds": arrayUnion(app.appId),
+        "developerProfile.metrics.totalPublishedApps": increment(1),
+      });
 
-      switch (status) {
-        case "published":
-          updateData["status.approval.isApproved"] = true;
-          updateData["status.approval.approvedAt"] = now;
-          updateData["status.rejection.isRejected"] = false;
-          updateData["status.suspension.isSuspended"] = false;
-          break;
-        case "rejected":
-          updateData["status.rejection.isRejected"] = true;
-          updateData["status.rejection.rejectedAt"] = now;
-          updateData["status.rejection.reason"] = reason;
-          updateData["status.approval.isApproved"] = false;
-          updateData["status.suspension.isSuspended"] = false;
-          break;
-        case "suspended":
-          updateData["status.suspension.isSuspended"] = true;
-          updateData["status.suspension.suspendedAt"] = now;
-          updateData["status.suspension.reason"] = reason;
-          updateData["status.approval.isApproved"] = false;
-          updateData["status.rejection.isRejected"] = false;
-          break;
-        default:
-          break;
-      }
-
-      updateData["status.updatedAt"] = now;
-
-      await updateDoc(appRef, updateData);
       return { success: true };
     } catch (err) {
-      set({ error: err.message });
+      console.error("Approve app error:", err);
       return { success: false, error: err.message };
     }
   },
 
+  // Reject App
+  onReject: async (app, reason) => {
+    try {
+      const appRef = doc(db, "apps", app.appId);
+      const appSnap = await getDoc(appRef);
+      if (!appSnap.exists()) return { success: false, error: "App not found" };
+
+      // Update App document status
+      await updateDoc(appRef, {
+        "status.approval.isApproved": false,
+        "status.suspension.isSuspended": false,
+        "status.rejection.isRejected": true,
+        "status.rejection.reason": reason,
+        "status.rejection.rejectedAt": serverTimestamp(),
+        "status.isActive": false,
+      });
+
+      // Find User
+      const userRef = doc(db, "users", app.developer.userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists())
+        return { success: false, error: "User not found" };
+
+      // Update user
+      await updateDoc(userRef, {
+        "developerProfile.apps.submittedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.rejectedAppIds": arrayUnion(app.appId),
+      });
+
+      return { success: true };
+    } catch (err) {
+      console.error("Reject app error:", err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  // Suspend App
+  onSuspend: async (app, reason) => {
+    try {
+      const appRef = doc(db, "apps", app.appId);
+      const appSnap = await getDoc(appRef);
+      if (!appSnap.exists()) return { success: false, error: "App not found" };
+
+      // Update App document status
+      await updateDoc(appRef, {
+        "status.approval.isApproved": false,
+        "status.rejection.isRejected": false,
+        "status.suspension.isSuspended": true,
+        "status.suspension.reason": reason,
+        "status.suspension.suspendedAt": serverTimestamp(),
+        "status.isActive": false,
+      });
+
+      // Find User
+      const userRef = doc(db, "users", app.developer.userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists())
+        return { success: false, error: "User not found" };
+
+      // Update user
+      await updateDoc(userRef, {
+        "developerProfile.apps.submittedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.publishedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.suspendedAppIds": arrayUnion(app.appId),
+        "developerProfile.metrics.totalPublishedApps": increment(-1),
+      });
+
+      return { success: true };
+    } catch (err) {
+      console.error("Suspend app error:", err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  // Restore App
+  onRestore: async (app) => {
+    try {
+      const appRef = doc(db, "apps", app.appId);
+      const appSnap = await getDoc(appRef);
+      if (!appSnap.exists()) return { success: false, error: "App not found" };
+
+      // Update App document status (back to pending review)
+      await updateDoc(appRef, {
+        "status.approval.isApproved": false,
+        "status.rejection.isRejected": false,
+        "status.rejection.reason": "",
+        "status.suspension.isSuspended": false,
+        "status.suspension.reason": "",
+        "status.isActive": false,
+      });
+
+      // get User
+      const userRef = doc(db, "users", app.developer.userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists())
+        return { success: false, error: "User not found" };
+
+      // Update user
+      await updateDoc(userRef, {
+        "developerProfile.apps.rejectedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.suspendedAppIds": arrayRemove(app.appId),
+        "developerProfile.apps.submittedAppIds": arrayUnion(app.appId),
+      });
+
+      return { success: true };
+    } catch (err) {
+      console.error("Restore app error:", err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  // --- User/Admin Actions ---
   deleteUserById: async (uid) => {
     try {
       const userDocRef = doc(db, "users", uid);
@@ -272,13 +349,9 @@ export const useSystemStore = create((set, get) => ({
     try {
       const userRef = doc(db, "users", uid);
       const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
+      if (!userSnap.exists())
         return { success: false, error: "User not found" };
-      }
-
       const banStatus = userSnap.data().system?.banStatus?.isBanned || false;
-
       await updateDoc(userRef, {
         "system.banStatus.isBanned": !banStatus,
         "system.banStatus.reason": !banStatus ? reason : "",
@@ -294,14 +367,10 @@ export const useSystemStore = create((set, get) => ({
     try {
       const userRef = doc(db, "users", uid);
       const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
+      if (!userSnap.exists())
         return { success: false, error: "User not found" };
-      }
-
       const suspensionStatus =
         userSnap.data().developerProfile?.suspendedStatus?.isSuspended || false;
-
       await updateDoc(userRef, {
         "developerProfile.suspendedStatus.isSuspended": !suspensionStatus,
         "developerProfile.suspendedStatus.reason": !suspensionStatus
@@ -319,14 +388,10 @@ export const useSystemStore = create((set, get) => ({
     try {
       const userRef = doc(db, "users", uid);
       const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
+      if (!userSnap.exists())
         return { success: false, error: "User not found" };
-      }
-
       const devVerifyStatus =
         userSnap.data().developerProfile?.verifiedDeveloper || false;
-
       await updateDoc(userRef, {
         "developerProfile.verifiedDeveloper": !devVerifyStatus,
       });
@@ -341,13 +406,9 @@ export const useSystemStore = create((set, get) => ({
     try {
       const userRef = doc(db, "users", uid);
       const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
+      if (!userSnap.exists())
         return { success: false, error: "User not found" };
-      }
-
       const adminStatus = userSnap.data().system?.isAdmin || false;
-
       await updateDoc(userRef, {
         "system.isAdmin": !adminStatus,
       });

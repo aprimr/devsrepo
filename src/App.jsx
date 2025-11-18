@@ -38,13 +38,18 @@ import Admin from "./pages/settings/admin/Admin";
 import AdminUserManagement from "./pages/settings/admin/AdminUserManagement";
 import AdminDeveloperManagement from "./pages/settings/admin/AdminDeveloperManagement";
 import AdminAppManagement from "./pages/settings/admin/AdminAppManagement";
+import TopDevelopers from "./pages/App/TopDevelopers";
+import DeveloperProfile from "./pages/App/DeveloperProfile";
 
 function AppContent() {
   const location = useLocation();
+
   const hideNavbarFooterRoutes = [
     "/login",
     "/onboarding",
     "/edit-profile",
+    "/top-developers",
+    "/p/:id",
     "/publish",
     "/admin",
     "/admin-user-management",
@@ -64,13 +69,23 @@ function AppContent() {
     "/setting-apps-management",
     "/setting-suspended-apps",
   ];
-  const hideNavbarFooter = hideNavbarFooterRoutes.includes(location.pathname);
+  // Dynamic route patterns
+  const hideNavbarFooterDynamic = ["/p/", "/d/", "/a/"];
+
+  // Check if current path should hide Navbar/Footer
+  const hideNavbarFooter =
+    hideNavbarFooterRoutes.includes(location.pathname) ||
+    hideNavbarFooterDynamic.some((pattern) =>
+      location.pathname.startsWith(pattern)
+    );
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 select-none">
       {!hideNavbarFooter && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/top-developers" element={<TopDevelopers />} />
+        <Route path="/p/:id" element={<DeveloperProfile />} />
         <Route
           path="/publish"
           element={

@@ -1,10 +1,18 @@
-import AppCard from "../components/ui/cards/AppCard";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { fetchDevelopers } from "../services/appServices";
+import AppCard from "../components/ui/cards/AppCard";
 import AppCardSquare from "../components/ui/cards/AppCardSquare";
+import DeveloperCard from "../components/ui/cards/DeveloperCard";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
+  const [sectionLoading, setSectionLoading] = useState([]);
   const [activeFilter, setActiveFilter] = useState("downloads");
+  const [verifiedDevs, setVerifiedDevs] = useState([]);
+
+  const navigate = useNavigate();
 
   const featuredApps = [
     {
@@ -122,6 +130,26 @@ function HomePage() {
     },
   ];
 
+  useEffect(() => {
+    // fetch top developers
+    const fetchTopDevsHandler = async () => {
+      setSectionLoading((prev) => [...prev, "verified-devs"]);
+      try {
+        const res = await fetchDevelopers();
+        setVerifiedDevs(res || []);
+      } catch (error) {
+        toast.error("Error fetching developer details.");
+      } finally {
+        setSectionLoading((prev) =>
+          prev.filter((section) => section !== "verified-devs")
+        );
+      }
+    };
+
+    // Function calling
+    fetchTopDevsHandler();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-[1300px] mx-auto px-4 py-8">
@@ -157,29 +185,66 @@ function HomePage() {
             </div>
           </div>
           {/* App Lists */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredApps.map((app, index) => (
-              <AppCard
-                key={index}
-                id={app.id}
-                icon={app.icon}
-                name={app.name}
-                category={app.category}
-                rating={app.rating}
-                downloads={app.downloads}
-                rank={index + 1}
-              />
-            ))}
+          {sectionLoading.includes("top-charts") ? (
+            <SectionLoading />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredApps.map((app, index) => (
+                <AppCard
+                  key={index}
+                  id={app.id}
+                  icon={app.icon}
+                  name={app.name}
+                  category={app.category}
+                  rating={app.rating}
+                  downloads={app.downloads}
+                  rank={index + 1}
+                />
+              ))}
+            </div>
+          )}
+          {!sectionLoading.includes("top-charts") && (
+            <div className="w-full flex justify-center mt-4">
+              <button className="text-green-600 hover:text-green-700 text-sm font-poppins font-medium cursor-pointer">
+                View More
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Developers */}
+        <section className="mb-12">
+          {/* Section Title */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-poppins font-medium text-gray-900">
+              Top Developers
+            </h2>
+            <div
+              onClick={() =>
+                navigate("/top-developers", {
+                  state: { developers: verifiedDevs },
+                })
+              }
+              className="text-green-600 hover:text-green-700 text-sm font-poppins font-medium cursor-pointer"
+            >
+              View all
+            </div>
           </div>
-          <div className="w-full flex justify-center mt-4">
-            <button className="text-green-600 hover:text-green-700 text-sm font-poppins font-medium cursor-pointer">
-              View More
-            </button>
-          </div>
+
+          {/* Devs List */}
+          {sectionLoading.includes("verified-devs") ? (
+            <SectionLoading />
+          ) : (
+            <div className="w-full flex gap-3 md:gap-6 overflow-x-auto no-scrollbar">
+              {verifiedDevs.slice(0, 30).map((dev) => (
+                <DeveloperCard key={dev.uid} developer={dev} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* New Apps */}
-        <section className="mb-12">
+        <section className="mb-12 ">
           {/* Section Title */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-poppins font-medium text-gray-900">
@@ -241,34 +306,10 @@ function HomePage() {
 
 export default HomePage;
 
-// id: 1,
-// name: "Weather Pro",
-// rating: 4.8,
-// downloads: "1.2M",
-// category: "Weather",
-// icon: "/icons/weather-pro.png",
-// screenshots: [
-//   "/screenshots/weather-1.jpg",
-//   "/screenshots/weather-2.jpg",
-//   "/screenshots/weather-3.jpg",
-//   "/screenshots/weather-4.jpg",
-//   "/screenshots/weather-5.jpg"
-// ],
-// description: "Accurate weather forecasts and real-time updates with beautiful UI and severe weather alerts",
-// androidApk: "/apks/weather-pro-v1.2.0.apk",
-// iosApk: "/apks/weather-pro-v1.2.0.ipa",
-// appVersion: "1.2.0",
-// repo: "https://github.com/username/weather-pro",
-// previousVersions: [
-//   {
-//     androidApk: "weather-pro-v1.1.1.apk",
-//     iosApk: "weather-pro-v1.1.1.apk"
-//     version: "1.1.1"
-//   },
-//   {
-//     androidApk: "weather-pro-v1.0.0.apk",
-//     iosApk: "weather-pro-v1.0.0.apk"
-//     version: "1.0.0"
-//   }
-// ],
-// tags: ["React Native", "Weather API", "Real-time", "UI/UX", "Notifications"]
+const SectionLoading = () => {
+  return (
+    <div className="h-34 md:h-50 flex items-center bg-gray-200/60 rounded-xl justify-center">
+      <Loader2 className="animate-spin text-green-600" size={50} />
+    </div>
+  );
+};

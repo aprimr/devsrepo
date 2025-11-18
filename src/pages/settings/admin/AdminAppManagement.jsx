@@ -5,7 +5,6 @@ import {
   MoreVertical,
   X,
   Trash2,
-  Edit2,
   ChevronRight,
   ArrowDown01,
   ArrowDown10,
@@ -23,7 +22,6 @@ import {
   AlertCircle,
   Download,
   Star,
-  DollarSign,
   Grid2X2Check,
   FilePlay,
   Wallet,
@@ -34,7 +32,7 @@ import { useSystemStore } from "../../../store/SystemStore";
 import numberSuffixer from "../../../utils/numberSuffixer";
 import { toast } from "sonner";
 import { getFileURL } from "../../../services/appwriteStorage";
-import { FaAndroid, FaApple } from "react-icons/fa";
+import { FaApple } from "react-icons/fa";
 import { IoLogoAndroid } from "react-icons/io";
 import { calculateRating } from "../../../utils/calculateRating";
 import { AiFillAndroid } from "react-icons/ai";
@@ -47,7 +45,10 @@ const AdminAppManagement = () => {
     suspendedAppIds = [],
     getAppDetailsById,
     deleteAppById,
-    updateAppStatus,
+    onApprove,
+    onReject,
+    onSuspend,
+    onRestore,
   } = useSystemStore();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,8 +57,6 @@ const AdminAppManagement = () => {
   const [isOptionsOpen, setIsOptionsOpen] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [allApps, setAllApps] = useState([]);
-
-  // Popup States
   const [viewingDetails, setViewingDetails] = useState(null);
 
   const appsMapRef = useRef(new Map());
@@ -165,6 +164,9 @@ const AdminAppManagement = () => {
         const developerMatch = app.developer?.name
           ?.toLowerCase()
           .includes(lowerCaseSearchTerm);
+        const developerIdMatch = app.developer?.developerId
+          ?.toLowerCase()
+          .includes(lowerCaseSearchTerm);
         const categoryMatch = app.category
           ?.toLowerCase()
           .includes(lowerCaseSearchTerm);
@@ -172,7 +174,13 @@ const AdminAppManagement = () => {
           ?.toLowerCase()
           .includes(lowerCaseSearchTerm);
 
-        return nameMatch || developerMatch || categoryMatch || appIdMatch;
+        return (
+          nameMatch ||
+          developerMatch ||
+          categoryMatch ||
+          appIdMatch ||
+          developerIdMatch
+        );
       });
     }
 
@@ -183,20 +191,6 @@ const AdminAppManagement = () => {
           return (b.metrics?.downloads || 0) - (a.metrics?.downloads || 0);
         case "downloads_low":
           return (a.metrics?.downloads || 0) - (b.metrics?.downloads || 0);
-        case "rating_high":
-          return (
-            (b.metrics?.ratings?.average || 0) -
-            (a.metrics?.ratings?.average || 0)
-          );
-        case "rating_low":
-          return (
-            (a.metrics?.ratings?.average || 0) -
-            (b.metrics?.ratings?.average || 0)
-          );
-        case "name_az":
-          return (a.name || "").localeCompare(b.name || "");
-        case "name_za":
-          return (b.name || "").localeCompare(a.name || "");
         case "date_new":
           return (b.createdAt || 0) - (a.createdAt || 0);
         case "date_old":
@@ -211,19 +205,16 @@ const AdminAppManagement = () => {
     });
   }, [allApps, searchTerm, filterTerm]);
 
-  const getTabCounts = () => {
-    return {
-      published: publishedAppIds?.length || 0,
-      submitted: pendingAppIds?.length || 0,
-      rejected: rejectedAppIds?.length || 0,
-      suspended: suspendedAppIds?.length || 0,
-    };
-  };
-
-  // Handle app status updates
+  // Handle app actions
   const handleApproveApp = async (appId) => {
     try {
-      const result = await updateAppStatus(appId, "published");
+      const app = allApps.find((app) => app.appId === appId);
+      if (!app) {
+        toast.error("App not found");
+        return;
+      }
+
+      const result = await onApprove(app);
       if (result.success) {
         toast.success("App approved successfully");
         setViewingDetails(null);
@@ -240,7 +231,13 @@ const AdminAppManagement = () => {
     if (!reason) return;
 
     try {
-      const result = await updateAppStatus(appId, "rejected", reason);
+      const app = allApps.find((app) => app.appId === appId);
+      if (!app) {
+        toast.error("App not found");
+        return;
+      }
+
+      const result = await onReject(app, reason);
       if (result.success) {
         toast.success("App rejected successfully");
         setViewingDetails(null);
@@ -257,7 +254,13 @@ const AdminAppManagement = () => {
     if (!reason) return;
 
     try {
-      const result = await updateAppStatus(appId, "suspended", reason);
+      const app = allApps.find((app) => app.appId === appId);
+      if (!app) {
+        toast.error("App not found");
+        return;
+      }
+
+      const result = await onSuspend(app, reason);
       if (result.success) {
         toast.success("App suspended successfully");
         setViewingDetails(null);
@@ -271,7 +274,13 @@ const AdminAppManagement = () => {
 
   const handleRestoreApp = async (appId) => {
     try {
-      const result = await updateAppStatus(appId, "published");
+      const app = allApps.find((app) => app.appId === appId);
+      if (!app) {
+        toast.error("App not found");
+        return;
+      }
+
+      const result = await onRestore(app);
       if (result.success) {
         toast.success("App restored successfully");
         setViewingDetails(null);
@@ -280,6 +289,20 @@ const AdminAppManagement = () => {
       }
     } catch (error) {
       toast.error("Error restoring app");
+    }
+  };
+
+  const handleDeleteApp = async (appId) => {
+    try {
+      const result = await deleteAppById(appId);
+      if (result.success) {
+        toast.success("App deleted successfully");
+        setViewingDetails(null);
+      } else {
+        toast.error(result.error || "Failed to delete app");
+      }
+    } catch (error) {
+      toast.error("Error deleting app");
     }
   };
 
@@ -311,8 +334,16 @@ const AdminAppManagement = () => {
                 label: "Published",
                 icon: <Grid2X2Check size={16} />,
               },
-              { key: "submitted", label: "Pending", icon: <Clock size={16} /> },
-              { key: "rejected", label: "Rejected", icon: <Ban size={16} /> },
+              {
+                key: "submitted",
+                label: "Pending",
+                icon: <Clock size={16} />,
+              },
+              {
+                key: "rejected",
+                label: "Rejected",
+                icon: <Ban size={16} />,
+              },
               {
                 key: "suspended",
                 label: "Suspended",
@@ -324,7 +355,10 @@ const AdminAppManagement = () => {
               return (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => {
+                    setIsOptionsOpen(false);
+                    setActiveTab(tab.key);
+                  }}
                   className={`flex items-center gap-2 px-2 py-1 rounded-xl border-2 transition-all duration-200 shrink-0 ${
                     isActive
                       ? "bg-green-500 text-white border-green-500"
@@ -335,6 +369,9 @@ const AdminAppManagement = () => {
                   <span className="font-normal text-sm whitespace-nowrap">
                     {tab.label}
                   </span>
+                  {tab.key === "submitted" && pendingAppIds.length !== 0 && (
+                    <div className="font-normal font-outfit h-1.5 w-1.5 flex justify-center items-center bg-rose-500 rounded-full text-[10px] whitespace-nowrap" />
+                  )}
                 </button>
               );
             })}
@@ -360,10 +397,10 @@ const AdminAppManagement = () => {
                   <tr>
                     <th className="px-6 py-4 font-semibold">App</th>
                     <th className="px-6 py-4 font-semibold">Developer</th>
-                    <th className="px-6 py-4 font-semibold">Platform - Size</th>
-                    <th className="px-6 py-4 font-semibold">Version</th>
+                    <th className="px-6 py-4 font-semibold">File</th>
                     <th className="px-6 py-4 font-semibold">Category</th>
                     <th className="px-6 py-4 font-semibold">Type</th>
+                    <th className="px-6 py-4 font-semibold">Source</th>
                     <th className="px-6 py-4 font-semibold">Actions</th>
                   </tr>
                 </thead>
@@ -377,8 +414,11 @@ const AdminAppManagement = () => {
                       setIsOptionsOpen={setIsOptionsOpen}
                       setViewingDetails={setViewingDetails}
                       status={activeTab}
-                      onStatusUpdate={updateAppStatus}
-                      onDeleteApp={deleteAppById}
+                      onApprove={handleApproveApp}
+                      onReject={handleRejectApp}
+                      onSuspend={handleSuspendApp}
+                      onRestore={handleRestoreApp}
+                      onDelete={handleDeleteApp}
                     />
                   ))}
                 </tbody>
@@ -396,8 +436,11 @@ const AdminAppManagement = () => {
                 setIsOptionsOpen={setIsOptionsOpen}
                 setViewingDetails={setViewingDetails}
                 status={activeTab}
-                onStatusUpdate={updateAppStatus}
-                onDeleteApp={deleteAppById}
+                onApprove={handleApproveApp}
+                onReject={handleRejectApp}
+                onSuspend={handleSuspendApp}
+                onRestore={handleRestoreApp}
+                onDelete={handleDeleteApp}
               />
             ))}
           </div>
@@ -414,9 +457,7 @@ const AdminAppManagement = () => {
                     ? `No results found for "${searchTerm}"`
                     : allApps.length > 0
                     ? "No apps matched the current filter criteria."
-                    : `No ${getStatusConfig(
-                        activeTab
-                      ).label.toLowerCase()} apps found.`}
+                    : `No ${activeTab} apps found.`}
                 </p>
                 <p className="text-gray-400 text-sm">
                   {searchTerm
@@ -505,7 +546,7 @@ const SearchAndFilter = ({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by app name, developer, or category..."
+            placeholder="Search by app/ developer name, app ID  or developer ID..."
             className="w-full border border-gray-300 rounded-xl pl-10 pr-10 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white transition-all duration-200"
           />
           {searchTerm && (
@@ -554,26 +595,6 @@ const SearchAndFilter = ({
                 icon: <Download size={13} className="text-gray-500" />,
               },
               {
-                label: "Highest Rating",
-                value: "rating_high",
-                icon: <Star size={13} className="text-gray-500" />,
-              },
-              {
-                label: "Lowest Rating",
-                value: "rating_low",
-                icon: <Star size={13} className="text-gray-500" />,
-              },
-              {
-                label: "Name A-Z",
-                value: "name_az",
-                icon: <ArrowDownAZ size={13} className="text-gray-500" />,
-              },
-              {
-                label: "Name Z-A",
-                value: "name_za",
-                icon: <ArrowDownZA size={13} className="text-gray-500" />,
-              },
-              {
                 label: "Date (Newest)",
                 value: "date_new",
                 icon: <ArrowDown01 size={13} className="text-gray-500" />,
@@ -620,8 +641,11 @@ const AppTableRow = ({
   setIsOptionsOpen,
   setViewingDetails,
   status,
-  onStatusUpdate,
-  onDeleteApp,
+  onApprove,
+  onReject,
+  onSuspend,
+  onRestore,
+  onDelete,
 }) => (
   <tr
     className={`hover:bg-green-50/50 transition-colors duration-150 ${
@@ -661,29 +685,35 @@ const AppTableRow = ({
         </div>
       </div>
     </td>
-    <td className="pl-4 py-4 text-gray-600 max-w-[120px] truncate text-xs capitalize">
-      <div className="flex gap-1 flex-row">
-        {app.details.appDetails.androidApk && "APK"}
-        {app.details.appDetails.androidApk &&
-          !app.details.appDetails.iosApk &&
-          " / "}
-        {!app.details.appDetails.iosApk && "IPA"}
-        <div className="flex items-center gap-2 ml-1 ">
-          <div className="h-1 w-1 rounded-full bg-gray-800" />
-          <p>
-            {app.details.appDetails.apkFileSizeMB ||
-              app.details.appDetails.ipaFileSizeMB}{" "}
-            MB
-          </p>
+    <td className="pl-4 py-4 text-gray-600 max-w-[120px] truncate text-sm">
+      <div className="min-w-0 flex-1">
+        <div className="flex font-medium text-gray-900  truncate max-w-[200px]">
+          {app.details.appDetails.androidApk && <p>APK</p>}
+          {app.details.appDetails.androidApk &&
+            app.details.appDetails.iosApk && <p className="mx-2">/</p>}
+          {app.details.appDetails.iosApk && <p>IPA</p>}
+        </div>
+
+        <div className="text-gray-500 text-sm font-mono pt-0.5 truncate max-w-[200px]">
+          {app.details.appDetails.apkFileSizeMB ||
+            app.details.appDetails.ipaFileSizeMB}{" "}
+          MB
         </div>
       </div>
-    </td>
-    <td className="pl-4 py-4 text-gray-600 text-sm">
-      {app.details.appDetails.version}
     </td>
     <td className="pl-4 py-4 text-gray-600 text-sm">{app.details.category}</td>
     <td className="pl-4 py-4 text-gray-600 text-sm">
       <div className="flex items-center gap-1">{app.details.type}</div>
+    </td>
+    <td className="pl-4 py-4 text-gray-600 text-sm">
+      <a
+        href={app.details.sourceCodeLink}
+        target="_blank"
+        className="flex justify-center gap-2 text-center bg-gray-300/80 text-gray-700 hover:bg-gray-400/40 font-medium py-1.5 items-center rounded-md"
+      >
+        <p>Source</p>
+        <ArrowUpRight size={16} />
+      </a>
     </td>
     <td className="pl-4 py-4">
       <Actions
@@ -692,8 +722,11 @@ const AppTableRow = ({
         setIsOptionsOpen={setIsOptionsOpen}
         setViewingDetails={setViewingDetails}
         status={status}
-        onStatusUpdate={onStatusUpdate}
-        onDeleteApp={onDeleteApp}
+        onApprove={onApprove}
+        onReject={onReject}
+        onSuspend={onSuspend}
+        onRestore={onRestore}
+        onDelete={onDelete}
       />
     </td>
   </tr>
@@ -706,8 +739,11 @@ const AppCard = ({
   setIsOptionsOpen,
   setViewingDetails,
   status,
-  onStatusUpdate,
-  onDeleteApp,
+  onApprove,
+  onReject,
+  onSuspend,
+  onRestore,
+  onDelete,
 }) => (
   <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
     <div className="flex items-start gap-3">
@@ -721,20 +757,14 @@ const AppCard = ({
             e.target.src = "https://placehold.co/56x56/CCCCCC/333333?text=App";
           }}
         />
-        <a
-          href={app.details.sourceCodeLink}
-          target="_blank"
-          className="text-sm font-outfit text-green-600 underline mt-1"
-        >
-          source
-        </a>
-        <p className="text-sm font-outfit text-gray-600">
+
+        <p className="text-sm font-outfit text-gray-600 mt-1.5">
           v {app.details?.appDetails?.version}
         </p>
 
-        <div className="flex items-center justify-between gap-4 mt-1">
-          {app.details.appDetails.androidApk && <IoLogoAndroid size={18} />}
-          {app.details.appDetails.androidApk && <FaApple size={18} />}
+        <div className="flex items-center justify-center text-gray-600 gap-2 mt-1">
+          {app.details.appDetails.androidApk && <IoLogoAndroid size={21} />}
+          {app.details.appDetails.iosApp && <FaApple size={18} />}
         </div>
       </div>
       {/* Detail */}
@@ -791,20 +821,25 @@ const AppCard = ({
       </div>
     </div>
     <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-      <button
-        onClick={() => setViewingDetails(app)}
-        className="bg-green-500 text-white hover:bg-green-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+      <a
+        href={app.details.sourceCodeLink}
+        target="_blank"
+        className="flex gap-1 items-center bg-green-500 text-white hover:bg-green-600 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
       >
-        View Details
-      </button>
+        <p>Source Code</p>
+        <ArrowUpRight size={16} />
+      </a>
       <Actions
         app={app}
         isOptionsOpen={isOptionsOpen}
         setIsOptionsOpen={setIsOptionsOpen}
         setViewingDetails={setViewingDetails}
         status={status}
-        onStatusUpdate={onStatusUpdate}
-        onDeleteApp={onDeleteApp}
+        onApprove={onApprove}
+        onReject={onReject}
+        onSuspend={onSuspend}
+        onRestore={onRestore}
+        onDelete={onDelete}
         isMobile={true}
       />
     </div>
@@ -818,8 +853,11 @@ const Actions = ({
   setIsOptionsOpen,
   setViewingDetails,
   status,
-  onStatusUpdate,
-  onDeleteApp,
+  onApprove,
+  onReject,
+  onSuspend,
+  onRestore,
+  onDelete,
   isMobile = false,
 }) => {
   const [loading, setLoading] = useState({ deleting: "", updating: "" });
@@ -828,12 +866,7 @@ const Actions = ({
     if (!app?.appId) return toast.error("Invalid app data");
     setLoading((prev) => ({ ...prev, deleting: app.appId }));
     try {
-      const res = await onDeleteApp(app.appId);
-      if (res?.success) {
-        toast.success("App deleted successfully");
-      } else {
-        toast.error(res?.error || "Failed to delete app.");
-      }
+      await onDelete(app.appId);
     } catch (error) {
       toast.error("Error deleting app.");
     } finally {
@@ -841,26 +874,33 @@ const Actions = ({
     }
   };
 
-  const handleStatusUpdate = async (newStatus) => {
+  const handleAction = async (action, needsReason = false) => {
     if (!app?.appId) return toast.error("Invalid app data");
+
+    let reason = "";
+    if (needsReason) {
+      reason = prompt(`Enter ${action} reason:`) || "";
+      if (!reason) return;
+    }
+
     setLoading((prev) => ({ ...prev, updating: app.appId }));
     try {
-      let reason = "";
-      if (newStatus === "rejected" || newStatus === "suspended") {
-        reason = prompt(`Enter ${newStatus} reason:`) || "";
-        if (!reason) {
-          setLoading((prev) => ({ ...prev, updating: "" }));
-          return;
-        }
-      }
-      const res = await onStatusUpdate(app.appId, newStatus, reason);
-      if (res?.success) {
-        toast.success(`App ${newStatus} successfully`);
-      } else {
-        toast.error(res?.error || `Failed to ${newStatus} app.`);
+      switch (action) {
+        case "approve":
+          await onApprove(app.appId);
+          break;
+        case "reject":
+          await onReject(app.appId);
+          break;
+        case "suspend":
+          await onSuspend(app.appId);
+          break;
+        case "restore":
+          await onRestore(app.appId);
+          break;
       }
     } catch (error) {
-      toast.error(`Error ${newStatus} app.`);
+      toast.error(`Error ${action} app.`);
     } finally {
       setLoading((prev) => ({ ...prev, updating: "" }));
     }
@@ -884,8 +924,8 @@ const Actions = ({
       {isOptionsOpen === app.appId && (
         <div
           className={`absolute ${
-            isMobile ? "right-8 -top-30" : "right-30 -top-2"
-          } mt-2 w-44 bg-white/30 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg z-50 flex flex-col divide-y divide-gray-100`}
+            isMobile ? "right-8 -top-30" : "right-32 -top-4"
+          } mt-2 w-44 bg-white/30 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg z-50 flex flex-col divide-y divide-gray-100`}
         >
           <button
             onClick={() => setViewingDetails(app)}
@@ -897,59 +937,85 @@ const Actions = ({
           {status === "submitted" && (
             <>
               <button
-                onClick={() => handleStatusUpdate("published")}
-                className="flex items-center gap-2 px-4 py-3 text-sm text-green-600 hover:bg-green-50 transition-colors duration-200"
+                onClick={() => handleAction("approve")}
+                disabled={loading.updating === app.appId}
+                className="flex items-center gap-2 px-4 py-3 text-sm text-green-600 hover:bg-green-50 transition-colors duration-200 disabled:opacity-50"
               >
-                <CheckCircle size={16} /> Approve
+                {loading.updating === app.appId ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={16} />
+                )}
+                Approve
               </button>
               <button
-                onClick={() => handleStatusUpdate("rejected")}
-                className="flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                onClick={() => handleAction("reject", true)}
+                disabled={loading.updating === app.appId}
+                className="flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200 disabled:opacity-50"
               >
-                <Ban size={16} /> Reject
+                {loading.updating === app.appId ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Ban size={16} />
+                )}
+                Reject
               </button>
             </>
           )}
 
           {status === "published" && (
             <button
-              onClick={() => handleStatusUpdate("suspended")}
-              className="flex items-center gap-2 px-4 py-3 text-sm text-orange-600 hover:bg-orange-50 transition-colors duration-200"
+              onClick={() => handleAction("suspend", true)}
+              disabled={loading.updating === app.appId}
+              className="flex items-center gap-2 px-4 py-3 text-sm text-orange-600 hover:bg-orange-50 transition-colors duration-200 disabled:opacity-50"
             >
-              <AlertCircle size={16} /> Suspend
+              {loading.updating === app.appId ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <AlertCircle size={16} />
+              )}
+              Suspend
             </button>
           )}
 
           {(status === "rejected" || status === "suspended") && (
             <button
-              onClick={() => handleStatusUpdate("published")}
-              className="flex items-center gap-2 px-4 py-3 text-sm text-green-600 hover:bg-green-50 transition-colors duration-200"
+              onClick={() => handleAction("restore")}
+              disabled={loading.updating === app.appId}
+              className="flex items-center gap-2 px-4 py-3 text-sm text-green-600 hover:bg-green-50 transition-colors duration-200 disabled:opacity-50"
             >
-              <Undo size={16} /> Restore
+              {loading.updating === app.appId ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Undo size={16} />
+              )}
+              Restore
             </button>
           )}
 
-          <button
-            disabled={loading.deleting === app.appId}
-            onClick={handleDeleteApp}
-            className={`flex items-center gap-2 px-4 py-3 text-sm transition-colors duration-200 rounded-b-xl ${
-              loading.deleting === app.appId
-                ? "text-gray-400 cursor-not-allowed bg-gray-50"
-                : "text-red-600 hover:bg-red-50"
-            }`}
-          >
-            {loading.deleting === app.appId ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                <span>Deleting...</span>
-              </>
-            ) : (
-              <>
-                <Trash2 size={16} />
-                <span>Delete App</span>
-              </>
-            )}
-          </button>
+          {status !== "published" && (
+            <button
+              disabled={loading.deleting === app.appId}
+              onClick={handleDeleteApp}
+              className={`flex items-center gap-2 px-4 py-3 text-sm transition-colors duration-200 rounded-b-xl ${
+                loading.deleting === app.appId
+                  ? "text-gray-400 cursor-not-allowed bg-gray-50"
+                  : "text-red-600 hover:bg-red-50"
+              }`}
+            >
+              {loading.deleting === app.appId ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 size={16} />
+                  <span>Delete App</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -966,6 +1032,44 @@ const ViewDetailsModal = ({
   onSuspend,
   onRestore,
 }) => {
+  const [loading, setLoading] = useState("");
+
+  const handleApprove = async () => {
+    setLoading("approve");
+    try {
+      await onApprove(viewingDetails.appId);
+    } finally {
+      setLoading("");
+    }
+  };
+
+  const handleReject = async () => {
+    setLoading("reject");
+    try {
+      await onReject(viewingDetails.appId);
+    } finally {
+      setLoading("");
+    }
+  };
+
+  const handleSuspend = async () => {
+    setLoading("suspend");
+    try {
+      await onSuspend(viewingDetails.appId);
+    } finally {
+      setLoading("");
+    }
+  };
+
+  const handleRestore = async () => {
+    setLoading("restore");
+    try {
+      await onRestore(viewingDetails.appId);
+    } finally {
+      setLoading("");
+    }
+  };
+
   const getStatusConfig = (status) => {
     const configs = {
       published: {
@@ -995,7 +1099,10 @@ const ViewDetailsModal = ({
   const statusConfig = getStatusConfig(activeTab);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md z-50 px-4">
+    <div
+      key={viewingDetails.appId}
+      className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md z-50 px-4"
+    >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl font-poppins relative animate-in fade-in duration-200 flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex justify-between items-center border-b border-gray-200 p-6 shrink-0">
@@ -1149,18 +1256,16 @@ const ViewDetailsModal = ({
             </div>
 
             {/* RIGHT */}
-            <div className="flex-1 space-y-6 text-gray-700 text-sm">
+            <div className="flex-1 space-y-2 text-gray-700 text-sm">
               {/* Screenshots */}
-              <div>
-                <div className="h-48 w-full flex gap-3 overflow-y-scroll no-scrollbar pr-1">
-                  {viewingDetails.details.media.screenshots.map((ss, i) => (
-                    <img
-                      key={i}
-                      src={getFileURL(ss)}
-                      className="h-full rounded-md"
-                    />
-                  ))}
-                </div>
+              <div className="h-48 w-full flex gap-3 overflow-y-scroll no-scrollbar pr-1">
+                {viewingDetails.details.media.screenshots.map((ss, i) => (
+                  <img
+                    key={i}
+                    src={getFileURL(ss)}
+                    className="h-full rounded-md"
+                  />
+                ))}
               </div>
 
               {/* Description */}
@@ -1178,18 +1283,18 @@ const ViewDetailsModal = ({
               </div>
 
               {/* More details */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mt-4">
                 <div>
                   <span className="font-medium text-gray-800">Age Rating:</span>
                   <p className="text-gray-500 mt-1">
-                    {viewingDetails?.details.ageRating || "Not specified"}
+                    {viewingDetails?.details.ageRating}
                   </p>
                 </div>
 
                 <div>
                   <span className="font-medium text-gray-800">Type:</span>
                   <p className="text-gray-500 mt-1">
-                    {viewingDetails?.type || "Mobile App"}
+                    {viewingDetails?.details.type}
                   </p>
                 </div>
               </div>
@@ -1200,55 +1305,72 @@ const ViewDetailsModal = ({
                   <span className="font-medium text-gray-800">
                     Contact Email:
                   </span>
-                  <p className="text-gray-500 mt-1 break-all">
-                    {viewingDetails?.links?.contactEmail || "Not provided"}
+                  <p className="text-gray-500 mt-1 break-all truncate">
+                    {viewingDetails?.details.links?.contactEmail}
                   </p>
                 </div>
 
-                <div>
+                <div title={viewingDetails?.details.links?.privacyPolicyUrl}>
                   <span className="font-medium text-gray-800">
                     Privacy Policy:
                   </span>
                   <p className="text-gray-500 mt-1 truncate">
-                    {viewingDetails?.links?.privacyPolicyUrl || "Not provided"}
+                    {viewingDetails?.details.links?.privacyPolicyUrl}
                   </p>
                 </div>
               </div>
 
-              {/* Tags */}
-              <div>
-                <span className="font-medium text-gray-800">Tags:</span>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {viewingDetails?.tags?.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+              {/* Tags & Features */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium text-gray-800">Tags:</span>
+                  <p className="flex flex-wrap flex-row gap-2 text-gray-500 mt-1 break-all">
+                    {viewingDetails?.details.tags.map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-1.5 py-0.5 bg-gray-200/60 text-xs rounded-md"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+
+                <div>
+                  <span className="font-medium text-gray-800">Features:</span>
+                  <p className="text-gray-500 mt-1 break-all">
+                    {viewingDetails?.details.description.featureBullets.map(
+                      (feature, i) => (
+                        <li key={i} className="text-xs rounded-md ml-2">
+                          {feature}
+                        </li>
+                      )
+                    )}
+                  </p>
                 </div>
               </div>
 
               {/* Reasons */}
-              {viewingDetails?.status?.rejection?.reason && (
+              {viewingDetails?.status?.rejection?.isRejected && (
                 <div className="space-y-1">
-                  <span className="font-medium text-gray-800">
+                  <span className="font-medium text-rose-600">
                     Rejection Reason:
                   </span>
-                  <p className="text-gray-500">
-                    {viewingDetails.status.rejection.reason}
+                  <p className="text-rose-500">
+                    {viewingDetails.status.rejection.reason ||
+                      "No reason provided"}
                   </p>
                 </div>
               )}
 
-              {viewingDetails?.status?.suspension?.reason && (
+              {viewingDetails?.status?.suspension?.isSuspended && (
                 <div className="space-y-1">
-                  <span className="font-medium text-gray-800">
+                  <span className="font-medium text-yellow-500">
                     Suspension Reason:
                   </span>
-                  <p className="text-gray-500">
-                    {viewingDetails.status.suspension.reason}
+                  <p className="text-yellow-600">
+                    {viewingDetails.status.suspension.reason ||
+                      "No reason provided"}
                   </p>
                 </div>
               )}
@@ -1261,58 +1383,188 @@ const ViewDetailsModal = ({
                     {formatDate(viewingDetails.createdAt) || "N/A"}
                   </p>
                 </div>
+
+                {/* Dynamic Status Date Section */}
                 <div>
                   <span className="font-medium text-gray-800">
-                    Last Updated:
+                    {(() => {
+                      const { status } = viewingDetails;
+
+                      if (status.approval?.isApproved) return "Approved At:";
+                      if (status.rejection?.isRejected) return "Rejected At:";
+                      if (status.suspension?.isSuspended)
+                        return "Suspended At:";
+                      if (status.isActive) return "Published At:";
+
+                      return "Last Updated:";
+                    })()}
                   </span>
+
                   <p className="text-gray-500 mt-1">
-                    {formatDate(viewingDetails.updatedAt) || "N/A"}
+                    {(() => {
+                      const { status } = viewingDetails;
+
+                      if (status.approval?.isApproved)
+                        return formatDate(status.approval.approvedAt) || "N/A";
+
+                      if (status.rejection?.isRejected)
+                        return formatDate(status.rejection.rejectedAt) || "N/A";
+
+                      if (status.suspension?.isSuspended)
+                        return formatDate(status.suspension.removedAt) || "N/A";
+
+                      if (status.isActive)
+                        return formatDate(viewingDetails.publishedAt) || "N/A";
+
+                      return formatDate(viewingDetails.updatedAt) || "N/A";
+                    })()}
                   </p>
                 </div>
+              </div>
+
+              {/* Download */}
+              <div className="grid grid-cols-2 gap-4 ">
+                {viewingDetails.details.appDetails.androidApk && (
+                  <div>
+                    <span className="font-medium text-gray-800">Android:</span>
+                    <button
+                      onClick={() => {
+                        try {
+                          // Get the file URL
+                          const url = getFileURL(
+                            viewingDetails.details.appDetails.androidApk
+                          );
+
+                          // Create temporary link to trigger download
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = `${viewingDetails.details.appDetails.name}.apk`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        } catch (error) {
+                          console.error("Download failed:", error);
+                        }
+                      }}
+                      className="px-4 py-2 mt-2 text-sm flex items-center gap-2 font-medium text-white bg-green-500 hover:bg-green-600 rounded-md cursor-pointer"
+                    >
+                      <Download size={16} />
+                      Download
+                    </button>
+                  </div>
+                )}
+                {viewingDetails.details.appDetails.iosApk && (
+                  <div>
+                    <span className="font-medium text-gray-800">IOS:</span>
+                    <button
+                      onClick={() => {
+                        try {
+                          // Get the file URL
+                          const url = getFileURL(
+                            viewingDetails.details.appDetails.iosApk
+                          );
+
+                          // Create temporary link to trigger download
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = `${viewingDetails.details.appDetails.name}.apk`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        } catch (error) {
+                          console.error("Download failed:", error);
+                        }
+                      }}
+                      className="px-4 py-2 mt-2 text-sm flex items-center gap-2 font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md cursor-pointer"
+                    >
+                      <FaApple size={16} />
+                      Download
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center border-t border-gray-200 p-6 \shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center border-t border-gray-200 p-6 shrink-0">
+          {/* SUBMITTED */}
           {activeTab === "submitted" && (
-            <>
+            <div className="w-full flex justify-between gap-4 ">
               <button
-                onClick={() => onApprove(viewingDetails.appId)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-green-500 text-white hover:bg-green-600"
+                onClick={handleApprove}
+                disabled={loading === "approve"}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-green-500 text-white hover:bg-green-600 disabled:bg-green-700 disabled:cursor-not-allowed"
               >
-                <CheckCircle size={16} />
+                {loading === "approve" ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={16} />
+                )}
                 <span>Approve App</span>
               </button>
 
               <button
-                onClick={() => onReject(viewingDetails.appId)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-red-500 text-white hover:bg-red-600"
+                onClick={handleReject}
+                disabled={loading === "reject"}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-red-500 text-white hover:bg-red-600 disabled:bg-red-700 disabled:cursor-not-allowed"
               >
-                <Ban size={16} />
+                {loading === "reject" ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Ban size={16} />
+                )}
                 <span>Reject App</span>
               </button>
-            </>
+            </div>
           )}
 
+          {/* PUBLISHED */}
           {activeTab === "published" && (
             <button
-              onClick={() => onSuspend(viewingDetails.appId)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-orange-500 text-white hover:bg-orange-600"
+              onClick={handleSuspend}
+              disabled={loading === "suspend"}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-orange-500 text-white hover:bg-orange-600 disabled:bg-orange-700 disabled:cursor-not-allowed"
             >
-              <AlertCircle size={16} />
+              {loading === "suspend" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <AlertCircle size={16} />
+              )}
               <span>Suspend App</span>
             </button>
           )}
 
-          {(activeTab === "rejected" || activeTab === "suspended") && (
+          {/* REJECTED */}
+          {activeTab === "rejected" && (
             <button
-              onClick={() => onRestore(viewingDetails.appId)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-green-500 text-white hover:bg-green-600"
+              onClick={handleRestore}
+              disabled={loading === "restore"}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-green-500 text-white hover:bg-green-600 disabled:bg-green-700 disabled:cursor-not-allowed"
             >
-              <Undo size={16} />
-              <span>Restore App</span>
+              {loading === "restore" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <CheckCircle size={16} />
+              )}
+              <span>Publish App</span>
+            </button>
+          )}
+
+          {/* SUSPENDED */}
+          {activeTab === "suspended" && (
+            <button
+              onClick={handleRestore}
+              disabled={loading === "restore"}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm bg-blue-500 text-white hover:bg-blue-600 disabled:bg-blue-700 disabled:cursor-not-allowed"
+            >
+              {loading === "restore" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Undo size={16} />
+              )}
+              <span>Unsuspend App</span>
             </button>
           )}
         </div>

@@ -365,7 +365,8 @@ export default function Publish() {
       const payload = {
         developer: {
           name: user?.name,
-          developerId: user?.uid,
+          userId: user?.uid,
+          developerId: user?.developerProfile.developerId,
           email: user?.email,
         },
         details: {

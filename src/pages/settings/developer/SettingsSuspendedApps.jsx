@@ -5,6 +5,7 @@ import { useAuthStore } from "../../../store/AuthStore";
 import { useAppStore } from "../../../store/AppStore";
 import { toast } from "sonner";
 import { formatDate } from "../../../utils/formatDate";
+import { getFileURL } from "../../../services/appwriteStorage";
 
 function SettingsSuspendedApps() {
   const { user } = useAuthStore();
@@ -85,11 +86,7 @@ function SettingsSuspendedApps() {
                 <div className="flex items-center gap-4">
                   {/* App Icon */}
                   <img
-                    src={`https://cloud.appwrite.io/v1/storage/buckets/${
-                      import.meta.env.VITE_APPWRITE_BUCKET_ID
-                    }/files/${appObj.app.details?.media?.icon}/view?project=${
-                      import.meta.env.VITE_APPWRITE_PROJECT_ID
-                    }`}
+                    src={getFileURL(appObj.app.details.media.icon)}
                     alt={appObj.app.appId}
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover bg-white shrink-0"
                   />
@@ -105,7 +102,7 @@ function SettingsSuspendedApps() {
                         {appObj.app.details?.name}
                       </h2>
 
-                      {appObj.app.status?.removal?.isRemoved && (
+                      {appObj.app.status?.suspension?.isSuspended && (
                         <span className="w-20 sm:w-[90px] text-center text-[10px] sm:text-xs px-2 py-1 rounded-lg font-poppins border font-medium bg-gray-200 text-gray-700 border-gray-700 shrink-0">
                           Suspended
                         </span>
@@ -116,7 +113,7 @@ function SettingsSuspendedApps() {
                     <div className="flex flex-wrap justify-between items-center text-gray-500 text-[11px] sm:text-xs mt-1 font-outfit">
                       <span className="flex gap-1 items-center">
                         <Calendar size={12} className="sm:size-[13px]" />{" "}
-                        {formatDate(appObj.app.status?.removal?.removedAt)}
+                        {formatDate(appObj.app.status?.suspension?.suspendedAt)}
                       </span>
                       <span>
                         {appObj.app.details.appDetails.apkFileSizeMB} MB
@@ -126,10 +123,7 @@ function SettingsSuspendedApps() {
                     {/* Reason */}
                     <div className="flex flex-wrap gap-x-2 gap-y-1 items-center text-gray-500 text-xs sm:text-[13.5px] font-outfit mt-0.5">
                       <span>Reason: </span>
-                      <span>
-                        {appObj.app.status?.removal?.reason ||
-                          "Error fetching data."}
-                      </span>
+                      <span>{appObj.app.status?.suspension?.reason}</span>
                     </div>
                   </div>
                 </div>
