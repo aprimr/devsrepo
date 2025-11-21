@@ -9,7 +9,7 @@ function DeveloperCard({ developer }) {
   return (
     <div
       onClick={() => {
-        if (user.uid === developer.uid) {
+        if (user?.uid === developer.uid) {
           navigate("/profile");
         } else {
           navigate(`/p/${developer.developerProfile.developerId}`);
@@ -23,7 +23,7 @@ function DeveloperCard({ developer }) {
           src={developer.photoURL}
           alt={developer.name}
           className="w-26 h-26 object-cover rounded-2xl border-2 border-gray-200"
-        />  
+        />
       </div>
 
       {/* Developer Info */}

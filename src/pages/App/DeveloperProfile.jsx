@@ -277,7 +277,7 @@ function DeveloperProfile() {
               <p className="absolute w-full flex items-center top-1 text-lg sm:text-xl font-medium text-white font-poppins truncate">
                 <span className="truncate mr-1.5">{developerDetails.name}</span>
 
-                {user.social.followingIds.includes(developerDetails.uid) &&
+                {user?.social?.followingIds?.includes(developerDetails.uid) &&
                   developerDetails.social.followingIds.includes(user.uid) && (
                     <Handshake size={16} className="shrink-0 text-gray-50" />
                   )}
