@@ -1,8 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DeveloperCard from "../../components/ui/cards/DeveloperCard";
-import { useEffect, useState } from "react";
-import { fetchDevelopers } from "../../services/appServices";
+import { useState } from "react";
 
 function TopDevelopers() {
   const { state } = useLocation();
@@ -58,51 +57,6 @@ function TopDevelopers() {
             </h2>
 
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 gap-8">
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
-              {developers.map((dev, i) => (
-                <DeveloperCard key={i} developer={dev} />
-              ))}
               {developers.map((dev, i) => (
                 <DeveloperCard key={i} developer={dev} />
               ))}

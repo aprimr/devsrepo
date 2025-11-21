@@ -16,6 +16,7 @@ import {
   Globe,
   Handshake,
   LayoutGrid,
+  Loader2,
   Mail,
   Share2,
   TriangleAlert,
@@ -32,14 +33,17 @@ import {
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { LuLink } from "react-icons/lu";
+import { toast } from "sonner";
 
 function DeveloperProfile() {
   const { id } = useParams();
+  const { user, followDeveloper, unfollowDeveloper } = useAuthStore();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
 
   const [loading, setLoading] = useState(false);
+  const [followingOrUnfollowing, setFollowingOrUnfollowing] = useState(false);
   const [developerDetails, setDeveloperDetails] = useState(null);
+  const [developerFollowers, setDeveloperFollowers] = useState(0);
 
   const [shareModal, setShareModal] = useState(false);
 
@@ -50,6 +54,7 @@ function DeveloperProfile() {
         const res = await fetchDeveloperbyDevID(id);
         if (res.success) {
           setDeveloperDetails(res.developer);
+          setDeveloperFollowers(res.developer.social.followersIds.length);
         } else {
           setDeveloperDetails(null);
         }
@@ -93,25 +98,6 @@ function DeveloperProfile() {
           <p className="text-gray-600 text-sm leading-relaxed mb-6">
             The developer you're looking for doesn't exist.
           </p>
-
-          {/* Reasons list */}
-          <ul className="text-sm text-gray-500 text-left space-y-2 mb-8">
-            <p className="text-gray-600 leading-relaxed mb-1">
-              This could be because:
-            </p>
-            <li className="flex items-start">
-              <span className="text-rose-400 mr-2">•</span>
-              The ID might be incorrect
-            </li>
-            <li className="flex items-start">
-              <span className="text-rose-400 mr-2">•</span>
-              The developer may have been deleted
-            </li>
-            <li className="flex items-start">
-              <span className="text-rose-400 mr-2">•</span>
-              There might be a temporary issue
-            </li>
-          </ul>
 
           {/* Action button */}
           <button
@@ -162,6 +148,42 @@ function DeveloperProfile() {
     );
   }
 
+  const handleFollowDeveloper = async (devId, devName) => {
+    setFollowingOrUnfollowing(true);
+    try {
+      const res = await followDeveloper(devId);
+
+      if (!res.success) {
+        toast.error("Something went wrong.");
+      } else {
+        toast.success(`Following ${devName}!`);
+        setDeveloperFollowers(developerFollowers + 1);
+      }
+    } catch (error) {
+      toast.error("Something went wrong.");
+    } finally {
+      setFollowingOrUnfollowing(false);
+    }
+  };
+
+  const handleUnfollowDeveloper = async (devId, devName) => {
+    setFollowingOrUnfollowing(true);
+    try {
+      const res = await unfollowDeveloper(devId);
+
+      if (!res.success) {
+        toast.error("Something went wrong.");
+      } else {
+        toast.success(`Unfollowed ${devName}!`);
+        setDeveloperFollowers(developerFollowers - 1);
+      }
+    } catch (error) {
+      toast.error("Something went wrong.");
+    } finally {
+      setFollowingOrUnfollowing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20 overflow-x-hidden">
       {/* Header */}
@@ -174,17 +196,6 @@ function DeveloperProfile() {
           >
             <ChevronLeft className="h-8 w-8 text-gray-700 bg-gray-100 border-2 border-gray-200 shadow-md backdrop-blur-sm rounded-xl p-1 pl-0.5" />
           </div>
-
-          {/* Follow
-          {user && (
-            <div
-              onClick={() => {}}
-              
-              <span className="text-gray-700 font-medium font-poppins text-xs">
-                Follow
-              </span>
-            </div>
-          )} */}
 
           {/* Share */}
           <div
@@ -199,6 +210,7 @@ function DeveloperProfile() {
       <div className="max-w-xl mx-auto">
         {/* Profile Pic, Cover & Details */}
         <div className="relative w-full h-32 sm:h-36 bg-gray-300">
+          {/* Cover image */}
           <img
             src={BGImage}
             className="w-screen h-full object-cover object-top-left bg-black"
@@ -220,15 +232,42 @@ function DeveloperProfile() {
 
               {/* Follow Btns */}
               {user && (
-                <div className="absolute bottom-0 right-0">
-                  {/* Follow */}
-                  {/* <div className="flex items-center gap-1 cursor-pointer bg-blue-200 border-3 border-white rounded-xl px-1 py-1">
-                    <UserRoundPlus className="h-3.5 w-3.5 text-gray-700" />
-                  </div> */}
+                <div className="absolute bottom-0 right-0 z-20">
                   {/* Unfollow / following */}
-                  <div className="flex items-center gap-1 cursor-pointer bg-green-200 border-3 border-white rounded-xl px-1 py-1">
-                    <CheckCheck className="h-3.5 w-3.5 text-gray-700" />
-                  </div>
+                  {followingOrUnfollowing ? (
+                    // Loading
+                    <div className="flex items-center gap-1 cursor-pointer bg-gray-200 border-3 border-white rounded-xl px-1 py-1">
+                      <Loader2 className="h-3.5 w-3.5 text-gray-700 animate-spin" />
+                    </div>
+                  ) : user.social?.followingIds?.includes(
+                      developerDetails.uid
+                    ) ? (
+                    // Already Following
+                    <div
+                      onClick={() =>
+                        handleUnfollowDeveloper(
+                          developerDetails.uid,
+                          developerDetails.name
+                        )
+                      }
+                      className="flex items-center gap-1 cursor-pointer bg-green-200 border-3 border-white rounded-xl px-1 py-1"
+                    >
+                      <CheckCheck className="h-3.5 w-3.5 text-gray-700" />
+                    </div>
+                  ) : (
+                    // Follow Button
+                    <button
+                      onClick={() =>
+                        handleFollowDeveloper(
+                          developerDetails.uid,
+                          developerDetails.name
+                        )
+                      }
+                      className="flex items-center gap-1 cursor-pointer bg-blue-200 border-3 border-white rounded-xl px-1 py-1"
+                    >
+                      <UserRoundPlus className="h-3.5 w-3.5 text-gray-700" />
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -238,9 +277,10 @@ function DeveloperProfile() {
               <p className="absolute w-full flex items-center top-1 text-lg sm:text-xl font-medium text-white font-poppins truncate">
                 <span className="truncate mr-1.5">{developerDetails.name}</span>
 
-                {user && (
-                  <Handshake size={16} className="shrink-0 text-gray-50" />
-                )}
+                {user.social.followingIds.includes(developerDetails.uid) &&
+                  developerDetails.social.followingIds.includes(user.uid) && (
+                    <Handshake size={16} className="shrink-0 text-gray-50" />
+                  )}
               </p>
 
               {/* Username */}
@@ -265,9 +305,7 @@ function DeveloperProfile() {
                   {/* Followers */}
                   <div className="flex flex-col items-center">
                     <p className="font-semibold text-gray-900">
-                      {numberSuffixer(
-                        developerDetails?.social?.followersIds?.length + 5327
-                      )}
+                      {numberSuffixer(developerFollowers)}
                     </p>
                     <p className="text-gray-600 text-xs sm:text-sm font-poppins">
                       Followers
@@ -278,7 +316,7 @@ function DeveloperProfile() {
                   <div className="flex flex-col items-center">
                     <p className="font-semibold text-gray-900">
                       {numberSuffixer(
-                        developerDetails?.social?.followingIds?.length + 626723
+                        developerDetails?.social?.followingIds?.length
                       )}
                     </p>
                     <p className="text-gray-600 text-xs sm:text-sm font-poppins">
@@ -303,21 +341,23 @@ function DeveloperProfile() {
         </div>
 
         {/* Website */}
-        <div className="px-6 flex flex-row gap-2 items-center text-green-600 font-poppins mt-1">
-          <Globe size={16} />
-          <a
-            href={`https://www.${developerDetails.developerProfile.website
-              .replace(/^https?:\/\//, "")
-              .replace(/^www\./, "")}`}
-            target="_blank"
-            className="text-[15px] font-normal "
-          >
-            {developerDetails.developerProfile.website.replace(
-              /^(https?:\/\/)?(www\.)?/,
-              ""
-            )}
-          </a>
-        </div>
+        {developerDetails.developerProfile.website && (
+          <div className="px-6 flex flex-row gap-2 items-center text-green-600 font-poppins mt-1">
+            <Globe size={16} />
+            <a
+              href={`https://www.${developerDetails.developerProfile.website
+                .replace(/^https?:\/\//, "")
+                .replace(/^www\./, "")}`}
+              target="_blank"
+              className="text-[15px] font-normal "
+            >
+              {developerDetails.developerProfile.website.replace(
+                /^(https?:\/\/)?(www\.)?/,
+                ""
+              )}
+            </a>
+          </div>
+        )}
 
         {/* Bio */}
         <div className="px-6 font-poppins mt-1">

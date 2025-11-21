@@ -14,6 +14,8 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { auth, db, googleProvider, githubProvider } from "../firebase/config";
 
@@ -366,6 +368,160 @@ export const useAuthStore = create(
           return { success: true, message: "Account deleted successfully." };
         } catch (error) {
           console.error("Error deleting account:", error);
+          set({ error: error.message });
+          return { success: false, error: error.message };
+        }
+      },
+
+      // Follow a dev
+      followDeveloper: async (toFollow) => {
+        const { user } = get();
+
+        if (!user) {
+          return { success: false, error: "No user logged in" };
+        }
+
+        try {
+          const currentUserId = user.uid;
+
+          // Prevent following yourself
+          if (toFollow === currentUserId) {
+            throw new Error("You cannot follow yourself.");
+          }
+
+          const currentUserRef = doc(db, "users", currentUserId);
+          const toFollowRef = doc(db, "users", toFollow);
+
+          // Fetch both users
+          const [currentSnap, toFollowSnap] = await Promise.all([
+            getDoc(currentUserRef),
+            getDoc(toFollowRef),
+          ]);
+
+          if (!currentSnap.exists()) {
+            throw new Error("Current user data missing.");
+          }
+
+          if (!toFollowSnap.exists()) {
+            throw new Error("This developer does not exist.");
+          }
+
+          const currentData = currentSnap.data();
+
+          const followingList = currentData.social?.followingIds || [];
+
+          const alreadyFollowing = followingList.includes(toFollow);
+
+          if (alreadyFollowing) {
+            return { success: false, error: "Already following this user." };
+          }
+
+          // Update Firestore
+          await Promise.all([
+            updateDoc(currentUserRef, {
+              "social.followingIds": arrayUnion(toFollow),
+            }),
+            updateDoc(toFollowRef, {
+              "social.followersIds": arrayUnion(currentUserId),
+            }),
+          ]);
+
+          // Update Zustand
+          set((state) => ({
+            user: {
+              ...state.user,
+              social: {
+                ...state.user.social,
+                followingIds: [
+                  ...(state.user.social?.followingIds || []),
+                  toFollow,
+                ],
+              },
+            },
+            error: null,
+          }));
+
+          return { success: true, message: "Followed user successfully." };
+        } catch (error) {
+          console.error("Error following user:", error);
+          set({ error: error.message });
+          return { success: false, error: error.message };
+        }
+      },
+
+      // Unfollow a dev
+      unfollowDeveloper: async (toUnfollow) => {
+        const { user } = get();
+
+        if (!user) {
+          return { success: false, error: "No user logged in" };
+        }
+
+        try {
+          const currentUserId = user.uid;
+
+          // Prevent unfollowing yourself
+          if (toUnfollow === currentUserId) {
+            throw new Error("You cannot unfollow yourself.");
+          }
+
+          const currentUserRef = doc(db, "users", currentUserId);
+          const toUnfollowRef = doc(db, "users", toUnfollow);
+
+          // Fetch both users
+          const [currentSnap, toUnfollowSnap] = await Promise.all([
+            getDoc(currentUserRef),
+            getDoc(toUnfollowRef),
+          ]);
+
+          if (!currentSnap.exists()) {
+            throw new Error("Current user data missing.");
+          }
+
+          if (!toUnfollowSnap.exists()) {
+            throw new Error("This developer does not exist.");
+          }
+
+          const currentData = currentSnap.data();
+
+          const followingList = currentData.social?.followingIds || [];
+
+          const alreadyFollowing = followingList.includes(toUnfollow);
+
+          if (!alreadyFollowing) {
+            return {
+              success: false,
+              error: "You are not following this user.",
+            };
+          }
+
+          // Update Firestore
+          await Promise.all([
+            updateDoc(currentUserRef, {
+              "social.followingIds": arrayRemove(toUnfollow),
+            }),
+            updateDoc(toUnfollowRef, {
+              "social.followersIds": arrayRemove(currentUserId),
+            }),
+          ]);
+
+          // Update Zustand
+          set((state) => ({
+            user: {
+              ...state.user,
+              social: {
+                ...state.user.social,
+                followingIds: state.user.social.followingIds.filter(
+                  (id) => id !== toUnfollow
+                ),
+              },
+            },
+            error: null,
+          }));
+
+          return { success: true, message: "Unfollowed user successfully." };
+        } catch (error) {
+          console.error("Error unfollowing user:", error);
           set({ error: error.message });
           return { success: false, error: error.message };
         }

@@ -4,8 +4,13 @@ import { toast } from "sonner";
 import { fetchAppbyID } from "../../../services/appServices";
 import { getFileURL } from "../../../services/appwriteStorage";
 import { calculateRating } from "../../../utils/calculateRating";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../../store/AuthStore";
 
 function DeveloperAppCard({ appId }) {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
   const [fetchingDetails, setFetchingDetails] = useState(false);
   const [appDetails, setAppDetails] = useState(null);
 
@@ -53,7 +58,12 @@ function DeveloperAppCard({ appId }) {
   }
 
   return (
-    <div className="group relative bg-gray-50 rounded-3xl cursor-pointer overflow-hidden shrink-0 w-28">
+    <div
+      onClick={() => {
+        navigate(`/a/${appDetails.appId}`);
+      }}
+      className="group relative bg-gray-50 rounded-3xl cursor-pointer overflow-hidden shrink-0 w-28"
+    >
       {/* App Icon */}
       <div className="relative p-2">
         <img
