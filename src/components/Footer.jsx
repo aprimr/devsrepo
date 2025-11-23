@@ -10,11 +10,11 @@ function Footer() {
           <span className="text-lg">DevsRepo</span>
 
           {/* Divider */}
-          <span className="text-gray-400">|</span>
+          <span className="text-gray-300">|</span>
 
           {/* Other content */}
-          <span className="text-sm text-gray-600">
-            Publish Apps. Explore Freely
+          <span className="text-sm text-gray-500">
+            Publish Apps. Explore Freely.
           </span>
         </div>
       </div>

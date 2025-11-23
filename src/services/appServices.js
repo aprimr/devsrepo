@@ -8,9 +8,8 @@ import {
   where,
   orderBy,
   limit,
-  addDoc,
-  updateDoc,
 } from "firebase/firestore";
+import { calculateRating } from "../utils/calculateRating";
 
 // Fetch all apps
 export const fetchAllApps = async () => {};
@@ -77,6 +76,25 @@ export const fetchDevelopers = async () => {
   }
 };
 
+// Fetch user by id
+export const fetchUserById = async (userId) => {
+  if (!userId) return { success: false, developer: null };
+
+  try {
+    const userRef = doc(db, "users", userId);
+    const snapshot = await getDoc(userRef);
+
+    if (!snapshot.exists()) {
+      return { success: false, developer: null };
+    }
+
+    return { success: true, developer: snapshot.data() };
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return { success: false, developer: null };
+  }
+};
+
 // Fetch developer by devId
 export const fetchDeveloperbyDevID = async (developerId) => {
   if (!developerId) return null;
@@ -116,14 +134,77 @@ export const fetchAppbyID = async (appId) => {
   }
 };
 
-// Fetch most downloaded apps
-export const fetchMostDownlaodedApps = async () => {};
+// Fetch top most downloaded apps
+export const fetchMostDownloadedApps = async () => {
+  try {
+    const appsRef = collection(db, "apps");
+    const querySnapshot = await getDocs(appsRef);
 
-// Fetch most reviews apps
-export const fetchMostReviewsApps = async () => {};
+    const apps = querySnapshot.docs
+      .map((doc) => doc.data())
+      .filter((app) => app.status?.isActive && app.status?.approval?.isApproved)
+      .sort((a, b) => (b.metrics?.downloads || 0) - (a.metrics?.downloads || 0))
+      .slice(0, 15);
+
+    return { success: true, apps };
+  } catch (error) {
+    console.error("Error fetching most downloaded apps:", error);
+    toast.error("Failed to fetch most downloaded apps");
+    return { success: false, apps: [] };
+  }
+};
+
+// Fetch apps with most reviews
+export const fetchMostReviewedApps = async () => {
+  try {
+    const appsRef = collection(db, "apps");
+    const querySnapshot = await getDocs(appsRef);
+
+    const apps = querySnapshot.docs
+      .map((doc) => doc.data())
+      .filter((app) => app.status?.isActive && app.status?.approval?.isApproved)
+      .sort(
+        (a, b) =>
+          (calculateRating(b.metrics?.ratings?.breakdown) || 0) -
+          (calculateRating(a.metrics?.ratings?.breakdown) || 0)
+      )
+      .slice(0, 15);
+
+    return { success: true, apps };
+  } catch (error) {
+    console.error("Error fetching most reviewed apps:", error);
+    toast.error("Failed to fetch most reviewed apps");
+    return { success: false, apps: [] };
+  }
+};
 
 // Fetch new apps
-export const fetchNewApps = async () => {};
+export const fetchNewApps = async () => {
+  try {
+    const appsRef = collection(db, "apps");
+    const q = query(appsRef, orderBy("createdAt", "desc"), limit(50));
+    const querySnapshot = await getDocs(q);
+
+    let apps = querySnapshot.docs.map((doc) => doc.data());
+
+    apps = apps.filter(
+      (app) => app.status?.isActive && app.status?.approval?.isApproved
+    );
+
+    apps = apps.slice(0, 15);
+
+    return {
+      success: true,
+      apps,
+    };
+  } catch (error) {
+    toast.error("Failed to fetch new apps");
+    return {
+      success: false,
+      apps: [],
+    };
+  }
+};
 
 // Fetch details of a single app
 export const fetchAppDetails = async (appId) => {};

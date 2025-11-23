@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Frown, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { fetchAppbyID } from "../../../services/appServices";
@@ -6,8 +6,10 @@ import { getFileURL } from "../../../services/appwriteStorage";
 import { calculateRating } from "../../../utils/calculateRating";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../store/AuthStore";
+import { FaApple } from "react-icons/fa";
+import { AiFillAndroid } from "react-icons/ai";
 
-function DeveloperAppCard({ appId }) {
+function DeveloperAppCard({ appId, hideRating = false }) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
@@ -39,11 +41,18 @@ function DeveloperAppCard({ appId }) {
 
   if (fetchingDetails) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-2 animate-pulse">
-        <div className="w-full aspect-square bg-gray-200 rounded-xl mb-3"></div>
-        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-        <div className="flex justify-between">
-          <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+      <div className="group relative bg-white/50 rounded-3xl border border-gray-100 shrink-0 w-28 animate-pulse">
+        <div className="relative p-2">
+          <div className="w-24 h-24 bg-gray-200 rounded-3xl mb-2"></div>
+        </div>
+
+        <div className="px-3 pb-2 flex flex-col gap-1">
+          <div className="h-3 bg-gray-200 rounded w-full"></div>
+          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+
+          <div className="flex items-center justify-between mt-1">
+            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+          </div>
         </div>
       </div>
     );
@@ -51,8 +60,21 @@ function DeveloperAppCard({ appId }) {
 
   if (!appDetails) {
     return (
-      <div className="bg-white p-4 text-center">
-        <p className="text-gray-500 text-sm">App not Published</p>
+      <div className="group relative bg-white/50 rounded-3xl border border-gray-100 shrink-0 w-28 animate-pulse">
+        <div className="relative p-2">
+          <div className="w-24 h-24 bg-gray-200 rounded-3xl mb-2"></div>
+        </div>
+
+        <div className="px-3 pb-2 flex flex-col gap-1">
+          <p className="text-[10px] pl-2 py-0.5 font-outfit text-gray-500 bg-gray-200 rounded w-full">
+            Error : (
+          </p>
+          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+
+          <div className="flex items-center justify-between mt-1">
+            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -81,15 +103,38 @@ function DeveloperAppCard({ appId }) {
         </h3>
 
         {/* Rating*/}
-        <div className="flex items-center justify-between">
-          {/* Rating */}
-          <div className="flex items-center gap-1">
-            <Star size={12} className="text-yellow-500 fill-yellow-500" />
-            <span className="text-xs font-outfit font-medium text-gray-700">
-              {calculateRating(appDetails.metrics.ratings.breakdown)}
-            </span>
+        {!hideRating && (
+          <div className="flex items-center justify-between">
+            {/* Rating */}
+            <div className="flex items-center gap-1">
+              <Star size={12} className="text-yellow-500 fill-yellow-500" />
+              <span className="text-xs font-outfit font-medium text-gray-700">
+                {calculateRating(appDetails.metrics.ratings.breakdown)}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Platform and size*/}
+        {hideRating && (
+          <div className="flex items-center justify-between">
+            {/* Platforms */}
+            <div className="flex items-center gap-1">
+              {appDetails.details.appDetails.iosApk && (
+                <FaApple size={12} className="text-black" />
+              )}
+              {appDetails.details.appDetails.androidApk && (
+                <AiFillAndroid size={12} className="text-black" />
+              )}
+            </div>
+            {/* Size */}
+            <div className="text-xs text-gray-600 font-outfit">
+              {appDetails.details.appDetails.apkFileSizeMB ||
+                appDetails.details.appDetails.ipaFileSizeMB}{" "}
+              MB
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

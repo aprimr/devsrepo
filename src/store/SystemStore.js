@@ -3,7 +3,6 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
   deleteDoc,
   updateDoc,
@@ -11,8 +10,6 @@ import {
   arrayUnion,
   arrayRemove,
   increment,
-  query,
-  where,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { deleteFile } from "../services/appwriteStorage";

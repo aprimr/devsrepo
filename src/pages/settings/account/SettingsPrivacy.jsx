@@ -14,6 +14,7 @@ import { useState } from "react";
 
 function SettingsPrivacy() {
   const { user, updateUserProfile } = useAuthStore();
+  const navigate = useNavigate();
   const [privateFollower, setPrivateFollower] = useState(
     user?.privacy.privateFollower
   );
@@ -114,16 +115,32 @@ function SettingsPrivacy() {
             Stats
           </label>
           <div className="flex flex-col gap-3 w-full px-1 py-2 border border-gray-100 rounded-xl bg-gray-50 hover:shadow-sm transition-all">
-            <SectionButton
-              icon={Scroll}
-              label="Followers List"
-              redirect="/profile-following"
-            />
-            <SectionButton
-              icon={ListCheck}
-              label="Following List"
-              redirect="/profile-followers"
-            />
+            {/* Followers List Btn */}
+            <button
+              onClick={() =>
+                navigate("/setting-privacy-stats", { state: { tab: "ers" } })
+              }
+              className="flex items-center justify-between w-full px-3 py-2 rounded-xl transition-all duration-200 text-gray-700 hover:bg-gray-100 font-medium font-poppins"
+            >
+              <div className="flex gap-3 items-center">
+                <Scroll size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+                <span className="text-sm sm:text-base">Followers List</span>
+              </div>
+              <ChevronRight size={16} className="sm:w-4 sm:h-4" />
+            </button>
+            {/* Following List Btn */}
+            <button
+              onClick={() =>
+                navigate("/setting-privacy-stats", { state: { tab: "ing" } })
+              }
+              className="flex items-center justify-between w-full px-3 py-2 rounded-xl transition-all duration-200 text-gray-700 hover:bg-gray-100 font-medium font-poppins"
+            >
+              <div className="flex gap-3 items-center">
+                <ListCheck size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+                <span className="text-sm sm:text-base">Following List</span>
+              </div>
+              <ChevronRight size={16} className="sm:w-4 sm:h-4" />
+            </button>
           </div>
         </div>
       </div>
@@ -173,21 +190,5 @@ const PrivacyToggle = ({
         </p>
       )}
     </div>
-  );
-};
-
-const SectionButton = ({ icon: Icon, label, func, redirect }) => {
-  const navigate = useNavigate();
-  return (
-    <button
-      onClick={() => (redirect ? navigate(redirect) : func?.())}
-      className="flex items-center justify-between w-full px-3 py-2 rounded-xl transition-all duration-200 text-gray-700 hover:bg-gray-100 font-medium font-poppins"
-    >
-      <div className="flex gap-3 items-center">
-        <Icon size={18} className="sm:w-5 sm:h-5 text-gray-500" />
-        <span className="text-sm sm:text-base">{label}</span>
-      </div>
-      {redirect && <ChevronRight size={16} className="sm:w-4 sm:h-4" />}
-    </button>
   );
 };

@@ -300,10 +300,15 @@ function DeveloperProfile() {
               </p>
 
               {/* Followers Section */}
-              <div className="absolute top-14 left-0 w-full">
+              <div className="absolute top-14 left-0 w-full z-50">
                 <div className="flex justify-between items-center text-black font-outfit text-base sm:text-lg w-[85%] sm:w-[90%]">
                   {/* Followers */}
-                  <div className="flex flex-col items-center">
+                  <div
+                    onClick={() =>
+                      navigate(`/s/${developerDetails?.uid}?t=ers`)
+                    }
+                    className="flex flex-col items-center"
+                  >
                     <p className="font-semibold text-gray-900">
                       {numberSuffixer(developerFollowers)}
                     </p>
@@ -313,7 +318,12 @@ function DeveloperProfile() {
                   </div>
 
                   {/* Following */}
-                  <div className="flex flex-col items-center">
+                  <div
+                    onClick={() =>
+                      navigate(`/s/${developerDetails?.uid}?t=ing`)
+                    }
+                    className="flex flex-col items-center"
+                  >
                     <p className="font-semibold text-gray-900">
                       {numberSuffixer(
                         developerDetails?.social?.followingIds?.length
@@ -384,10 +394,17 @@ function DeveloperProfile() {
 
           {/* Apps List */}
           <div className="w-full grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-3">
-            {developerDetails.developerProfile.apps.publishedAppIds.map(
-              (appId) => (
-                <DeveloperAppCard key={appId} appId={appId} />
+            {developerDetails.developerProfile.apps.publishedAppIds.length !==
+            0 ? (
+              developerDetails.developerProfile.apps.publishedAppIds.map(
+                (appId) => <DeveloperAppCard key={appId} appId={appId} />
               )
+            ) : (
+              <div className="pt-4 min-w-xl">
+                <p className="text-sm font-medium text-gray-500">
+                  No apps published yet
+                </p>
+              </div>
             )}
           </div>
         </div>

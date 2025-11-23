@@ -4,6 +4,7 @@ import { useAuthStore } from "../../store/AuthStore";
 import numberSuffixer from "../../utils/numberSuffixer";
 import { useNavigate } from "react-router-dom";
 import DevsRepoImport from "../../assets/images/DevsRepoInvert.png";
+import DeveloperAppCard from "../../components/ui/cards/DeveloperAppCard";
 import { FcGoogle } from "react-icons/fc";
 import {
   FaFacebook,
@@ -22,7 +23,7 @@ export default function Profile() {
 
   return (
     <div
-      className={`min-h-screen bg-white select-none ${
+      className={`min-h-screen bg-gray-50 select-none ${
         user.system.banStatus.isBanned && "pointer-events-none"
       }`}
     >
@@ -64,7 +65,11 @@ export default function Profile() {
                     </p>
                     <p className="text-sm text-gray-600 font-poppins">Apps</p>
                   </div>
-                  <div className="text-left ">
+                  {/* Followers */}
+                  <div
+                    onClick={() => navigate(`/s/${user?.uid}?t=ers`)}
+                    className="text-left"
+                  >
                     <p className="text-lg sm:text-2xl font-outfit text-gray-800">
                       {numberSuffixer(user.social.followersIds.length)}
                     </p>
@@ -72,7 +77,11 @@ export default function Profile() {
                       Followers
                     </p>
                   </div>
-                  <div className="text-left">
+                  {/* Following */}
+                  <div
+                    onClick={() => navigate(`/s/${user?.uid}?t=ing`)}
+                    className="text-left"
+                  >
                     <p className="text-lg sm:text-2xl font-outfit text-gray-800">
                       {numberSuffixer(user.social.followingIds.length)}
                     </p>
@@ -480,11 +489,15 @@ export default function Profile() {
             {user.developerProfile.isDeveloper ? (
               <>
                 {user.developerProfile.apps.publishedAppIds.length != 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7 gap-3 sm:gap-4 mt-4">
+                    {user.developerProfile.apps.publishedAppIds.map((appId) => (
+                      <DeveloperAppCard key={appId} appId={appId} />
+                    ))}
+                  </div>
                 ) : (
                   <NoData
                     happyIcon={false}
-                    text="You haven’t published any apps yet. Start by clicking the Dev Dash button above to publish your first app!"
+                    text="You haven’t published any apps yet. Start by clicking the PUBLISH button above to publish your first app!"
                   />
                 )}
               </>
@@ -504,8 +517,16 @@ export default function Profile() {
             {user.developerProfile.isDeveloper &&
             user.developerProfile.apps.submittedAppIds ? (
               <>
-                {user.developerProfile.apps.publishedAppIds.length != 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
+                {user.developerProfile.apps.submittedAppIds.length != 0 ? (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7 gap-3 sm:gap-4 mt-4 pointer-events-none">
+                    {user.developerProfile.apps.submittedAppIds.map((appId) => (
+                      <DeveloperAppCard
+                        key={appId}
+                        appId={appId}
+                        hideRating={true}
+                      />
+                    ))}
+                  </div>
                 ) : (
                   <NoData
                     happyIcon={true}
@@ -557,13 +578,9 @@ function NoData({ happyIcon, text }) {
       {happyIcon ? (
         <Sticker size={80} className="text-green-600" />
       ) : (
-        <img
-          src={DevsRepoImport}
-          alt="devs-repo-import"
-          className="h-20 w-20"
-        />
+        <img src={DevsRepoImport} alt="icon-devsrepo" className="h-20 w-20" />
       )}
-      <p className="text-sm px-6 mt-2 font-poppins font-medium text-gray-700 text-center">
+      <p className="text-sm px-6 mt-2 font-poppins text-gray-700 text-center">
         {text}
       </p>
     </div>

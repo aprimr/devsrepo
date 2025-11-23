@@ -3,10 +3,13 @@ import {
   Search,
   Smartphone,
   Layout,
-  Globe,
   Zap,
   GalleryVerticalEnd,
   Upload,
+  Gamepad2,
+  DraftingCompass,
+  ShoppingBag,
+  Dumbbell,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/AuthStore";
@@ -19,20 +22,22 @@ function Navbar() {
   const hideMobileMenuRoutes = ["/profile", "/setting"];
   const hideMobileMenu = hideMobileMenuRoutes.includes(location.pathname);
 
-  const categories = [
+  const types = [
     {
       name: "All",
       icon: <GalleryVerticalEnd size={18} />,
       path: "/",
     },
     {
-      name: "Mobile Apps",
+      name: "Apps",
       icon: <Smartphone size={18} />,
-      path: "/mobile-apps",
+      path: "/apps",
     },
-    { name: "Web Apps", icon: <Globe size={18} />, path: "/web-apps" },
+    { name: "Games", icon: <Gamepad2 size={18} />, path: "/games" },
     { name: "UI Clones", icon: <Layout size={18} />, path: "/ui-clones" },
-    { name: "Tools", icon: <Zap size={18} />, path: "/tools" },
+    { name: "Tools", icon: <DraftingCompass size={18} />, path: "/tools" },
+    { name: "Fitness", icon: <Dumbbell size={18} />, path: "/fitness" },
+    { name: "Shopping", icon: <ShoppingBag size={18} />, path: "/shopping" },
   ];
 
   return (
@@ -48,9 +53,9 @@ function Navbar() {
           </NavLink>
         </div>
 
-        {/* Categories - desktop */}
+        {/* Types - desktop */}
         <div className="hidden xl:flex items-center gap-4 lg:gap-6">
-          {categories.map((cat) => (
+          {types.map((cat) => (
             <NavLink
               key={cat.name}
               to={cat.path}
@@ -111,19 +116,19 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Menu chips - mobile */}
+      {/* Types chips - mobile */}
       {!hideMobileMenu && (
         <div className="xl:hidden bg-white border-t border-gray-200 px-3 sm:px-4 py-2">
           <div className="flex gap-3 sm:gap-2 overflow-x-auto no-scrollbar">
-            {categories.map((cat) => (
+            {types.map((cat) => (
               <NavLink
                 key={cat.name}
                 to={cat.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-1 sm:gap-2 whitespace-nowrap px-2 sm:px-3 py-1.5 text-xs font-medium font-outfit rounded-full transition-colors border-2 ${
+                  `flex items-center gap-2 sm:gap-3 whitespace-nowrap px-2.5 sm:px-3 py-1.5 text-xs font-medium font-poppins rounded-full transition-colors border ${
                     isActive
                       ? "bg-green-50 text-green-700 border-green-600 shadow-sm"
-                      : "bg-white text-gray-600 border-gray-400"
+                      : "bg-white text-gray-500 border-gray-400"
                   }`
                 }
               >

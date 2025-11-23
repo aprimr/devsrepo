@@ -40,6 +40,8 @@ import AdminDeveloperManagement from "./pages/settings/admin/AdminDeveloperManag
 import AdminAppManagement from "./pages/settings/admin/AdminAppManagement";
 import TopDevelopers from "./pages/App/TopDevelopers";
 import DeveloperProfile from "./pages/App/DeveloperProfile";
+import SocialStatus from "./pages/App/SocialStatus";
+import SettingsPrivacyStats from "./pages/settings/account/SettingsPrivactStats";
 
 function AppContent() {
   const location = useLocation();
@@ -59,6 +61,7 @@ function AppContent() {
     "/setting-profile",
     "/setting-security",
     "/setting-privacy",
+    "/setting-privacy-stats",
     "/setting-status",
     "/setting-notifications",
     "/setting-email",
@@ -70,7 +73,7 @@ function AppContent() {
     "/setting-suspended-apps",
   ];
   // Dynamic route patterns
-  const hideNavbarFooterDynamic = ["/p/", "/d/", "/a/"];
+  const hideNavbarFooterDynamic = ["/p/", "/s/", "/a/"];
 
   // Check if current path should hide Navbar/Footer
   const hideNavbarFooter =
@@ -86,6 +89,7 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/top-developers" element={<TopDevelopers />} />
         <Route path="/p/:id" element={<DeveloperProfile />} />
+        <Route path="/s/:id" element={<SocialStatus />} />
         <Route
           path="/publish"
           element={
@@ -171,6 +175,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <SettingsPrivacy />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting-privacy-stats"
+          element={
+            <ProtectedRoute>
+              <SettingsPrivacyStats />
             </ProtectedRoute>
           }
         />
