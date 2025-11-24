@@ -42,6 +42,7 @@ import TopDevelopers from "./pages/App/TopDevelopers";
 import DeveloperProfile from "./pages/App/DeveloperProfile";
 import SocialStatus from "./pages/App/SocialStatus";
 import SettingsPrivacyStats from "./pages/settings/account/SettingsPrivactStats";
+import AppsTypesPage from "./pages/App/AppsTypesPage";
 
 function AppContent() {
   const location = useLocation();
@@ -90,6 +91,7 @@ function AppContent() {
         <Route path="/top-developers" element={<TopDevelopers />} />
         <Route path="/p/:id" element={<DeveloperProfile />} />
         <Route path="/s/:id" element={<SocialStatus />} />
+        <Route path="/t/:type" element={<AppsTypesPage />} />
         <Route
           path="/publish"
           element={

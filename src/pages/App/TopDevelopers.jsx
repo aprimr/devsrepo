@@ -53,7 +53,7 @@ function TopDevelopers() {
         ) : (
           <>
             <h2 className="text-gray-500 text-sm font-medium sm:text-base font-poppins mb-5">
-              Explore the top developers in the DevsRepo community.
+              Explore featured developers in the DevsRepo community.
             </h2>
 
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 gap-8">

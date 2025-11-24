@@ -1,47 +1,48 @@
-import { Star, Download, ArrowDownToLine } from "lucide-react";
+import { Star, ArrowDownToLine } from "lucide-react";
+import { getFileURL } from "../../../services/appwriteStorage";
+import { calculateRating } from "../../../utils/calculateRating";
+import { useNavigate } from "react-router-dom";
 
-function AppCardSquare({ id, icon, name, category, rating, downloads }) {
+function AppCardSquare({ app }) {
+  const { appId, details, metrics } = app;
+  const navigate = useNavigate();
+
   return (
     <div
-      key={id}
-      className="group relative bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden"
+      key={appId}
+      onClick={() => navigate(`/a/${app.appId}`)}
+      className="group cursor-pointer rounded-2xl bg-transparent transition-all duration-200"
     >
-      {/* App Icon */}
-      <div className="relative p-2">
+      {/* Icon */}
+      <div className="w-full p-2">
         <img
-          src={icon}
-          alt={name}
-          className="w-full aspect-square object-cover rounded-xl border border-gray-100 group-hover:scale-[1.02] transition-transform duration-300 ease-out"
+          src={getFileURL(details.media?.icon)}
+          alt={details.name}
+          className="w-full aspect-square object-cover rounded-2xl"
         />
-
-        {/* Rating Badge */}
-        <div className="absolute bottom-1 -left-0.5 bg-white rounded-sm pl-3 pr-2 py-0.5">
-          <div className="flex items-center gap-1 text-gray-700 text-xs font-inter">
-            <Star size={12} className="text-yellow-500 fill-yellow-500" />
-            <span className="font-medium">{rating || "—"}</span>
-          </div>
-        </div>
       </div>
 
-      {/* App Info */}
-      <div className="px-3 pb-3 text-left">
-        <h3 className="font-poppins font-medium text-gray-900 text-[14px] leading-snug truncate">
-          {name}
+      <div className="px-2 pb-2">
+        {/* App Name */}
+        <h3 className="font-poppins font-medium text-xs sm:text-sm h-8.5 sm:h-10.5 sm:font-normal text-gray-900 line-clamp-2">
+          {details.name}
         </h3>
 
-        {/* Category and Downloads */}
-        <div className="flex items-center justify-between mt-1">
-          <p className="text-gray-500 text-[11px] font-poppins capitalize truncate">
-            {category}
-          </p>
-          <div className="flex items-center gap-0.5 text-gray-500 text-xs ml-2">
-            <ArrowDownToLine
-              size={12}
-              strokeWidth={2}
-              className="text-gray-500"
-            />
-            <span className="text-[11px] font-medium font-montserrat ">
-              {downloads || "0"}
+        {/* Rating & Downlaod */}
+        <div className="flex items-center justify-between">
+          {/* Rating */}
+          <div className="flex items-center gap-1 text-gray-700">
+            <Star size={12} className="text-yellow-500 fill-yellow-500" />
+            <span className="text-xs font-medium font-outfits">
+              {calculateRating(metrics.ratings.breakdown)}
+            </span>
+          </div>
+
+          {/* Downloads */}
+          <div className="flex items-center gap-1 font-medium text-gray-700">
+            <ArrowDownToLine size={12} />
+            <span className="text-xs font-outfit">
+              {metrics.downloads || 0}
             </span>
           </div>
         </div>

@@ -89,7 +89,6 @@ export const useAppStore = create(
         metrics: {
           downloads: 0,
           ratings: {
-            average: 0,
             totalReviews: 0,
             breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
           },
@@ -99,10 +98,6 @@ export const useAppStore = create(
 
         discovery: {
           searchKeywords: [],
-          similarApps: [],
-          trendingScore: 0,
-          categoryRank: {},
-          lastTrendingUpdate: "",
         },
       }),
 

@@ -1,103 +1,166 @@
+<div align="center">
+
 # 🧑‍💻 DevsRepo
 
-**DevsRepo** is a modern platform for developers to **publish, manage, and showcase their apps** — completely free.  
-It was founded with a single mission: **to give app developers a place to share their creations without paying huge fees**.
+**A Modern Alternative to the App Store & Play Store**  
+Built for developers who want freedom and users who love discovering new apps.
+
+<br/>
+
+[![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=white)](https://firebase.google.com/)
+[![Appwrite](https://img.shields.io/badge/Appwrite-FF3C00?logo=appwrite&logoColor=white)](https://appwrite.io/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+</div>
 
 ---
 
-## 💡 The Story Behind DevsRepo
+## 🚀 What is DevsRepo?
 
-DevsRepo was founded because **app developers often struggle to publish their apps** on platforms like Google Play or the App Store —  
-where uploading even a small project requires paying expensive fees.
+DevsRepo is an open platform designed to remove the common friction points associated with major app stores. It exists to support developers who can't publish on major stores due to **cost, strict policies, or hosting limits**.
 
-That’s why **DevsRepo exists** — a **completely free, developer-focused hub** where anyone can share their apps, projects, or tools openly with the world.
+    “DevsRepo exists because every developer deserves a place to showcase their apps — not just those who can afford it.”
 
-It is **built and maintained entirely by [areg](https://aprimregmi.com.np)** — a solo developer passionate about helping others showcase their work.
+#### For Developers:
 
----
+- **Publish** their apps without paying huge store fees.
+- **Manage and update** their apps with ease.
+- **Showcase** projects in a clean, user-friendly interface.
+- **Share** direct download links instantly.
 
-## 🌍 What is DevsRepo?
+#### For Users:
 
-DevsRepo is your personal **developer portfolio + app management dashboard**.  
-From uploading your app to managing updates and analytics — DevsRepo gives you a single, elegant space to do it all.
-
-Think of it as **your own Play Store, made for developers — free, modern, and community-driven.**
-
----
-
-## ✨ Features
-
-### 🧩 For Developers
-
-- **Developer Dashboard** – Publish, update, and track your apps easily.
-- **App Upload System** – Add your app details, icons, and versions instantly.
-- **Profile & Role Management** – Switch between user and developer roles.
-- **Email Preferences** – Customize which updates and notifications you receive.
-
-### 📱 For Users
-
-- **Explore Apps** – Browse developer projects in a clean, categorized feed.
-- **Simple UI** – See icons, descriptions, and stats at a glance.
-- **Modern Interface** – Simple, fast, and mobile-friendly.
-
----
-
-## ⚙️ Built For Performance
-
-DevsRepo is powered by **modern web technologies** — built for speed, scalability, and beauty.  
-It’s lightweight, minimal, and hosted on **Netlify** for blazing-fast performance.
+- **Browse** apps in a simple, modern UI.
+- **Discover** new indie developers.
+- **Download** apps directly — fast & free.
 
 ---
 
 ## 🖼️ Screenshots
 
-### 🔹 Home & Explore
+Here are some screenshots of DevsRepo in action:
 
-Clean and searchable grid of apps with categories and filters.  
-![Home Screenshot](./screenshots/home.png)
+#### Home & Discover
 
-### 🔹 Developer Dashboard
-
-Powerful yet simple interface to manage all your apps.  
-![Dashboard Screenshot](./screenshots/dashboard.png)
-
-### 🔹 Profile Page
-
-Your developer identity — neat, professional, and customizable.  
-![Profile Screenshot](./screenshots/profile.png)
-
-> 🖼️ Screenshots will be uploaded after some time
+![Home Screen](screenshots/home.png "Home Screen")
+_Browse trending, new, and top apps easily._
 
 ---
 
-## 🚀 Roadmap
+## 💡 Why DevsRepo?
 
-- ⭐ **Ratings & Reviews System**
-- 📊 **App Analytics Dashboard**
-- 💬 **Community Discussions**
-- 🌐 **Public Developer Profiles**
-- 📨 **Email Newsletter & App Updates**
+Many new developers struggle with high barriers to entry. DevsRepo solves these issues by providing a **free, open platform** where developers can launch apps instantly.
+
+| Major Store Pain Points        | DevsRepo Solution                     |
+| :----------------------------- | :------------------------------------ |
+| 💸 **High publishing fees**    | **Free** to publish and use.          |
+| 🚫 **Strict store rules**      | Open and developer-friendly policies. |
+| 🕒 **Approval delays**         | Launch apps **instantly**.            |
+| ⚙️ **Complicated app updates** | Simple app management for developers. |
 
 ---
+
+## 📦 Features
+
+- Developer Profiles
+- App Publishing & Management
+- Category-based App Discovery
+- App Reviews & Ratings
+- Trending, New & Top Downloads
+- Beautiful App Cards UI
+- Secure Authentication
+- Direct Download Links
+
+---
+
+## 🏗️ Project Setup
+
+### Installation
+
+1. Clone the repo
+
+```bash
+git clone https://github.com/aprimr/devsrepo.git
+```
+
+2. Navigate into the project directory
+
+```bash
+cd devsrepo
+```
+
+3. Install dependencies
+
+```bash
+npm install
+```
+
+4. Start development server
+
+```bash
+npm run dev
+```
+
+### Environment Variables
+
+Create a file named .env in the root directory and add your Firebase & appwrite configuration details:
+
+```bash
+.env
+
+VITE_FIREBASE_API_KEY=YOUR_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN=YOUR_AUTH_DOMAIN
+VITE_FIREBASE_PROJECT_ID=YOUR_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET=YOUR_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID=YOUR_SENDER_ID
+VITE_FIREBASE_APP_ID=YOUR_APP_ID
+
+VITE_APPWRITE_ENDPOINT = YOUR_APPWRITE_ENDPOINT
+VITE_APPWRITE_PROJECT_ID = YOUR_APPWRITE_PROJECT_ID
+VITE_APPWRITE_BUCKET_ID = YOUR_APPWRITE_BUCKET_ID
+```
+
+## 🤝 Contributing
+
+Contributions are welcome and highly appreciated!
+
+1. **Fork the repository** to your GitHub account.
+2. **Clone your fork** to your local machine:
+
+```bash
+git clone https://github.com/aprimr/devsrepo.git
+cd devsrepo
+```
+
+3. Create a new branch for your feature or fix:
+
+```bash
+git checkout -b feature/my-awesome-feature
+```
+
+4. Make your changes and commit them with a clear message:
+
+```bash
+git add .
+git commit -m "Add some feature"
+```
+
+5. Push your branch to your fork:
+
+```bash
+git push origin feature/my-awesome-feature
+```
+
+6. Open a Pull Request from your branch to the main repository.
+
+## ⭐ Support the Project
+
+If you like DevsRepo, please consider giving the repo a star on GitHub. It helps the project grow and reach more developers!
 
 ## 🧾 License
 
-This project is licensed under the **MIT License** — free to use and modify.
+This project is licensed under the MIT License — free to use and modify.
 
----
-
-## ❤️ Built by a Developer, for Developers
-
-**DevsRepo** is not a company.  
-It’s a **passion project** — built and maintained by a solo developer,  
-**areg**, to support every app creator who just wants to share their work freely.
-
-> “DevsRepo exists because every developer deserves a place to showcase their apps — not just those who can afford it.”
-
----
-
-### 🌐 Hosted on [Netlify](https://www.netlify.com)
-
----
-
-### Made with 💚 for the developer community.
+    Made with ❤️ for the developers.

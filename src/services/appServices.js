@@ -11,9 +11,6 @@ import {
 } from "firebase/firestore";
 import { calculateRating } from "../utils/calculateRating";
 
-// Fetch all apps
-export const fetchAllApps = async () => {};
-
 // Fetch verified developers
 export const fetchDevelopers = async () => {
   try {
@@ -203,6 +200,76 @@ export const fetchNewApps = async () => {
       success: false,
       apps: [],
     };
+  }
+};
+
+// Fetch All Apps (fetch app stream)
+export const appsStream = async (onChunk, batchSize = 10) => {
+  try {
+    const appsRef = collection(db, "apps");
+    const snapshot = await getDocs(appsRef);
+
+    const batch = [];
+    const addedAppIds = new Set();
+
+    for (let i = 0; i < snapshot.docs.length; i++) {
+      const doc = snapshot.docs[i];
+      const app = doc.data();
+      const appId = app.appId || doc.id;
+
+      // Skip duplicates
+      if (addedAppIds.has(appId)) continue;
+      addedAppIds.add(appId);
+
+      const s = app.status;
+      if (!s?.isActive || !s?.approval?.isApproved) continue;
+
+      // determine app rank
+      const breakdown = app.metrics?.ratings?.breakdown;
+      const rating = calculateRating(breakdown);
+      const downloads = app.metrics?.downloads;
+      const safeDownloads = downloads > 0 ? downloads : 1;
+      const score = rating * 0.7 + Math.log(safeDownloads) * 0.3;
+
+      batch.push({ ...app, appId, rating, score });
+
+      if (batch.length >= batchSize || i === snapshot.docs.length - 1) {
+        onChunk([...batch]);
+        batch.length = 0;
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error fetching apps:", error);
+    return { success: false };
+  }
+};
+
+// Fetch Apps By Type
+export const fetchAppsByType = async (type) => {
+  if (!type) {
+    console.error("Type is required to fetch apps");
+    return { success: false, apps: [] };
+  }
+
+  try {
+    const appsRef = collection(db, "apps");
+    const q = query(
+      appsRef,
+      where("details.type", "==", type),
+      where("status.isActive", "==", true),
+      where("status.approval.isApproved", "==", true)
+    );
+
+    const snapshot = await getDocs(q);
+    const apps = snapshot.docs.map((doc) => ({ ...doc.data() }));
+
+    return { success: true, apps };
+  } catch (error) {
+    console.error("Failed to fetch apps by type:", error);
+    toast?.error?.("Failed to fetch apps");
+    return { success: false, apps: [] };
   }
 };
 

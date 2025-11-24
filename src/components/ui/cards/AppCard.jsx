@@ -55,8 +55,8 @@ function AppCard({ app, rank }) {
 
       {/* Rank Circle */}
       {rank && (
-        <div className="absolute -right-8 -bottom-1 pr-6 h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
-          <p className="text-4xl font-black font-montserrat text-green-700/80">
+        <div className="absolute -right-8 -bottom-10 pr-6 pb-16 h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+          <p className="text-5xl font-black font-outfit text-green-700/80">
             {rank}
           </p>
         </div>
