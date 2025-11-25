@@ -373,7 +373,7 @@ function DeveloperProfile() {
         <div className="px-6 font-poppins mt-1">
           <details className="group cursor-pointer">
             <summary className="list-none">
-              <p className="text-[14px] font-normal line-clamp-2 group-open:line-clamp-none text-gray-600">
+              <p className="text-[14px] font-normal line-clamp-2 group-open:line-clamp-none text-gray-600 whitespace-pre-line">
                 {developerDetails.bio}
               </p>
             </summary>

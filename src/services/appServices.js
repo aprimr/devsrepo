@@ -115,19 +115,20 @@ export const fetchDeveloperbyDevID = async (developerId) => {
 
 // Fetch app by id
 export const fetchAppbyID = async (appId) => {
-  if (!appId) return null;
+  if (!appId) return { success: false, app: null };
 
   try {
-    const usersRef = collection(db, "apps");
-    const q = query(usersRef, where("appId", "==", appId));
+    const appsRef = collection(db, "apps");
+    const q = query(appsRef, where("appId", "==", appId));
     const querySnapshot = await getDocs(q);
 
-    if (querySnapshot.empty) return null;
+    if (querySnapshot.empty) return { success: false, app: null };
 
     const appDoc = querySnapshot.docs[0];
-    return { success: true, app: { ...appDoc.data() } };
+    return { success: true, app: { id: appDoc.id, ...appDoc.data() } };
   } catch (error) {
-    return null;
+    console.error("Error fetching app by ID:", error);
+    return { success: false, app: null };
   }
 };
 

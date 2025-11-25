@@ -2,6 +2,7 @@ import { ArrowDownToLine, Star } from "lucide-react";
 import { getFileURL } from "../../../services/appwriteStorage";
 import { calculateRating } from "../../../utils/calculateRating";
 import { useNavigate } from "react-router-dom";
+import numberSuffixer from "../../../utils/numberSuffixer";
 
 function AppCard({ app, rank }) {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ function AppCard({ app, rank }) {
             <div className="flex items-center gap-1 text-gray-500 text-xs">
               <ArrowDownToLine size={12} />
               <span className="text-xs font-medium font-montserrat text-gray-500">
-                {app.metrics?.downloads}
+                {numberSuffixer(app.metrics?.downloads)}
               </span>
             </div>
             <span className="text-xs font-medium font-outfit text-gray-500">

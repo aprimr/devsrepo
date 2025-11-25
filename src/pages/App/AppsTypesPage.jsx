@@ -73,27 +73,7 @@ function AppsTypesPage() {
         ) : apps.length > 0 ? (
           <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-10 gap-6">
             {apps.map((app) => (
-              <>
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-                <AppCardSquare key={app.appId} app={app} />
-              </>
+              <AppCardSquare key={app.appId} app={app} />
             ))}
           </div>
         ) : (

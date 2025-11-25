@@ -127,7 +127,7 @@ export default function Profile() {
                 {/* Bio */}
                 <p
                   onClick={() => setIsBioExpanded(!isBioExpanded)}
-                  className={`text-gray-800 font-poppins text-sm sm:text-base ${
+                  className={`text-gray-800 font-poppins text-sm sm:text-base whitespace-pre-line ${
                     isBioExpanded ? "" : "line-clamp-2"
                   }`}
                 >
@@ -280,7 +280,7 @@ export default function Profile() {
                     {/* Bio */}
                     <p
                       onClick={() => setIsBioExpanded(!isBioExpanded)}
-                      className={`text-gray-800 font-poppins text-base leading-relaxed ${
+                      className={`text-gray-800 font-poppins text-base leading-relaxed whitespace-pre-line${
                         isBioExpanded ? "" : "line-clamp-3"
                       }`}
                     >
