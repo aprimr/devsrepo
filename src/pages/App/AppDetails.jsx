@@ -38,7 +38,6 @@ import { reviewService } from "../../services/reviewServices";
 import ReviewCard from "../../components/ui/cards/ReviewCard";
 import AppLoading from "../../components/ui/Loading/AppLoading";
 import AppNotFound from "../../components/ui/Loading/NoAppFound";
-import { storage } from "../../appwrite/config";
 
 const AppDetails = () => {
   const { appId } = useParams();
@@ -459,7 +458,7 @@ const AppDetails = () => {
 
         {/* Write a review */}
         {user &&
-          !app.community.reviews.includes(user.uid) &&
+          !app.community.reviews.includes(user?.uid) &&
           !isReviewSubmitted && (
             <section className="px-4 sm:px-6">
               <WriteReviewSection
@@ -482,10 +481,10 @@ const AppDetails = () => {
         )}
 
         {/* MyReview */}
-        {user && app.community.reviews.includes(user.uid) && (
+        {user && app.community.reviews.includes(user?.uid) && (
           <section className="px-4 sm:px-6">
             <MyReviewCard
-              userId={user.uid}
+              userId={user?.uid}
               appId={app.appId}
               developerId={app.developer.developerId}
             />
@@ -495,7 +494,7 @@ const AppDetails = () => {
         {/* App Reviews */}
         <section className="py-3">
           <ReviewsHead app={app} />
-          <ReviewsBody app={app} currentUser={user.uid} />
+          <ReviewsBody app={app} currentUser={user?.uid} />
         </section>
 
         {/* App Info */}
@@ -774,7 +773,7 @@ const WriteReviewSection = ({
     try {
       const result = await reviewService.createReview({
         appId: app.appId,
-        userId: user.uid,
+        userId: user?.uid,
         developerId: app.developer.developerId,
         rating,
         reviewText,

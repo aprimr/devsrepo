@@ -1,16 +1,24 @@
-import React from "react";
 import { Link } from "react-router-dom";
+import DevsRepoInverted from "../../../assets/images/DevsRepoInvert.png";
 
 const AppNotFound = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 sm:px-0">
       <div className="w-full max-w-md text-center">
+        <center>
+          {" "}
+          <img
+            src={DevsRepoInverted}
+            alt="App not found"
+            className="h-20 w-20 mb-5"
+          />
+        </center>
         <h1 className="text-2xl sm:text-3xl font-poppins font-semibold text-gray-900 mb-4">
           App Not Found
         </h1>
         <p className="text-gray-600 text-sm font-poppins sm:text-base leading-relaxed mb-6">
-          The app you are looking for does not exist, has been removed, or may
-          have been moved. Please check the app ID or return to a safe page.
+          The app you’re looking for doesn’t exist or is no longer available.
+          Please Retry or return to a safe page.
         </p>
         <div className="flex justify-center gap-4">
           <button

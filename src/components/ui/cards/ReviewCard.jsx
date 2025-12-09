@@ -443,7 +443,8 @@ function ReviewCard({ userId, appId, developerId, myReview = false }) {
             </p>
 
             {/* Reply to User Input */}
-            {user.developerProfile.developerId === developerId &&
+            {user &&
+              user?.developerProfile.developerId === developerId &&
               !review?.developerReply?.replyText &&
               !myReview && (
                 <div className="relative mt-2 mb-1">
