@@ -547,7 +547,7 @@ function ReviewCard({ userId, appId, developerId, myReview = false }) {
               </div>
 
               {/* Buttons */}
-              {user.developerProfile.developerId === developerId && (
+              {user && user.developerProfile.developerId === developerId && (
                 <div className="flex gap-4">
                   <button
                     onClick={() => {
