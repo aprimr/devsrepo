@@ -348,12 +348,17 @@ const AppDetails = () => {
         )}
 
         {/* More Info*/}
-        <section className="px-4 pt-0 sm:px-6">
+        <section className="px-4 pt-0">
           <AgeRating app={app} />
         </section>
 
+        {/* App Support */}
+        <section className="py-3">
+          <AppSupport app={app} />
+        </section>
+
         {/* Data Safety */}
-        <section className="py-3 sm:px-6">
+        <section className="py-3">
           <DataSafety app={app} />
         </section>
 
@@ -393,7 +398,7 @@ const AppDetails = () => {
         )}
 
         {/* App Reviews */}
-        <section className="py-3 sm:px-6">
+        <section className="py-3">
           <ReviewsHead app={app} />
           <ReviewsBody app={app} currentUser={user.uid} />
         </section>
@@ -401,11 +406,6 @@ const AppDetails = () => {
         {/* App Info */}
         <section className="py-3 px-3">
           <AppInfo app={app} />
-        </section>
-
-        {/* App Support */}
-        <section className="py-3 sm:px-6">
-          <AppSupport app={app} />
         </section>
 
         <div className="h-4"></div>
