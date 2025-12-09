@@ -277,12 +277,6 @@ export const fetchAppsByType = async (type) => {
   }
 };
 
-// Fetch details of a single app
-export const fetchAppDetails = async (appId) => {};
-
-// Add review
-export const addReview = async (appId, review) => {};
-
 // Increase download count
 export const incrementDownload = async (appId) => {
   if (!appId) {

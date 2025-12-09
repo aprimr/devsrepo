@@ -18,6 +18,11 @@ export const getFileURL = (fileId) => {
   return storage.getFileView({ bucketId, fileId });
 };
 
+// Get Apk Download
+export const getAppDownload = async (fileId) => {
+  return storage.getFileDownload({ bucketId, fileId });
+};
+
 // Delete file
 export const deleteFile = async (fileId) => {
   await storage.deleteFile({ bucketId, fileId });

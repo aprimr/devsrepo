@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchAppbyID } from "../../services/appServices";
+import { fetchAppbyID, incrementDownload } from "../../services/appServices";
 import {
   ChevronLeft,
   EllipsisVertical,
@@ -38,6 +38,7 @@ import { reviewService } from "../../services/reviewServices";
 import ReviewCard from "../../components/ui/cards/ReviewCard";
 import AppLoading from "../../components/ui/Loading/AppLoading";
 import AppNotFound from "../../components/ui/Loading/NoAppFound";
+import { storage } from "../../appwrite/config";
 
 const AppDetails = () => {
   const { appId } = useParams();
@@ -80,6 +81,52 @@ const AppDetails = () => {
 
     fetchApp();
   }, [appId]);
+
+  const handleDownload = async (fileId, fileName) => {
+    const bucketId = import.meta.env.VITE_APPWRITE_BUCKET_ID;
+
+    try {
+      //Cloudflare Worker URL
+      const workerUrl = "https://app-download-proxy.aprimregmi24.workers.dev";
+
+      // Download URL
+      const downloadUrl = `${workerUrl}/download?bucket=${bucketId}&file=${fileId}&name=${encodeURIComponent(
+        fileName
+      )}`;
+
+      // Try download
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // If above fails do this
+      setTimeout(async () => {
+        try {
+          const response = await fetch(downloadUrl);
+          const blob = await response.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+
+          const backupLink = document.createElement("a");
+          backupLink.href = blobUrl;
+          backupLink.download = fileName;
+          backupLink.click();
+
+          setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+        } catch (error) {
+          console.log("Backup method failed:", error);
+        }
+      }, 1000);
+
+      incrementDownload(app.appId);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Download failed. Please try again.");
+    }
+  };
 
   if (loading) return <AppLoading />;
   if (!app) return <AppNotFound />;
@@ -215,7 +262,15 @@ const AppDetails = () => {
           {device === "Android" && (
             <>
               {app.details.appDetails.androidApk ? (
-                <button className="flex-1 flex items-center justify-center font-poppins bg-green-500 text-black py-3 rounded-full">
+                <button
+                  onClick={() =>
+                    handleDownload(
+                      app.details.appDetails.androidApk,
+                      `${app.details.name.split(" ").join("_")}.apk`
+                    )
+                  }
+                  className="flex-1 flex items-center justify-center font-poppins bg-green-500 text-black py-3 rounded-full"
+                >
                   Download for Android
                 </button>
               ) : (
@@ -224,7 +279,15 @@ const AppDetails = () => {
                     App not available for Android
                   </p>
                   {app.details.appDetails.iosApk && (
-                    <button className="flex-1 flex items-center justify-center font-poppins bg-black text-white py-3 rounded-full">
+                    <button
+                      onClick={() =>
+                        handleDownload(
+                          app.details.appDetails.iosApk,
+                          `${app.details.name.split(" ").join("_")}.ipa`
+                        )
+                      }
+                      className="flex-1 flex items-center justify-center font-poppins bg-black text-white py-3 rounded-full"
+                    >
                       Download for iOS
                     </button>
                   )}
@@ -237,7 +300,15 @@ const AppDetails = () => {
           {device === "iOS" && (
             <>
               {app.details.appDetails.iosApk ? (
-                <button className="flex-1 flex items-center justify-center font-poppins bg-black text-white py-3 rounded-full">
+                <button
+                  onClick={() =>
+                    handleDownload(
+                      app.details.appDetails.iosApk,
+                      `${app.details.name.split(" ").join("_")}.ipa`
+                    )
+                  }
+                  className="flex-1 flex items-center justify-center font-poppins bg-black text-white py-3 rounded-full"
+                >
                   Download for iOS
                 </button>
               ) : (
@@ -246,7 +317,15 @@ const AppDetails = () => {
                     App not available for iOS
                   </p>
                   {app.details.appDetails.androidApk && (
-                    <button className="flex-1 flex items-center justify-center font-poppins bg-green-500 text-black py-3 rounded-full text-sm">
+                    <button
+                      onClick={() =>
+                        handleDownload(
+                          app.details.appDetails.androidApk,
+                          `${app.details.name.split(" ").join("_")}.apk`
+                        )
+                      }
+                      className="flex-1 flex items-center justify-center font-poppins bg-green-500 text-black py-3 rounded-full text-sm"
+                    >
                       Download for Android
                     </button>
                   )}
@@ -259,12 +338,28 @@ const AppDetails = () => {
           {device === "Other" && (
             <>
               {app.details.appDetails.androidApk && (
-                <button className="flex-1 flex text-sm items-center justify-center font-poppins bg-green-500 text-black py-3 rounded-full">
+                <button
+                  onClick={() =>
+                    handleDownload(
+                      app.details.appDetails.androidApk,
+                      `${app.details.name.split(" ").join("_")}.apk`
+                    )
+                  }
+                  className="flex-1 flex text-sm items-center justify-center font-poppins bg-green-500 text-black py-3 rounded-full"
+                >
                   Download for Android
                 </button>
               )}
               {app.details.appDetails.iosApk && (
-                <button className="flex-1 flex text-sm items-center justify-center font-poppins bg-black text-white py-3 rounded-full">
+                <button
+                  onClick={() =>
+                    handleDownload(
+                      app.details.appDetails.iosApk,
+                      `${app.details.name.split(" ").join("_")}.ipa`
+                    )
+                  }
+                  className="flex-1 flex text-sm items-center justify-center font-poppins bg-black text-white py-3 rounded-full"
+                >
                   Download for iOS
                 </button>
               )}
