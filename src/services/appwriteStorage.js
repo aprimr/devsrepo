@@ -15,7 +15,7 @@ export const uploadFile = async (file) => {
 
 // Get download URL
 export const getFileURL = (fileId) => {
-  return storage.getFileDownload({ bucketId, fileId });
+  return storage.getFileView({ bucketId, fileId });
 };
 
 // Delete file

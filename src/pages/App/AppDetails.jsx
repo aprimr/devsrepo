@@ -12,14 +12,20 @@ import {
   X,
   ArrowRight,
   Shield,
-  Baby,
-  User,
   AlertTriangle,
   ChevronDown,
-  Globe,
   Mail,
-  Github,
   BadgeQuestionMark,
+  ShieldAlert,
+  UserCheck,
+  Share2,
+  ThumbsUp,
+  UserCircle2,
+  CloudUpload,
+  ChevronRight,
+  CheckCircle,
+  BadgeCheck,
+  Loader2,
 } from "lucide-react";
 import { getFileURL } from "../../services/appwriteStorage";
 import { calculateRating } from "../../utils/calculateRating";
@@ -27,14 +33,21 @@ import numberSuffixer from "../../utils/numberSuffixer";
 import useDeviceType from "../../hooks/useDeviceType";
 import { formatDate } from "../../utils/formatDate";
 import { FaGithub } from "react-icons/fa";
+import { useAuthStore } from "../../store/AuthStore";
+import { reviewService } from "../../services/reviewServices";
+import ReviewCard from "../../components/ui/cards/ReviewCard";
+import AppLoading from "../../components/ui/Loading/AppLoading";
+import AppNotFound from "../../components/ui/Loading/NoAppFound";
 
 const AppDetails = () => {
   const { appId } = useParams();
-  const [app, setApp] = useState({});
+  const [app, setApp] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [isAboutAppOpen, setIsAboutAppOpen] = useState(false);
+  const [isReviewSubmitted, setIsReviewSubmitted] = useState(false);
 
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const device = useDeviceType();
 
@@ -68,10 +81,8 @@ const AppDetails = () => {
     fetchApp();
   }, [appId]);
 
-  if (loading)
-    return <div className="text-center pt-20 text-gray-900">Loading...</div>;
-  if (!app)
-    return <div className="text-center mt-20 text-red-600">App not found</div>;
+  if (loading) return <AppLoading />;
+  if (!app) return <AppNotFound />;
 
   return (
     <div className="min-h-screen bg-white font-sans">
@@ -107,7 +118,7 @@ const AppDetails = () => {
             </div>
           )}
 
-          {/* Save */}
+          {/* Option */}
           <button>
             <EllipsisVertical size={20} className="text-black" />
           </button>
@@ -264,11 +275,19 @@ const AppDetails = () => {
         {/* Media Gallery */}
         <section>
           <div className="flex overflow-x-auto gap-2 p-4 sm:px-6 no-scrollbar">
-            {app.details.media.promoVideoURL && (
+            {app.details.media.promoVideoURL ? (
               <PromoVideoCard
                 thumbnail={getFileURL(app.details.media.banner)}
                 promoVideoURL={app.details.media.promoVideoURL}
               />
+            ) : (
+              <div className="relative shrink-0 w-[80vw] sm:w-[328px] h-[177px] rounded-xl overflow-hidden bg-transparent cursor-pointer">
+                <img
+                  src={getFileURL(app.details.media.banner)}
+                  alt="App Banner"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             )}
             {app.details.media.screenshots.map((id, index) => (
               <ScreenshotCard imgId={id} key={index} />
@@ -278,6 +297,7 @@ const AppDetails = () => {
 
         {/* About App */}
         <section className="px-4 pt-2 sm:px-6">
+          {/* Title & Btn */}
           <div className="flex justify-between items-center mb-1">
             <h2 className="text-lg font-medium font-poppins text-black">
               About this app
@@ -293,11 +313,7 @@ const AppDetails = () => {
             {app.details.description.short}
           </p>
           {/* Features */}
-          <div className="mt-2">
-            <h2 className="text-sm font-medium font-poppins text-black mb-1 pt-2">
-              Features
-            </h2>
-
+          <div className="mt-3">
             <div className="flex flex-wrap gap-2 ">
               {app.details.description.featureBullets?.map((feature, index) => (
                 <p
@@ -336,12 +352,60 @@ const AppDetails = () => {
           <AgeRating app={app} />
         </section>
 
-        {/* App Support */}
-        <AppSupport app={app} />
+        {/* Data Safety */}
+        <section className="py-3 sm:px-6">
+          <DataSafety app={app} />
+        </section>
 
-        {/* App Info*/}
-        <section className="px-4 pt-0 sm:px-6">
+        {/* Write a review */}
+        {user &&
+          !app.community.reviews.includes(user.uid) &&
+          !isReviewSubmitted && (
+            <section className="px-4 sm:px-6">
+              <WriteReviewSection
+                app={app}
+                user={user}
+                reviewService={reviewService}
+                setIsReviewSubmitted={setIsReviewSubmitted}
+              />
+            </section>
+          )}
+
+        {/* Review Submitted Message */}
+        {isReviewSubmitted && (
+          <section className="px-4 sm:px-6">
+            <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm font-poppins">
+              Thank you for your review! Your feedback has been submitted
+              successfully.
+            </div>
+          </section>
+        )}
+
+        {/* MyReview */}
+        {user && app.community.reviews.includes(user.uid) && (
+          <section className="px-4 sm:px-6">
+            <MyReviewCard
+              userId={user.uid}
+              appId={app.appId}
+              developerId={app.developer.developerId}
+            />
+          </section>
+        )}
+
+        {/* App Reviews */}
+        <section className="py-3 sm:px-6">
+          <ReviewsHead app={app} />
+          <ReviewsBody app={app} currentUser={user.uid} />
+        </section>
+
+        {/* App Info */}
+        <section className="py-3 px-3">
           <AppInfo app={app} />
+        </section>
+
+        {/* App Support */}
+        <section className="py-3 sm:px-6">
+          <AppSupport app={app} />
         </section>
 
         <div className="h-4"></div>
@@ -594,10 +658,396 @@ const ScreenshotCard = ({ imgId }) => {
   );
 };
 
+const WriteReviewSection = ({
+  user,
+  app,
+  reviewService,
+  setIsReviewSubmitted,
+}) => {
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmitReview = async () => {
+    if (!rating) {
+      toast.info("Please select your rating");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await reviewService.createReview({
+        appId: app.appId,
+        userId: user.uid,
+        developerId: app.developer.developerId,
+        rating,
+        reviewText,
+      });
+
+      if (result.success) {
+        setRating(0);
+        setReviewText("");
+        setIsReviewSubmitted(true);
+      }
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full">
+      {/* Header */}
+      <h2 className="text-lg font-medium font-poppins text-black border-t border-gray-300 pt-3 mb-2">
+        Rate this app
+      </h2>
+
+      {/* Stars */}
+      <div className="flex justify-between ">
+        <div className="flex gap-6 mb-4">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <button key={s} onClick={() => setRating(s)} className="transition">
+              <Star
+                size={30}
+                className={
+                  rating >= s
+                    ? "text-yellow-500 fill-yellow-500"
+                    : "text-gray-400"
+                }
+              />
+            </button>
+          ))}
+        </div>
+        <span className="text-2xl">
+          {["😞", "😐", "😕", "🙂", "😍"][rating - 1]}
+        </span>
+      </div>
+
+      {/* Textarea */}
+      <div className="mb-2">
+        <textarea
+          rows={3}
+          className="w-full p-4 bg-gray-50 rounded-xl border border-gray-300 text-sm font-poppins outline-none focus:ring-2 focus:ring-green-500 transition resize-none"
+          placeholder="Share your thoughts about this app..."
+          value={reviewText}
+          onChange={(e) => setReviewText(e.target.value)}
+        />
+      </div>
+
+      {/* Avatar + Submit Button */}
+      <div className="flex justify-between items-center">
+        <div className="h-10 w-10">
+          <img
+            src={user.photoURL}
+            alt={user.name}
+            className="rounded-full w-10 h-10"
+          />
+        </div>
+        <button
+          onClick={handleSubmitReview}
+          disabled={loading}
+          className="bg-green-500 hover:bg-green-600 text-black font-poppins py-2 px-4 rounded-xl flex items-center justify-center gap-2 transition disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
+        >
+          {loading && <Loader2 className="animate-spin" size={18} />}
+          <span>{loading ? "Submitting..." : "Submit Review"}</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const MyReviewCard = ({ userId, appId, developerId }) => {
+  return (
+    <div className="w-full">
+      {/* Header */}
+      <h2 className="text-lg font-medium font-poppins text-black border-t border-gray-300 pt-3 mb-2">
+        Your Review
+      </h2>
+
+      <ReviewCard
+        userId={userId}
+        appId={appId}
+        developerId={developerId}
+        myReview={true}
+      />
+    </div>
+  );
+};
+
+const AgeRating = ({ app }) => {
+  const ageMap = {
+    everyone: {
+      type: "letter",
+      letter: "E",
+      label: "Everyone",
+      desc: "Suitable for all age groups",
+    },
+    teen: {
+      type: "letter",
+      letter: "T",
+      label: "Teen",
+      desc: "Content appropriate for teens",
+    },
+    mature17: {
+      type: "icon",
+      icon: Shield,
+      label: "Mature 17+",
+      desc: "May contain intense content",
+    },
+    adult18: {
+      type: "icon",
+      icon: AlertTriangle,
+      label: "Adult 18+",
+      desc: "Restricted adult-only content",
+    },
+  };
+
+  const rating = app.details.ageRating?.toLowerCase();
+  const data = ageMap[rating];
+
+  return (
+    <div className="mt-4 mb-2">
+      <h2 className="text-lg font-medium font-poppins text-black mt-3 mb-2 pt-2 border-t border-gray-300">
+        More Info
+      </h2>
+
+      <div className="flex gap-6 items-start p-3">
+        <div className="w-10 h-10 flex items-center justify-center bg-black rounded-md rotate-6">
+          {/* Show Letter */}
+          {data.type === "letter" && (
+            <p className="text-5xl font-black text-white pt-4 -rotate-12">
+              {data.letter}
+            </p>
+          )}
+
+          {/* Show Icon */}
+          {data.type === "icon" && (
+            <data.icon className="w-8 h-8 stroke-3 text-white -rotate-12" />
+          )}
+        </div>
+
+        <div>
+          <p className="text-sm font-medium font-poppins text-gray-800">
+            {data.label}
+          </p>
+          <p className="text-xs font-poppins text-gray-600">{data.desc}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DataSafety = ({ app }) => {
+  return (
+    <section className="px-4 ">
+      <details className="group  pt-1">
+        <summary className="cursor-pointer list-none">
+          <div className="flex justify-between items-center pr-3">
+            <span className="text-base font-medium font-poppins text-black">
+              Data Safety
+            </span>
+
+            <ChevronDown
+              size={20}
+              className="w-[22px] h-[22px] text-gray-700 transition-transform duration-200 
+              group-open:rotate-180 p-1 bg-gray-200/50 rounded-full"
+            />
+          </div>
+
+          <p className="text-sm text-gray-800 mt-1 font-poppins pr-6">
+            Safety starts with understanding how developers collect and share
+            your data. The developer provided this information and may update it
+            over time.
+          </p>
+        </summary>
+
+        <div className="mt-4 space-y-5">
+          {/* Data Collection */}
+          <div className="flex items-start gap-3">
+            {app?.data?.collectsData ? (
+              <CloudUpload className="w-5 h-5 text-red-600 mt-1 transition-transform duration-300 scale-100" />
+            ) : (
+              <CloudUpload className="w-5 h-5 text-green-600 mt-1 transition-transform duration-300 scale-100" />
+            )}
+
+            <div className="flex flex-col">
+              <span className="text-sm font-medium font-poppins text-gray-900">
+                Data Collection
+              </span>
+
+              <p className="text-sm font-poppins text-gray-600">
+                {app?.data?.collectsData
+                  ? "This app collects user data."
+                  : "This app does not collect any user data."}
+              </p>
+
+              {app?.data?.collectsData &&
+                Array.isArray(app?.data?.dataCollected) &&
+                app.data.dataCollected.length > 0 && (
+                  <ul className="mt-2 ml-1 space-y-1">
+                    {app.data.dataCollected.map((item, idx) => (
+                      <li
+                        key={idx}
+                        className="text-sm text-gray-700 font-poppins flex items-center gap-2"
+                      >
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </div>
+          </div>
+
+          {/* Data Sharing */}
+          <div className="flex items-start gap-3">
+            {app?.data?.sharesData ? (
+              <Share2 className="w-5 h-5 text-red-600 mt-1 transition-transform duration-300 scale-100" />
+            ) : (
+              <Share2 className="w-5 h-5 text-green-600 mt-1 transition-transform duration-300 scale-100" />
+            )}
+
+            <div className="flex flex-col">
+              <span className="text-sm font-medium font-poppins text-gray-900">
+                Data Sharing
+              </span>
+
+              <p className="text-sm font-poppins text-gray-600">
+                {app?.data?.sharesData
+                  ? "This app may share user data with third parties."
+                  : "This app does not share any user data with third parties."}
+              </p>
+            </div>
+          </div>
+
+          {/* COPPA */}
+          <div className="flex items-start gap-3">
+            {app?.data?.coppaCompliant ? (
+              <UserCheck className="w-5 h-5 text-green-600 mt-1 transition-transform duration-300 scale-100" />
+            ) : (
+              <ShieldAlert className="w-5 h-5 text-red-600 mt-1 transition-transform duration-300 scale-100" />
+            )}
+
+            <div className="flex flex-col">
+              <span className="text-sm font-medium font-poppins text-gray-900">
+                COPPA Compliance
+              </span>
+
+              <p className="text-sm font-poppins text-gray-600">
+                {app?.data?.coppaCompliant
+                  ? "This app complies with the Children's Online Privacy Protection Act (COPPA)."
+                  : "This app is not declared as COPPA compliant."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+  );
+};
+
+const ReviewsHead = ({ app }) => {
+  return (
+    <section className="px-4 sm:px-6 mt-2">
+      {/* Title and Btn */}
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-lg font-medium font-poppins text-black">
+          Ratings and Reviews
+        </h2>
+      </div>
+
+      {/* Rating Summary */}
+      <div className="flex gap-6 items-center">
+        {/* Average Rating */}
+        <div className="flex flex-col items-center">
+          <span className="text-4xl font-semibold font-outfit text-gray-900">
+            {calculateRating(app.metrics.ratings.breakdown)}
+          </span>
+          <div className="flex gap-1 items-center mt-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                size={16}
+                className={`${
+                  i < calculateRating(app.metrics.ratings.breakdown)
+                    ? "text-green-500"
+                    : "text-gray-300"
+                } fill-current`}
+              />
+            ))}
+          </div>
+          <p className="text-xs font-poppins text-gray-500 mt-1">
+            {app.metrics.ratings.totalReviews} reviews
+          </p>
+        </div>
+
+        {/* Rating Bars */}
+        <div className="flex flex-col gap-1 flex-1">
+          {[5, 4, 3, 2, 1].map((star) => {
+            const breakdown = app.metrics.ratings.breakdown;
+            const totalReviews =
+              breakdown[1] +
+              breakdown[2] +
+              breakdown[3] +
+              breakdown[4] +
+              breakdown[5];
+            const count = breakdown[star] || 0;
+            const percentage =
+              totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+
+            return (
+              <div key={star} className="flex items-center gap-2">
+                <span className="text-xs font-medium font-outfit w-3">
+                  {star}
+                </span>
+                <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500 rounded-r-full transition-all duration-300"
+                    style={{ width: `${percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="h-px w-full bg-gray-200 mt-4" />
+    </section>
+  );
+};
+
+const ReviewsBody = ({ app, currentUser }) => {
+  const filteredReviews = app.community.reviews.filter(
+    (id) => id !== currentUser
+  );
+  return (
+    <section className="px-4 sm:px-6 mt-6">
+      <div className="space-y-6">
+        {filteredReviews.map((userId, index) => (
+          <ReviewCard
+            key={index}
+            userId={userId}
+            appId={app.appId}
+            developerId={app.developer.developerId}
+          />
+        ))}
+        {filteredReviews.length === 0 && (
+          <div className="w-full text-center text-gray-700 text-xs font-poppins">
+            No reviews yet
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 const AppSupport = ({ app }) => {
   return (
-    <section className="px-4 sm:px-6">
-      <details className="group border-t border-gray-300 pt-3">
+    <section className="px-4">
+      <details className="group pt-1">
         <summary className="flex justify-between items-center pr-3 cursor-pointer list-none">
           <span className="text-base font-medium font-poppins text-black">
             App Support
@@ -733,68 +1183,5 @@ const AppInfo = ({ app }) => {
         )}
       />
     </>
-  );
-};
-
-const AgeRating = ({ app }) => {
-  const ageMap = {
-    everyone: {
-      type: "letter",
-      letter: "E",
-      label: "Everyone",
-      desc: "Suitable for all age groups",
-    },
-    teen: {
-      type: "letter",
-      letter: "T",
-      label: "Teen",
-      desc: "Content appropriate for teens",
-    },
-    mature17: {
-      type: "icon",
-      icon: Shield,
-      label: "Mature 17+",
-      desc: "May contain intense content",
-    },
-    adult18: {
-      type: "icon",
-      icon: AlertTriangle,
-      label: "Adult 18+",
-      desc: "Restricted adult-only content",
-    },
-  };
-
-  const rating = app.details.ageRating?.toLowerCase();
-  const data = ageMap[rating];
-
-  return (
-    <div className="mt-4 mb-2">
-      <h2 className="text-lg font-medium font-poppins text-black mt-3 mb-2 pt-2 border-t border-gray-300">
-        More Info
-      </h2>
-
-      <div className="flex gap-6 items-start p-3">
-        <div className="w-10 h-10 flex items-center justify-center bg-black rounded-md rotate-6">
-          {/* Show Letter */}
-          {data.type === "letter" && (
-            <p className="text-5xl font-black text-white pt-4 -rotate-12">
-              {data.letter}
-            </p>
-          )}
-
-          {/* Show Icon */}
-          {data.type === "icon" && (
-            <data.icon className="w-8 h-8 stroke-3 text-white -rotate-12" />
-          )}
-        </div>
-
-        <div>
-          <p className="text-sm font-medium font-poppins text-gray-800">
-            {data.label}
-          </p>
-          <p className="text-xs font-poppins text-gray-600">{data.desc}</p>
-        </div>
-      </div>
-    </div>
   );
 };

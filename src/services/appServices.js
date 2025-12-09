@@ -8,8 +8,11 @@ import {
   where,
   orderBy,
   limit,
+  updateDoc,
+  increment,
 } from "firebase/firestore";
 import { calculateRating } from "../utils/calculateRating";
+import { toast } from "sonner";
 
 // Fetch verified developers
 export const fetchDevelopers = async () => {
@@ -281,4 +284,22 @@ export const fetchAppDetails = async (appId) => {};
 export const addReview = async (appId, review) => {};
 
 // Increase download count
-export const downloadApp = async (appId) => {};
+export const incrementDownload = async (appId) => {
+  if (!appId) {
+    return { success: false };
+  }
+
+  try {
+    const appRef = doc(db, "apps", appId);
+
+    await updateDoc(appRef, {
+      "metrics.downloads": increment(1),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to increment download:", error);
+    toast.error("Failed to increment download count");
+    return { success: false, error: error.message };
+  }
+};
