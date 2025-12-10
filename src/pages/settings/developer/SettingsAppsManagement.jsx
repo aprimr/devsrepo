@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Calendar, ChevronLeft } from "lucide-react";
+import {
+  AlertCircleIcon,
+  AlertTriangle,
+  Calendar,
+  ChevronLeft,
+  CircleFadingArrowUp,
+  Trash2,
+} from "lucide-react";
 import { useAuthStore } from "../../../store/AuthStore";
 import { useAppStore } from "../../../store/AppStore";
 import { formatDate } from "../../../utils/formatDate";
 import { toast } from "sonner";
-import { TfiAndroid } from "react-icons/tfi";
 
 function SettingsAppsManagement() {
   const { user } = useAuthStore();
@@ -147,6 +153,8 @@ function SettingsAppsManagement() {
 export default SettingsAppsManagement;
 
 const AppCard = ({ appObj, activeTab }) => {
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
   return (
     <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 transition-all">
       <div className="flex items-start gap-4 w-full overflow-hidden">
@@ -181,6 +189,13 @@ const AppCard = ({ appObj, activeTab }) => {
               }`}
             >
               {activeTab.replace("-", " ")}
+            </span>
+          </div>
+
+          {/* App Id */}
+          <div className="flex justify-between items-center text-gray-700 text-xs mt-2 font-poppins">
+            <span className="flex items-center gap-1 truncate">
+              AppID: {appObj.app.appId}
             </span>
           </div>
 
@@ -236,6 +251,48 @@ const AppCard = ({ appObj, activeTab }) => {
             </div>
           )}
         </div>
+      </div>
+      {/* Delete and Push Updates buttons */}
+      <div className="flex items-center gap-3 mt-2 font-poppins text-[12px]">
+        {/* Push Update Button */}
+        {!showConfirmDelete && (
+          <button className="w-full flex justify-center items-center gap-1.5 px-2 py-2 rounded-md bg-green-500 text-white">
+            <CircleFadingArrowUp className="w-4 h-4" />
+            <span className="text-xs font-medium">Push Updates</span>
+          </button>
+        )}
+
+        {/* Delete Button */}
+        {!showConfirmDelete && (
+          <button
+            onClick={() => setShowConfirmDelete((prev) => !prev)}
+            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-red-500 text-white"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span className="text-xs font-medium">Delete App</span>
+          </button>
+        )}
+
+        {/* Actual Delete Button */}
+        {showConfirmDelete && (
+          <button
+            onClick={() => setShowConfirmDelete((prev) => !prev)}
+            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-red-500 text-white"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            <span className="text-xs font-medium">Confirm Delete ?</span>
+          </button>
+        )}
+
+        {/* Cancle Delete Button */}
+        {showConfirmDelete && (
+          <button
+            onClick={() => setShowConfirmDelete((prev) => !prev)}
+            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-gray-300 text-gray-900"
+          >
+            <span className="text-xs font-medium">Cancle</span>
+          </button>
+        )}
       </div>
     </div>
   );

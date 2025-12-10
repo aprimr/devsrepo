@@ -256,7 +256,7 @@ const AppDetails = () => {
         </section>
 
         {/* Download Buttons */}
-        <section className="p-4 pb-1 flex flex-row items-center gap-2 w-full max-w-lg mx-auto">
+        <section className="p-4 pb-1 flex flex-row items-center gap-10 w-full max-w-3xl mx-auto">
           {/* Android Platform */}
           {device === "Android" && (
             <>
