@@ -6,6 +6,7 @@ import {
   Calendar,
   ChevronLeft,
   CircleFadingArrowUp,
+  OctagonAlert,
   Trash2,
 } from "lucide-react";
 import { useAuthStore } from "../../../store/AuthStore";
@@ -193,9 +194,12 @@ const AppCard = ({ appObj, activeTab }) => {
           </div>
 
           {/* App Id */}
-          <div className="flex justify-between items-center text-gray-700 text-xs mt-2 font-poppins">
+          <div className="flex justify-between items-center text-gray-600 text-xs mt-2 font-poppins">
             <span className="flex items-center gap-1 truncate">
               AppID: {appObj.app.appId}
+            </span>
+            <span className="shrink-0 font-outfit">
+              v {appObj.app.details.appDetails.version}
             </span>
           </div>
 
@@ -243,33 +247,43 @@ const AppCard = ({ appObj, activeTab }) => {
 
           {/* Additional info for rejected */}
           {activeTab === "rejected" && (
-            <div className="mt-0.5 flex flex-col gap-1 text-gray-600 text-xs font-outfit">
+            <div className="mt-0.5 flex flex-col gap-1 text-gray-600 text-xs font-poppins">
               <span>
-                <span className="font-medium text-gray-600">Reason:</span>{" "}
+                <span className="font-medium text-gray-600 whitespace-pre-wrap">
+                  Reason:
+                </span>{" "}
                 {appObj.app.status?.rejection?.reason || "Error fetching data."}
               </span>
             </div>
           )}
         </div>
       </div>
-      {/* Delete and Push Updates buttons */}
-      <div className="flex items-center gap-3 mt-2 font-poppins text-[12px]">
-        {/* Push Update Button */}
-        {!showConfirmDelete && (
-          <button className="w-full flex justify-center items-center gap-1.5 px-2 py-2 rounded-md bg-green-500 text-white">
-            <CircleFadingArrowUp className="w-4 h-4" />
-            <span className="text-xs font-medium">Push Updates</span>
-          </button>
-        )}
 
-        {/* Delete Button */}
-        {!showConfirmDelete && (
+      {showConfirmDelete && (
+        <div className="mt-2 px-3 py-2 rounded-md bg-rose-50 border border-rose-200 text-rose-500 text-sm leading-relaxed flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-1" />
+          <p className="font-poppins">
+            You are about to permanently delete the app
+            <span className="font-semibold text-rose-600">
+              {` ${appObj.app.details.name} `}
+            </span>
+            . This action cannot be undone. Please confirm your decision before
+            clicking
+            <span className="font-semibold text-rose-600"> Confirm Delete</span>
+            .
+          </p>
+        </div>
+      )}
+
+      {/* Delete and Push Updates buttons */}
+      <div className="flex items-center gap-3 mt-2 sm:mt-2 font-poppins text-[12px]">
+        {/* Cancle Delete Button */}
+        {showConfirmDelete && (
           <button
             onClick={() => setShowConfirmDelete((prev) => !prev)}
-            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-red-500 text-white"
+            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-gray-300 text-gray-900"
           >
-            <Trash2 className="w-4 h-4" />
-            <span className="text-xs font-medium">Delete App</span>
+            <span className="text-xs font-medium sm:text-sm">Cancel</span>
           </button>
         )}
 
@@ -277,22 +291,37 @@ const AppCard = ({ appObj, activeTab }) => {
         {showConfirmDelete && (
           <button
             onClick={() => setShowConfirmDelete((prev) => !prev)}
-            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-red-500 text-white"
+            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-rose-500 text-white"
           >
-            <AlertTriangle className="w-4 h-4" />
-            <span className="text-xs font-medium">Confirm Delete ?</span>
+            <OctagonAlert className="w-4 h-4" />
+            <span className="text-xs font-medium sm:text-sm">
+              Confirm Delete
+            </span>
           </button>
         )}
 
-        {/* Cancle Delete Button */}
-        {showConfirmDelete && (
+        {/* First Delete Button */}
+        {!showConfirmDelete && (
           <button
             onClick={() => setShowConfirmDelete((prev) => !prev)}
-            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-gray-300 text-gray-900"
+            className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-rose-500 text-white"
           >
-            <span className="text-xs font-medium">Cancle</span>
+            <Trash2 className="w-4 h-4" />
+            <span className="text-xs font-medium sm:text-sm">Delete App</span>
           </button>
         )}
+
+        {/* Push Update Button */}
+        {!showConfirmDelete &&
+          appObj.app.status.approval.isApproved &&
+          appObj.app.status.isActive && (
+            <button className="w-full flex justify-center items-center gap-1.5 px-2 py-2 rounded-md bg-green-500 text-white">
+              <CircleFadingArrowUp className="w-4 h-4" />
+              <span className="text-xs font-medium sm:text-sm">
+                Push Updates
+              </span>
+            </button>
+          )}
       </div>
     </div>
   );
