@@ -19,12 +19,7 @@ import {
   ShieldAlert,
   UserCheck,
   Share2,
-  ThumbsUp,
-  UserCircle2,
   CloudUpload,
-  ChevronRight,
-  CheckCircle,
-  BadgeCheck,
   Loader2,
 } from "lucide-react";
 import { getFileURL } from "../../services/appwriteStorage";
@@ -1253,6 +1248,7 @@ const AppInfo = ({ app }) => {
         App Info
       </h2>
       <Card title="Version" value={app.details.appDetails.version} />
+      <Card title="App Type" value={app.details.type} />
       <Card
         title="Updated on"
         value={(formatDate(app.updatedAt).split("2025")[0] + "2025").replace(

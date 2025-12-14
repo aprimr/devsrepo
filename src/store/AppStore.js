@@ -13,6 +13,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
+import { deleteFile } from "../services/appwriteStorage";
 
 export const useAppStore = create(
   persist(
@@ -193,64 +194,126 @@ export const useAppStore = create(
       },
 
       // Push App Update
-      pushAppUpdate: async (appId, versionData = {}) => {
-        set({ isLoading: true, error: null });
+      pushAppUpdate: async (appId, updatedApp) => {
         try {
-          const currentApp = get().selectedApp;
-          if (!currentApp) throw new Error("No app selected for update.");
+          if (!appId || !updatedApp) {
+            throw new Error("App ID and updated app object are required.");
+          }
 
-          const docRef = doc(db, "apps", appId);
-          const newWhatsNew =
-            versionData.whatsNew ||
-            currentApp.details.description.whatsNew ||
-            "";
+          // Increment versionCode
+          const newVersionCode =
+            (updatedApp.details.appDetails.versionCode || 0) + 1;
 
+          // Prepare payload for Firestore
           const updatePayload = {
-            "details.appDetails.version":
-              versionData.version || currentApp.details.appDetails.version,
-            "details.appDetails.versionCode":
-              versionData.versionCode ||
-              currentApp.details.appDetails.versionCode,
-            "details.appDetails.releaseDate": serverTimestamp(),
-            "details.description.whatsNew": newWhatsNew,
+            ...updatedApp,
+            details: {
+              ...updatedApp.details,
+              appDetails: {
+                ...updatedApp.details.appDetails,
+                versionCode: newVersionCode,
+              },
+            },
             updatedAt: serverTimestamp(),
           };
 
+          // Update the document
+          const docRef = doc(db, "apps", appId);
           await updateDoc(docRef, updatePayload);
 
-          const now = new Date().toISOString();
-
-          const updatedApp = {
-            ...currentApp,
-            details: {
-              ...currentApp.details,
-              appDetails: {
-                ...currentApp.details.appDetails,
-                ...versionData,
-                releaseDate: now,
+          // Return updated object
+          return {
+            success: true,
+            app: {
+              ...updatedApp,
+              details: {
+                ...updatedApp.details,
+                appDetails: {
+                  ...updatedApp.details.appDetails,
+                  versionCode: newVersionCode,
+                },
               },
-              description: {
-                ...currentApp.details.description,
-                whatsNew: newWhatsNew,
-              },
+              updatedAt: new Date().toISOString(),
             },
-            updatedAt: now,
           };
-
-          set({ selectedApp: updatedApp, isLoading: false });
-          return { success: true, app: updatedApp };
         } catch (error) {
-          console.error("Error pushing app update:", error);
-          set({ isLoading: false, error: error.message });
+          console.error("Error updating app:", error);
           return { success: false, error: error.message };
         }
       },
 
       // Delete App
       deleteApp: async (appId) => {
+        if (!appId || typeof appId !== "string") {
+          return { success: false, error: "Invalid appId" };
+        }
+
         set({ isLoading: true, error: null });
+
         try {
-          await deleteDoc(doc(db, "apps", appId));
+          // Get app document
+          const appRef = doc(db, "apps", appId);
+          const appSnap = await getDoc(appRef);
+
+          if (!appSnap.exists()) {
+            throw new Error("App not found.");
+          }
+
+          const appData = appSnap.data();
+
+          // Delete associated media files from appwrite bucket
+          const media = appData?.details?.media || {};
+          const screenshots = Array.isArray(media.screenshots)
+            ? media.screenshots
+            : [];
+
+          const mediaFiles = [media.icon, media.banner, ...screenshots].filter(
+            Boolean
+          );
+
+          for (const fileId of mediaFiles) {
+            try {
+              await deleteFile(fileId);
+            } catch (err) {
+              console.error("Failed to delete media file:", fileId);
+            }
+          }
+
+          // Get user document of the developer and delete appId from their profile
+          const developerUserId = appData?.developer?.userId;
+
+          if (developerUserId) {
+            const userRef = doc(db, "users", developerUserId);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+              const userData = userSnap.data();
+
+              const apps = userData?.developerProfile?.apps || {};
+
+              const updatedApps = {
+                submittedAppIds: (apps.submittedAppIds || []).filter(
+                  (id) => id !== appId
+                ),
+                publishedAppIds: (apps.publishedAppIds || []).filter(
+                  (id) => id !== appId
+                ),
+                rejectedAppIds: (apps.rejectedAppIds || []).filter(
+                  (id) => id !== appId
+                ),
+                suspendedAppIds: (apps.suspendedAppIds || []).filter(
+                  (id) => id !== appId
+                ),
+              };
+
+              await updateDoc(userRef, {
+                "developerProfile.apps": updatedApps,
+              });
+            }
+          }
+
+          // Delete app document
+          await deleteDoc(appRef);
 
           set((state) => ({
             apps: state.apps.filter((app) => app.appId !== appId),

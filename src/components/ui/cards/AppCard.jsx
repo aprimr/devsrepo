@@ -17,7 +17,7 @@ function AppCard({ app, rank }) {
         <img
           src={getFileURL(app.details.media.icon)}
           alt={app.details.name}
-          className="w-16 h-16 rounded-lg object-cover shrink-0"
+          className="w-16 h-16 rounded-xl object-cover shrink-0"
         />
 
         {/* App Details */}

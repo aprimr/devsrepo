@@ -1,25 +1,27 @@
-import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
-  AlertCircleIcon,
   AlertTriangle,
   Calendar,
   ChevronLeft,
   CircleFadingArrowUp,
+  Loader2,
   OctagonAlert,
   Trash2,
 } from "lucide-react";
 import { useAuthStore } from "../../../store/AuthStore";
 import { useAppStore } from "../../../store/AppStore";
+import { useSystemStore } from "../../../store/SystemStore";
 import { formatDate } from "../../../utils/formatDate";
 import { toast } from "sonner";
 
 function SettingsAppsManagement() {
   const { user } = useAuthStore();
   const { fetchAppById } = useAppStore();
+  const { getUserDetailsById } = useSystemStore();
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState("in-review");
+  const [activeTab, setActiveTab] = useState("approved");
 
   // Apps States
   const [inReviewApps, setInReviewApps] = useState([]);
@@ -27,10 +29,42 @@ function SettingsAppsManagement() {
   const [rejectedApps, setRejectedApps] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // App IDs
-  const submittedAppIds = user?.developerProfile?.apps?.submittedAppIds || [];
-  const publishedAppIds = user?.developerProfile?.apps?.publishedAppIds || [];
-  const rejectedAppIds = user?.developerProfile?.apps?.rejectedAppIds || [];
+  const [dbUser, setDbUser] = useState(null);
+  const [isFetchingUser, setIsFetchingUser] = useState(false);
+
+  // fetch user from db
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!user?.uid) return;
+      console.log("Fetching user details for uid:", user.uid);
+
+      try {
+        setIsFetchingUser(true);
+        const freshUser = await getUserDetailsById(user.uid);
+        setDbUser(freshUser);
+      } catch (error) {
+        console.error("Failed to refetch user:", error);
+      } finally {
+        setIsFetchingUser(false);
+      }
+    };
+
+    fetchUser();
+  }, [user?.uid]);
+
+  // Memoized App IDs (will auto-update when dbUser changes)
+  const submittedAppIds = useMemo(
+    () => dbUser?.developerProfile?.apps?.submittedAppIds || [],
+    [dbUser]
+  );
+  const publishedAppIds = useMemo(
+    () => dbUser?.developerProfile?.apps?.publishedAppIds || [],
+    [dbUser]
+  );
+  const rejectedAppIds = useMemo(
+    () => dbUser?.developerProfile?.apps?.rejectedAppIds || [],
+    [dbUser]
+  );
 
   // Fetch apps based on active tab
   useEffect(() => {
@@ -53,6 +87,11 @@ function SettingsAppsManagement() {
       }
 
       if (!ids.length) {
+        // Clear old data to avoid stale UI
+        if (activeTab === "in-review") setInReviewApps([]);
+        if (activeTab === "approved") setApprovedApps([]);
+        if (activeTab === "rejected") setRejectedApps([]);
+
         setLoading(false);
         return;
       }
@@ -74,7 +113,7 @@ function SettingsAppsManagement() {
     };
 
     fetchAppsForTab();
-  }, [activeTab]);
+  }, [activeTab, submittedAppIds, publishedAppIds, rejectedAppIds]);
 
   // Determine which apps to display
   const displayedApps =
@@ -83,6 +122,42 @@ function SettingsAppsManagement() {
       : activeTab === "approved"
       ? approvedApps
       : rejectedApps;
+
+  // Remove app from dbUser when deleted to update memoized IDs automatically
+  const handleAppDeleted = (appId) => {
+    setDbUser((prev) => {
+      if (!prev) return prev;
+
+      const updatedUser = {
+        ...prev,
+        developerProfile: {
+          ...prev.developerProfile,
+          apps: { ...prev.developerProfile.apps },
+        },
+      };
+      updatedUser.developerProfile.apps.publishedAppIds =
+        updatedUser.developerProfile.apps.publishedAppIds?.filter(
+          (id) => id !== appId
+        ) || [];
+      updatedUser.developerProfile.apps.submittedAppIds =
+        updatedUser.developerProfile.apps.submittedAppIds?.filter(
+          (id) => id !== appId
+        ) || [];
+      updatedUser.developerProfile.apps.rejectedAppIds =
+        updatedUser.developerProfile.apps.rejectedAppIds?.filter(
+          (id) => id !== appId
+        ) || [];
+      return updatedUser;
+    });
+
+    // Also remove from currently displayed list to instantly update UI
+    if (activeTab === "approved")
+      setApprovedApps((prev) => prev.filter((app) => app.app.appId !== appId));
+    if (activeTab === "in-review")
+      setInReviewApps((prev) => prev.filter((app) => app.app.appId !== appId));
+    if (activeTab === "rejected")
+      setRejectedApps((prev) => prev.filter((app) => app.app.appId !== appId));
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -101,8 +176,8 @@ function SettingsAppsManagement() {
       {/* Tabs */}
       <div className="max-w-2xl mx-auto flex justify-between mt-4 border-b border-gray-200 px-6 sm:px-6">
         {[
-          { key: "in-review", label: "In Review" },
           { key: "approved", label: "Approved" },
+          { key: "in-review", label: "In Review" },
           { key: "rejected", label: "Rejected" },
         ].map((tab) => (
           <button
@@ -133,14 +208,11 @@ function SettingsAppsManagement() {
               key={appObj.app.appId}
               appObj={appObj}
               activeTab={activeTab}
+              onDeleted={handleAppDeleted}
             />
           ))
         ) : (
           <>
-            <AppSkeleton />
-            <AppSkeleton />
-            <AppSkeleton />
-            <AppSkeleton />
             <AppSkeleton />
             <AppSkeleton />
             <AppSkeleton />
@@ -153,13 +225,35 @@ function SettingsAppsManagement() {
 
 export default SettingsAppsManagement;
 
-const AppCard = ({ appObj, activeTab }) => {
+const AppCard = ({ appObj, activeTab, onDeleted }) => {
+  const navigate = useNavigate();
+  const { deleteApp } = useAppStore();
+
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteApp = async (appId) => {
+    try {
+      setIsDeleting(true);
+      const res = await deleteApp(appId);
+
+      if (res.success) {
+        toast.success("App and its media files deleted successfully!");
+        onDeleted?.(appId); // update parent state
+      } else {
+        toast.error("Failed to delete app: " + res.error);
+      }
+    } catch (err) {
+      console.error("Error deleting app:", err);
+      toast.error("Error deleting app: " + err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 transition-all">
       <div className="flex items-start gap-4 w-full overflow-hidden">
-        {/* App Icon */}
         <img
           src={`https://cloud.appwrite.io/v1/storage/buckets/${
             import.meta.env.VITE_APPWRITE_BUCKET_ID
@@ -169,10 +263,7 @@ const AppCard = ({ appObj, activeTab }) => {
           alt={appObj.app.appId}
           className="w-14 h-14 rounded-lg object-cover bg-white shrink-0"
         />
-
-        {/* App Info */}
         <div className="flex-1 min-w-0">
-          {/* Title & Status */}
           <div className="flex items-center justify-between gap-2 min-w-0">
             <h2 className="truncate text-sm sm:text-lg font-medium text-gray-800 font-poppins max-w-[70%] sm:max-w-[75%]">
               {appObj.app.details?.name}
@@ -193,7 +284,6 @@ const AppCard = ({ appObj, activeTab }) => {
             </span>
           </div>
 
-          {/* App Id */}
           <div className="flex justify-between items-center text-gray-600 text-xs mt-2 font-poppins">
             <span className="flex items-center gap-1 truncate">
               AppID: {appObj.app.appId}
@@ -203,7 +293,6 @@ const AppCard = ({ appObj, activeTab }) => {
             </span>
           </div>
 
-          {/* Date & Size */}
           <div className="flex justify-between items-center text-gray-500 text-[13px] mt-1 font-outfit">
             <span className="flex items-center gap-1 truncate">
               <Calendar size={12} /> {formatDate(appObj.app.createdAt)}
@@ -213,14 +302,12 @@ const AppCard = ({ appObj, activeTab }) => {
             </span>
           </div>
 
-          {/* Type & Category */}
           <div className="flex flex-wrap items-center gap-3 text-gray-500 text-[12px] mt-0.5 font-outfit">
             <span className="capitalize">{appObj.app.details?.type}</span>
             <div className="h-1 w-1 bg-gray-400 rounded-full shrink-0" />
             <span className="capitalize">{appObj.app.details?.category}</span>
           </div>
 
-          {/* Additional info for approved */}
           {activeTab === "approved" && (
             <div className="mt-0.5 flex flex-col gap-1 text-gray-600 text-xs font-outfit">
               <span>
@@ -245,7 +332,6 @@ const AppCard = ({ appObj, activeTab }) => {
             </div>
           )}
 
-          {/* Additional info for rejected */}
           {activeTab === "rejected" && (
             <div className="mt-0.5 flex flex-col gap-1 text-gray-600 text-xs font-poppins">
               <span>
@@ -275,35 +361,41 @@ const AppCard = ({ appObj, activeTab }) => {
         </div>
       )}
 
-      {/* Delete and Push Updates buttons */}
       <div className="flex items-center gap-3 mt-2 sm:mt-2 font-poppins text-[12px]">
-        {/* Cancle Delete Button */}
         {showConfirmDelete && (
           <button
-            onClick={() => setShowConfirmDelete((prev) => !prev)}
+            onClick={() => setShowConfirmDelete(false)}
             className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-gray-300 text-gray-900"
           >
             <span className="text-xs font-medium sm:text-sm">Cancel</span>
           </button>
         )}
 
-        {/* Actual Delete Button */}
         {showConfirmDelete && (
           <button
-            onClick={() => setShowConfirmDelete((prev) => !prev)}
+            onClick={() => handleDeleteApp(appObj.app.appId)}
+            disabled={isDeleting}
             className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-rose-500 text-white"
           >
-            <OctagonAlert className="w-4 h-4" />
-            <span className="text-xs font-medium sm:text-sm">
-              Confirm Delete
-            </span>
+            {!isDeleting ? (
+              <>
+                <OctagonAlert className="w-4 h-4" />
+                <span className="text-xs font-medium sm:text-sm">
+                  Confirm Delete
+                </span>
+              </>
+            ) : (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-xs font-medium sm:text-sm">Deleting</span>
+              </>
+            )}
           </button>
         )}
 
-        {/* First Delete Button */}
         {!showConfirmDelete && (
           <button
-            onClick={() => setShowConfirmDelete((prev) => !prev)}
+            onClick={() => setShowConfirmDelete(true)}
             className="w-full flex justify-center items-center gap-1.5 px-3 py-2 rounded-md bg-rose-500 text-white"
           >
             <Trash2 className="w-4 h-4" />
@@ -311,11 +403,17 @@ const AppCard = ({ appObj, activeTab }) => {
           </button>
         )}
 
-        {/* Push Update Button */}
         {!showConfirmDelete &&
           appObj.app.status.approval.isApproved &&
           appObj.app.status.isActive && (
-            <button className="w-full flex justify-center items-center gap-1.5 px-2 py-2 rounded-md bg-green-500 text-white">
+            <button
+              onClick={() =>
+                navigate("/push-updates", {
+                  state: { appId: appObj.app.appId },
+                })
+              }
+              className="w-full flex justify-center items-center gap-1.5 px-2 py-2 rounded-md bg-green-500 text-white"
+            >
               <CircleFadingArrowUp className="w-4 h-4" />
               <span className="text-xs font-medium sm:text-sm">
                 Push Updates
@@ -327,18 +425,14 @@ const AppCard = ({ appObj, activeTab }) => {
   );
 };
 
-const AppSkeleton = () => {
-  return (
-    <div className="p-4 bg-gray-100 rounded-2xl overflow-hidden relative animate-pulse">
-      <div className="flex items-center gap-5">
-        {/* App Icon */}
-        <div className="w-14 h-14 rounded-lg bg-gray-200 relative overflow-hidden" />
-        {/* App Info */}
-        <div className="flex-1 space-y-2">
-          <div className="h-5 w-26 rounded-lg bg-gray-200" />
-          <div className="h-4 w-32 rounded-lg bg-gray-200" />
-        </div>
+const AppSkeleton = () => (
+  <div className="p-4 bg-gray-100 rounded-2xl overflow-hidden relative animate-pulse">
+    <div className="flex items-center gap-5">
+      <div className="w-14 h-14 rounded-lg bg-gray-200 relative overflow-hidden" />
+      <div className="flex-1 space-y-2">
+        <div className="h-5 w-26 rounded-lg bg-gray-200" />
+        <div className="h-4 w-32 rounded-lg bg-gray-200" />
       </div>
     </div>
-  );
-};
+  </div>
+);

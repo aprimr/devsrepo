@@ -808,11 +808,12 @@ export default function Publish() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
               >
                 <option value="">Select type</option>
-                <option>Mobile App</option>
-                <option>UI Clone</option>
-                <option>Tools</option>
-                <option>Game</option>
-                <option>Template</option>
+                <option value="education">Education</option>
+                <option value="kids">Kids</option>
+                <option value="uiclone">UI Clones</option>
+                <option value="tools">Tools</option>
+                <option value="fitness">Fitness</option>
+                <option value="shopping">Shopping</option>
               </select>
             </div>
 
@@ -1308,7 +1309,7 @@ export default function Publish() {
           <div className="mt-auto mb-20 flex flex-col sm:flex-row gap-4 w-full max-w-sm sm:mb-8">
             <button
               onClick={() => {
-                // navigate("/setting-apps");
+                navigate("/setting-apps-management");
                 setIsModalOpen(false);
               }}
               className="flex-1 px-4 py-3 border-2 border-green-600 text-green-600 font-medium rounded-xl font-poppins"

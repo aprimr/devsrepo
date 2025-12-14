@@ -44,6 +44,7 @@ import SocialStatus from "./pages/App/SocialStatus";
 import SettingsPrivacyStats from "./pages/settings/account/SettingsPrivactStats";
 import AppsTypesPage from "./pages/App/AppsTypesPage";
 import AppDetails from "./pages/App/AppDetails";
+import PushUpdates from "./pages/settings/developer/PushUpdates";
 
 function AppContent() {
   const location = useLocation();
@@ -55,6 +56,7 @@ function AppContent() {
     "/top-developers",
     "/p/:id",
     "/publish",
+    "/push-updates",
     "/admin",
     "/admin-user-management",
     "/admin-developer-management",
@@ -99,6 +101,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Publish />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/push-updates"
+          element={
+            <ProtectedRoute>
+              <PushUpdates />
             </ProtectedRoute>
           }
         />

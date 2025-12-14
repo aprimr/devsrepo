@@ -1,6 +1,15 @@
-import { useState } from "react";
-import { MapPin, Settings, Globe, Sticker, BadgeCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  MapPin,
+  Settings,
+  Globe,
+  Sticker,
+  BadgeCheck,
+  Loader2,
+  Loader,
+} from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
+import { useSystemStore } from "../../store/SystemStore";
 import numberSuffixer from "../../utils/numberSuffixer";
 import { useNavigate } from "react-router-dom";
 import DevsRepoImport from "../../assets/images/DevsRepoInvert.png";
@@ -20,6 +29,46 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("apps");
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const { user } = useAuthStore();
+  const { getUserDetailsById } = useSystemStore();
+
+  const [publishedApps, setPublishedApps] = useState([]);
+  const [pendingApps, setPendingApps] = useState([]);
+  const [appsLoading, setAppsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    let isMounted = true;
+
+    const fetchUserAndApps = async () => {
+      try {
+        document.title = `${user.name} - DevsRepo`;
+        setAppsLoading(true);
+
+        const dbUser = await getUserDetailsById(user.uid);
+        if (!isMounted) return;
+
+        if (!dbUser?.developerProfile?.isDeveloper) {
+          setPublishedApps([]);
+          setPendingApps([]);
+          return;
+        }
+
+        setPublishedApps(dbUser.developerProfile.apps?.publishedAppIds || []);
+        setPendingApps(dbUser.developerProfile.apps?.submittedAppIds || []);
+      } catch (err) {
+        console.error("Error fetching apps:", err);
+      } finally {
+        if (isMounted) setAppsLoading(false);
+      }
+    };
+
+    fetchUserAndApps();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.uid]);
 
   return (
     <div
@@ -483,14 +532,21 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Apps Loading */}
+        {appsLoading && (
+          <div className="w-full flex justify-center items-center mt-40">
+            <Loader size={30} className="animate-spin text-gray-300" />
+          </div>
+        )}
+
         {/* Apps Grid */}
-        {activeTab === "apps" && (
+        {activeTab === "apps" && !appsLoading && (
           <>
             {user.developerProfile.isDeveloper ? (
               <>
-                {user.developerProfile.apps.publishedAppIds.length != 0 ? (
+                {publishedApps != 0 ? (
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7 gap-3 sm:gap-4 mt-4">
-                    {user.developerProfile.apps.publishedAppIds.map((appId) => (
+                    {publishedApps.map((appId) => (
                       <DeveloperAppCard key={appId} appId={appId} />
                     ))}
                   </div>
@@ -512,14 +568,13 @@ export default function Profile() {
         )}
 
         {/* Pending Apps Grid */}
-        {activeTab === "pending-apps" && (
+        {activeTab === "pending-apps" && !appsLoading && (
           <>
-            {user.developerProfile.isDeveloper &&
-            user.developerProfile.apps.submittedAppIds ? (
+            {user.developerProfile.isDeveloper && pendingApps ? (
               <>
-                {user.developerProfile.apps.submittedAppIds.length != 0 ? (
+                {pendingApps != 0 ? (
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7 gap-3 sm:gap-4 mt-4 pointer-events-none">
-                    {user.developerProfile.apps.submittedAppIds.map((appId) => (
+                    {pendingApps.map((appId) => (
                       <DeveloperAppCard
                         key={appId}
                         appId={appId}
@@ -545,7 +600,7 @@ export default function Profile() {
         )}
 
         {/* Reviews Grid */}
-        {activeTab === "reviews" && (
+        {activeTab === "reviews" && !appsLoading && (
           <>
             {user.developerProfile.isDeveloper ? (
               <>
