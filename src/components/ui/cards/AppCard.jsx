@@ -23,7 +23,7 @@ function AppCard({ app, rank }) {
         {/* App Details */}
         <div className="flex-1 min-w-0 flex flex-col justify-between">
           <div className="max-w-6/7">
-            <h3 className="font-poppins text-sm sm:text-base font-medium text-gray-800 line-clamp-1">
+            <h3 className="font-poppins text-sm sm:text-base text-gray-800 line-clamp-1">
               {app.details.name}
             </h3>
             <p className="text-gray-500 text-xs sm:text-[12px] font-inter line-clamp-1">

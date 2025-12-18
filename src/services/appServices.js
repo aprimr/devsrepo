@@ -116,6 +116,67 @@ export const fetchDeveloperbyDevID = async (developerId) => {
   }
 };
 
+// Search apps by name
+export const searchAppByName = async (searchTerm) => {
+  if (!searchTerm?.trim()) return { success: false, data: [] };
+
+  const keyword = searchTerm.toLowerCase();
+
+  try {
+    const appsRef = collection(db, "apps");
+
+    // Get apps from tags matches
+    const tagQuery = query(
+      appsRef,
+      where("discovery.searchKeywords", "array-contains", keyword)
+    );
+    const tagSnapshot = await getDocs(tagQuery);
+
+    const tagApps = tagSnapshot.docs
+      .map((doc) => ({
+        appId: doc.id,
+        ...doc.data(),
+        isTagMatch: true,
+      }))
+      // Only approved and active apps
+      .filter(
+        (app) => app.status?.approval?.isApproved && app.status?.isActive
+      );
+
+    // Get apps from name matches
+    const allSnapshot = await getDocs(appsRef);
+    const nameApps = allSnapshot.docs
+      .map((doc) => ({
+        appId: doc.id,
+        ...doc.data(),
+      }))
+      .filter(
+        (app) =>
+          app.details?.name?.toLowerCase().includes(keyword) &&
+          app.status?.approval?.isApproved &&
+          app.status?.isActive
+      )
+      .map((app) => ({
+        ...app,
+        isTagMatch: false,
+      }));
+
+    // Merge results
+    const allAppsMap = new Map();
+    [...nameApps, ...tagApps].forEach((app) => {
+      allAppsMap.set(app.appId, app);
+    });
+
+    return {
+      success: true,
+      data: Array.from(allAppsMap.values()),
+    };
+  } catch (error) {
+    console.error("Search error:", error);
+    return { success: false, data: [], error: error.message };
+  }
+};
+
 // Fetch app by id
 export const fetchAppbyID = async (appId) => {
   if (!appId) return { success: false, app: null };

@@ -25,12 +25,12 @@ function AppCardSquare({ app }) {
 
       <div className="px-2 pb-2">
         {/* App Name */}
-        <h3 className="font-poppins font-medium text-xs sm:text-sm h-8.5 sm:h-10.5 sm:font-normal text-gray-900 line-clamp-2">
-          {details.name}
+        <h3 className="font-poppins font-normal text-xs sm:text-sm h-8.5 sm:h-10.5 sm:font-normal text-gray-900 line-clamp-2">
+          {details.name} yoo
         </h3>
 
         {/* Rating & Downlaod */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-1">
           {/* Rating */}
           <div className="flex items-center gap-1 text-gray-700">
             <Star size={12} className="text-yellow-500 fill-yellow-500" />

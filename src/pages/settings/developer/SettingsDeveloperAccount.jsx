@@ -126,6 +126,16 @@ function SettingsDeveloperAccount() {
             >
               Create Developer Account
             </button>
+            <p className="text-xs font-poppins text-gray-500 mt-3">
+              By clicking Create Developer Account, you agree to our{" "}
+              <span
+                className="text-gray-600 font-medium cursor-pointer"
+                onClick={() => navigate("/developer-terms")}
+              >
+                Developer Terms & Conditions
+              </span>
+              .
+            </p>
           </div>
         </div>
       </div>

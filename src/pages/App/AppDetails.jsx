@@ -172,7 +172,7 @@ const AppDetails = () => {
           <img
             src={getFileURL(app.details.media.icon)}
             alt={`${app.name}`}
-            className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl shrink-0"
+            className="w-20 h-20 sm:w-22 sm:h-22 object-cover rounded-2xl shrink-0"
           />
           <div className="flex flex-col min-w-0">
             <h1 className="text-xl sm:text-2xl font-medium font-poppins text-black wrap-break-words line-clamp-2 leading-tight">
@@ -251,7 +251,7 @@ const AppDetails = () => {
         </section>
 
         {/* Download Buttons */}
-        <section className="p-4 pb-1 flex flex-row items-center gap-10 w-full max-w-3xl mx-auto">
+        <section className="p-4 pb-1 flex flex-row items-center gap-2 sm:gap-6 md:gap-10 w-full max-w-3xl mx-auto">
           {/* Android Platform */}
           {device === "Android" && (
             <>

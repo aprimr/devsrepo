@@ -9,17 +9,60 @@ import {
   Dumbbell,
   GraduationCap,
   Shapes,
+  Bell,
+  X,
+  Loader2,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/AuthStore";
+import { useEffect, useState } from "react";
+import { searchAppByName } from "../services/appServices";
+import DevsRepoImg from "../assets/images/DevsRepoInvert.png";
+import { getFileURL } from "../services/appwriteStorage";
+import { FaStar } from "react-icons/fa";
+import { calculateRating } from "../utils/calculateRating";
 
 function Navbar() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthStore();
   const location = useLocation();
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [noResults, setNoResults] = useState(false);
+  const [bellModalOpen, setBellModalOpen] = useState(false);
 
   const hideMobileMenuRoutes = ["/profile", "/setting"];
   const hideMobileMenu = hideMobileMenuRoutes.includes(location.pathname);
+
+  // Search effect
+  useEffect(() => {
+    if (!searchInput?.trim()) {
+      setSearchResults([]);
+      setNoResults(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      setNoResults(false);
+
+      const res = await searchAppByName(searchInput);
+
+      if (res.success && res.data.length > 0) {
+        setSearchResults(res.data);
+        setNoResults(false);
+      } else {
+        setSearchResults([]);
+        setNoResults(true);
+      }
+
+      setSearching(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const types = [
     { name: "All", icon: <GalleryVerticalEnd size={18} />, type: "" },
@@ -31,7 +74,6 @@ function Navbar() {
     { name: "Shopping", icon: <ShoppingBag size={18} />, type: "shopping" },
   ];
 
-  // Check if  active
   const isTypeActive = (type) =>
     type === ""
       ? location.pathname === "/"
@@ -74,7 +116,11 @@ function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-[1450px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+      <div
+        className={`max-w-[1450px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3 ${
+          searchModalOpen && "overflow-hidden"
+        }`}
+      >
         {/* Logo */}
         <div
           className="flex items-center gap-3 cursor-pointer"
@@ -86,47 +132,62 @@ function Navbar() {
           </span>
         </div>
 
-        {/* Types - desktop */}
+        {/* Desktop Types */}
         <div className="hidden xl:flex items-center gap-4 lg:gap-6">
           {types.map((cat) => (
             <TypeButton key={cat.name} cat={cat} />
           ))}
         </div>
 
-        {/* Profile, Upload and Search */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        {/* Actions */}
+        <div className="flex items-center gap-1 sm:gap-4">
           {/* Search */}
           <button
+            onClick={() => {
+              setSearchModalOpen((prev) => !prev);
+              setBellModalOpen(false);
+            }}
             className="hover:bg-gray-100 p-2 rounded-full transition-colors"
-            aria-label="Search"
           >
-            <Search size={20} className="text-gray-600" />
+            {searchModalOpen ? <X size={20} /> : <Search size={20} />}
           </button>
 
-          {/* Publish btn */}
+          {/* Bell */}
+          {user && (
+            <button
+              onClick={() => {
+                setBellModalOpen((prev) => !prev);
+                setSearchModalOpen(false);
+              }}
+              className="hover:bg-gray-100 p-2 rounded-full transition-colors mr-1"
+            >
+              {bellModalOpen ? <X size={20} /> : <Bell size={20} />}
+            </button>
+          )}
+
+          {/* Publish */}
           {isAuthenticated && user?.developerProfile?.isDeveloper && (
             <button
               onClick={() => navigate("/publish")}
               className="flex justify-center items-center gap-2 px-3 md:px-4 py-2 rounded-full border-2 border-green-600 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
-              aria-label="Upload"
             >
-              <Upload size={16} className="size-[18px]" />
+              <Upload size={16} />
               <span>Publish</span>
             </button>
           )}
 
-          {/* Login Button & Profile */}
+          {/* Login/Profile */}
           {isAuthenticated ? (
             <img
               onClick={() => navigate("/profile")}
               src={user?.photoURL}
               alt="profile"
-              className="w-10 h-10 flex items-center justify-center bg-linear-to-br from-green-500 to-green-700 text-white font-semibold rounded-full border-2 border-white shadow-sm cursor-pointer"
+              className="w-10 h-10 rounded-full border-2 border-white shadow-sm cursor-pointer"
             />
           ) : (
             <button
               onClick={() => navigate("/login")}
-              className="flex justify-center items-center gap-2 px-5 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
+              className="flex justify-center items-center gap-2 px-5 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition font-poppins font-medium text-sm md:text-base cursor-pointer"
             >
               Login
             </button>
@@ -134,8 +195,8 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Types chips - mobile */}
-      {!hideMobileMenu && (
+      {/* Mobile Types */}
+      {!hideMobileMenu && !searchModalOpen && !bellModalOpen && (
         <div className="xl:hidden bg-white border-t border-gray-200 px-3 sm:px-4 py-2">
           <div className="flex gap-3 sm:gap-2 overflow-x-auto no-scrollbar">
             {types.map((cat) => (
@@ -144,8 +205,151 @@ function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Search Modal */}
+      {searchModalOpen && (
+        <div className="fixed left-0 right-0 z-40 top-[60px] sm:top-[50px] min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-50px)] bg-white">
+          {/* Search Row */}
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 mt-1">
+            <div className="relative">
+              {searching ? (
+                <Loader2
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 animate-spin"
+                />
+              ) : (
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                />
+              )}
+
+              <input
+                autoFocus
+                type="text"
+                placeholder="Search apps on DevsRepo"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full pl-9 pr-9 py-2.5 rounded-lg font-poppins border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+              />
+
+              {searchInput && (
+                <button
+                  onClick={() => setSearchInput("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 transition"
+                >
+                  <X size={16} className="text-gray-500" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Search result */}
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
+            {!searchInput && (
+              <div className="flex flex-col font-poppins items-center text-center text-gray-500 mt-16">
+                <h2 className="text-lg sm:text-xl font-medium text-gray-700">
+                  Search DevsRepo
+                </h2>
+                <p className="text-sm max-w-md mt-1 leading-relaxed">
+                  Search and discover apps published on DevsRepo.
+                </p>
+              </div>
+            )}
+
+            {searchInput && (
+              <div className="space-y-3">
+                {noResults ? (
+                  <div className="flex flex-col font-poppins items-center text-center text-gray-500 mt-16">
+                    <h2 className="text-lg sm:text-xl font-medium text-gray-700">
+                      No apps found.
+                    </h2>
+                    <p className="text-sm max-w-md mt-1 leading-relaxed">
+                      Please try searching different apps.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="max-h-[78vh] overflow-y-auto no-scrollbar">
+                    {searchResults.map((app) => (
+                      <SearchResult key={app.appId} app={app} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Notifications */}
+      {bellModalOpen && (
+        <div className="absolute top-full right-4 sm:right-6 w-[90%] sm:w-[380px] bg-white border border-gray-200 rounded-xl shadow-lg z-40">
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="font-semibold text-gray-800">Notifications</h3>
+          </div>
+
+          <div className="flex flex-col items-center justify-center text-center px-6 py-10 text-gray-500">
+            <Bell size={40} className="mb-3 text-gray-300" />
+            <p className="font-medium">No notifications yet</p>
+            <p className="text-sm">
+              Updates, reviews, and alerts will appear here.
+            </p>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
 
 export default Navbar;
+
+const SearchResult = ({ app }) => {
+  const navigate = useNavigate();
+  return (
+    <div
+      onClick={() => navigate(`/a/${app.appId}`)}
+      className="flex items-start gap-4 py-2.5 border-b border-gray-200"
+    >
+      {/* App Icon */}
+      <img
+        src={getFileURL(app.details.media.icon) || DevsRepoImg}
+        alt={app.details?.name}
+        className="w-12 h-12 rounded-lg object-cover shrink-0"
+      />
+
+      {/* App Info */}
+      <div className="flex flex-col flex-1">
+        {/* Title Row */}
+        <p className="text-sm font-poppins text-gray-800 line-clamp-1">
+          {app.details?.name} {app.isTagMatch && "(Similar match)"}
+        </p>
+
+        {/* Type / Version / Ratings */}
+        <div className="flex items-center gap-2 text-xs text-gray-500 font-poppins mt-1 truncate">
+          <span className="capitalize truncate">{app.details?.type}</span>
+          <span className="h-1 w-1 rounded-full bg-gray-500" />
+          <span className="truncate">
+            v{" "}
+            <span className="font-outfit">
+              {app.details?.appDetails?.version}
+            </span>
+          </span>
+          {app.metrics?.ratings?.totalReviews > 0 && (
+            <>
+              <span className="h-1 w-1 rounded-full bg-gray-500" />
+              <div className="flex items-center gap-1 truncate">
+                <FaStar size={12} className="text-yellow-500" />
+                <span className="text-gray-600 font-outfit">
+                  {calculateRating(app.metrics.ratings.breakdown)}
+                </span>
+                <span className="text-xs font-outfit text-gray-500">
+                  ({app.metrics.ratings.totalReviews})
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -45,6 +45,11 @@ import SettingsPrivacyStats from "./pages/settings/account/SettingsPrivactStats"
 import AppsTypesPage from "./pages/App/AppsTypesPage";
 import AppDetails from "./pages/App/AppDetails";
 import PushUpdates from "./pages/settings/developer/PushUpdates";
+import Privacy from "./pages/others/Privacy";
+import Terms from "./pages/others/Terms";
+import DeveloperTerms from "./pages/others/DeveloperTerms";
+import About from "./pages/others/About";
+import Search from "./pages/App/Search";
 
 function AppContent() {
   const location = useLocation();
@@ -52,6 +57,10 @@ function AppContent() {
   const hideNavbarFooterRoutes = [
     "/login",
     "/onboarding",
+    "/terms",
+    "/developer-terms",
+    "/privacy",
+    "/about",
     "/edit-profile",
     "/top-developers",
     "/p/:id",
@@ -91,6 +100,7 @@ function AppContent() {
       {!hideNavbarFooter && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/top-developers" element={<TopDevelopers />} />
         <Route path="/p/:id" element={<DeveloperProfile />} />
         <Route path="/a/:appId" element={<AppDetails />} />
@@ -274,6 +284,11 @@ function AppContent() {
         />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/login" element={<Login />} />
+
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/developer-terms" element={<DeveloperTerms />} />
+        <Route path="/about" element={<About />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       {!hideNavbarFooter && <Footer />}

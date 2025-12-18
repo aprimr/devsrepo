@@ -33,13 +33,11 @@ function DeveloperCard({ developer }) {
         </h3>
 
         <p className="text-sm text-gray-500 font-outfit flex items-center justify-center gap-1">
-          <span className="truncate text-gray-600 -mr-1">
-            @{developer.username}
-          </span>
+          <span className="truncate text-gray-600">@{developer.username}</span>
 
           {developer.developerProfile.verifiedDeveloper && (
             <BadgeCheck
-              size={16}
+              size={14}
               fill="#3B82F6"
               color="white"
               className="shrink-0"

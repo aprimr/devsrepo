@@ -95,10 +95,12 @@ export const useAppStore = create(
           },
         },
 
-        community: { reviews: [], questions: [], reportedIssues: [] },
+        community: { reviews: [], reportedIssues: [] },
 
         discovery: {
-          searchKeywords: [],
+          searchKeywords: [
+            ...(appData.details?.tags?.map((t) => t.toLowerCase()) || []),
+          ],
         },
       }),
 

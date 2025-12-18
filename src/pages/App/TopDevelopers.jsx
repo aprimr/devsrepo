@@ -21,16 +21,9 @@ function TopDevelopers() {
           >
             <ChevronLeft size={26} className="text-gray-800" />
             <span className="text-lg sm:text-2xl py-1.5 font-poppins font-medium text-gray-800 tracking-tight truncate block max-w-[70vw] sm:max-w-[500px]">
-              Top Developers
+              Featured Developers
             </span>
           </div>
-
-          {/* Save */}
-          {/* <button
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white border-2 border-green-600 hover:bg-green-700 disabled:bg-green-700 disabled:text-gray-200 transition-all duration-300 font-poppins font-medium text-sm md:text-base"
-          >
-            Save
-          </button> */}
         </div>
       </nav>
 

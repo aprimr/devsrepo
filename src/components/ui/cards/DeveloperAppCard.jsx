@@ -91,14 +91,14 @@ function DeveloperAppCard({ appId, hideRating = false }) {
         <img
           src={getFileURL(appDetails.details.media.icon)}
           alt={appDetails.name}
-          className="w-24 h-24 rounded-3xl border border-gray-100 group-hover:scale-[1.02] transition-transform duration-300 ease-out"
+          className="w-24 h-24 rounded-3xl object-cover border border-gray-100 group-hover:scale-[1.02] transition-transform duration-300 ease-out"
         />
       </div>
 
       {/* App Info */}
       <div className="px-3 pb-2">
         {/* App Name */}
-        <h3 className="font-poppins font-medium text-gray-800 text-[11px] leading-tight line-clamp-2 mb-1">
+        <h3 className="font-poppins text-gray-800 text-[11px] leading-tight line-clamp-2 mb-1">
           {appDetails.details.name}
         </h3>
 

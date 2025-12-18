@@ -75,7 +75,7 @@ function Login() {
 
       {/* Back Button */}
       <NavLink
-        to={-1}
+        to={-1 || "/"}
         className="absolute top-6 left-5 sm:left-10 z-20 flex items-center gap-1 text-white/80 hover:text-white transition-colors"
       >
         <ChevronLeft size={16} />
@@ -140,13 +140,19 @@ function Login() {
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-white/70 text-[10px] font-inter leading-relaxed">
+          <p className="text-white text-[10px] font-inter leading-relaxed">
             By continuing, you agree to the{" "}
-            <NavLink to="/terms" className="text-white/80 hover:text-white">
+            <NavLink
+              to="/terms"
+              className="text-white/90 underline hover:text-white"
+            >
               Terms of Service
             </NavLink>{" "}
             and{" "}
-            <NavLink to="/privacy" className="text-white/80 hover:text-white">
+            <NavLink
+              to="/privacy"
+              className="text-white/90 underline hover:text-white"
+            >
               Privacy Policy
             </NavLink>
             .
