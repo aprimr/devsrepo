@@ -40,14 +40,18 @@ DevsRepo is an open platform designed to remove the common friction points assoc
 
 ## 🖼️ Screenshots
 
-Here are some screenshots of DevsRepo in action:
+Here are some screenshots of **DevsRepo** in action:
 
-#### Home & Discover
-
-![Home Screen](screenshots/home.png "Home Screen")
-_Browse trending, new, and top apps easily._
-
----
+![Home – Discover Apps](./src/assets/screens/1.jpg)
+![App Overview](./src/assets/screens/2.jpg)
+![Reviews & Rating](./src/assets/screens/3.jpg)
+![Search Apps](./src/assets/screens/4.jpg)
+![Meet the Developer](./src/assets/screens/5.jpg)
+![Easy Sign In](./src/assets/screens/6.jpg)
+![User Profile](./src/assets/screens/7.jpg)
+![Create Developer Account](./src/assets/screens/8.jpg)
+![Publish Your Apps](./src/assets/screens/9.jpg)
+![App Management](./src/assets/screens/10.jpg)
 
 ## 💡 Why DevsRepo?
 
