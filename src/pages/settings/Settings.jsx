@@ -6,7 +6,6 @@ import {
   Code,
   Lock,
   Bell,
-  Globe,
   ChevronRight,
   Forward,
   Info,
@@ -22,6 +21,8 @@ import {
   RotateCw,
   BrickWallShield,
   Ban,
+  X,
+  Share2,
 } from "lucide-react";
 import { useAuthStore } from "../../store/AuthStore";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -29,9 +30,14 @@ import { useState } from "react";
 import {
   FaFacebook,
   FaFacebookMessenger,
+  FaInstagram,
+  FaReddit,
+  FaTelegram,
   FaTwitter,
   FaWhatsapp,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { LuLink } from "react-icons/lu";
 
 function Setting() {
   const { user, logout } = useAuthStore();
@@ -143,11 +149,13 @@ function Setting() {
                 label="Status"
                 redirect="/setting-status"
               />
-              <SectionButton
-                icon={Forward}
-                label="Share Profile"
-                func={() => setShowShare(true)}
-              />
+              {user.developerProfile.isDeveloper && (
+                <SectionButton
+                  icon={Share2}
+                  label="Share Profile"
+                  func={() => setShowShare(true)}
+                />
+              )}
             </div>
           </div>
 
@@ -332,115 +340,197 @@ function Setting() {
       {/* Share Profile Modal */}
       {showShare && (
         <div
-          onClick={() => {
-            setShowShare(false);
-          }}
-          className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 select-none"
+          onClick={() => setShowShare(false)}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-50 lg:items-center"
         >
           <div
-            className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-3xl shadow-xl border border-gray-200 p-6 animate-slide-up sm:animate-scale-in"
             onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-t-2xl lg:rounded-2xl shadow-2xl max-w-md w-full border border-gray-100 animate-in slide-in-from-bottom duration-300 lg:animate-in lg:fade-in lg:duration-300"
           >
-            {/* Header with User Info */}
-            <div className="flex items-start gap-4 mb-6">
-              <div className="flex-1">
-                <h2 className="text-xl font-medium text-gray-900 font-poppins text-left">
-                  Share Profile
-                </h2>
-                <p className="text-xs text-gray-600 font-poppins text-left leading-relaxed">
-                  Let others find you by sharing your profile.
-                </p>
-              </div>
-              <img
-                src={user?.photoURL}
-                alt={user?.name}
-                className="w-12 h-12 rounded-xl object-cover border border-gray-200"
-              />
-            </div>
-
-            {/* Link Copy Section */}
-            <div className="mb-3">
-              <label className="block text-sm font-medium text-gray-700 font-poppins mb-1">
-                Profile Link
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    readOnly
-                    disabled
-                    value={window.location.href}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-mono text-gray-600 tracking-tighter pr-4"
-                    onClick={(e) => e.target.select()}
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    alert("Profile link copied to clipboard!");
-                  }}
-                  className="px-4 py-3 bg-green-500 text-white rounded-xl font-medium text-sm font-poppins transition-all duration-200 whitespace-nowrap"
-                >
-                  Copy
-                </button>
-              </div>
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 pb-0 border-b border-gray-100">
+              <h3 className="text-lg font-medium text-gray-900 font-poppins">
+                Share Your Profile
+              </h3>
+              <button
+                onClick={() => setShowShare(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
             </div>
 
             {/* Share Options */}
-            <div className="mb-3">
-              <h3 className="text-sm font-medium text-gray-700 font-poppins mb-1">
-                Share via
-              </h3>
-              <div className="grid grid-cols-4 gap-3">
-                {/* Twitter */}
-                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
-                  <div className="p-2 bg-[#1DA1F2] rounded-lg transition-all">
-                    <FaTwitter className="text-white" size={18} />
-                  </div>
-                  <span className="text-xs font-poppins font-medium text-gray-600">
-                    Twitter
-                  </span>
-                </button>
+            <div className="p-6 pt-4 pb-4">
+              <div className="grid grid-cols-4 gap-4 mb-2">
+                {(() => {
+                  const baseUrl = window.location.href.replace(
+                    /\/setting\/?$/,
+                    ""
+                  );
+                  const devProfileUrl = `${baseUrl}/p/${user.developerProfile.developerId}`;
+                  return (
+                    <>
+                      {/* Facebook */}
+                      <button
+                        onClick={() => {
+                          const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                            devProfileUrl
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-1 bg-white rounded-2xl group-hover:scale-110 transition-transform">
+                          <FaFacebook className="h-10 w-10 text-blue-500" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          Facebook
+                        </span>
+                      </button>
 
-                {/* Messenger */}
-                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
-                  <div className="p-2 bg-[#0084FF] rounded-lg transition-all">
-                    <FaFacebookMessenger className="text-white" size={18} />
-                  </div>
-                  <span className="text-xs font-poppins font-medium text-gray-600">
-                    Messenger
-                  </span>
-                </button>
+                      {/* X / Twitter */}
+                      <button
+                        onClick={() => {
+                          const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                            devProfileUrl
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-2.5 m-0.5 bg-black rounded-2xl group-hover:scale-110 transition-transform">
+                          <FaXTwitter className="h-6 w-6 text-white" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          X/Twitter
+                        </span>
+                      </button>
 
-                {/* WhatsApp */}
-                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
-                  <div className="p-2 bg-[#25D366] rounded-lg transition-all">
-                    <FaWhatsapp className="text-white" size={18} />
-                  </div>
-                  <span className="text-xs font-poppins font-medium text-gray-600">
-                    WhatsApp
-                  </span>
-                </button>
+                      {/* Reddit */}
+                      <button
+                        onClick={() => {
+                          const url = `https://www.reddit.com/submit?url=${encodeURIComponent(
+                            devProfileUrl
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-1 bg-white rounded-2xl group-hover:scale-110 transition-transform">
+                          <FaReddit className="h-10 w-10 text-orange-600" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          Reddit
+                        </span>
+                      </button>
 
-                {/* Facebook */}
-                <button className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50">
-                  <div className="p-2 bg-[#1877F2] rounded-lg transition-all">
-                    <FaFacebook className="text-white" size={18} />
-                  </div>
-                  <span className="text-xs font-poppins font-medium text-gray-600">
-                    Facebook
-                  </span>
-                </button>
+                      {/* Telegram */}
+                      <button
+                        onClick={() => {
+                          const url = `https://t.me/share/url?url=${encodeURIComponent(
+                            devProfileUrl
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-1 bg-white rounded-2xl group-hover:scale-110 transition-transform">
+                          <FaTelegram className="h-10 w-10 text-sky-400" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          Telegram
+                        </span>
+                      </button>
+
+                      {/* Messenger */}
+                      <button
+                        onClick={() => {
+                          const url = `fb-messenger://share?link=${encodeURIComponent(
+                            devProfileUrl
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-2 bg-white rounded-2xl group-hover:scale-110 transition-transform">
+                          <FaFacebookMessenger className="h-9 w-9 text-blue-500" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          Messenger
+                        </span>
+                      </button>
+
+                      {/* WhatsApp */}
+                      <button
+                        onClick={() => {
+                          const url = `https://wa.me/?text=${encodeURIComponent(
+                            devProfileUrl
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-1.5 bg-white rounded-2xl group-hover:scale-110 transition-transform">
+                          <FaWhatsapp color="#25D366" className="h-10 w-10" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          WhatsApp
+                        </span>
+                      </button>
+
+                      {/* Instagram */}
+                      <button
+                        onClick={() => {
+                          const url = `https://www.instagram.com/?url=${encodeURIComponent(
+                            devProfileUrl
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-2 rounded-2xl bg-linear-to-br from-purple-500 via-pink-500 to-yellow-500 group-hover:scale-110 transition-transform">
+                          <FaInstagram className="h-8 w-8 text-white" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          Instagram
+                        </span>
+                      </button>
+
+                      {/* Copy Link */}
+                      <button
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(devProfileUrl);
+                            toast.success("Link copied to clipboard!");
+                          } catch (error) {
+                            toast.error("Failed to copy link");
+                          }
+                        }}
+                        className="flex flex-col items-center gap-1 px-3 rounded-xl transition-colors group"
+                      >
+                        <div className="p-2.5 bg-white rounded-2xl group-hover:scale-110 transition-transform">
+                          <LuLink className="h-7 w-7 text-black" />
+                        </div>
+                        <span className="text-xs font-poppins text-gray-700">
+                          Copy
+                        </span>
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 
-            {/* Cancel Button */}
-            <button
-              onClick={() => setShowShare(false)}
-              className="w-full py-3.5 rounded-xl text-gray-700 font-semibold text-sm bg-gray-100 hover:bg-gray-200 font-poppins transition-all duration-200 border border-transparent hover:border-gray-200"
-            >
-              Cancel
-            </button>
+            {/* Cancel */}
+            <div className="w-full px-6 pb-6">
+              <button
+                onClick={() => setShowShare(false)}
+                className="w-full py-2.5 bg-gray-200/70 text-gray-700 font-medium font-poppins border-2 border-gray-200 rounded-xl"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

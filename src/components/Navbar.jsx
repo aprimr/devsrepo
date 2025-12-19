@@ -31,7 +31,6 @@ function Navbar() {
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [noResults, setNoResults] = useState(false);
-  const [bellModalOpen, setBellModalOpen] = useState(false);
 
   const hideMobileMenuRoutes = ["/profile", "/setting"];
   const hideMobileMenu = hideMobileMenuRoutes.includes(location.pathname);
@@ -145,25 +144,11 @@ function Navbar() {
           <button
             onClick={() => {
               setSearchModalOpen((prev) => !prev);
-              setBellModalOpen(false);
             }}
             className="hover:bg-gray-100 p-2 rounded-full transition-colors"
           >
             {searchModalOpen ? <X size={20} /> : <Search size={20} />}
           </button>
-
-          {/* Bell */}
-          {user && (
-            <button
-              onClick={() => {
-                setBellModalOpen((prev) => !prev);
-                setSearchModalOpen(false);
-              }}
-              className="hover:bg-gray-100 p-2 rounded-full transition-colors mr-1"
-            >
-              {bellModalOpen ? <X size={20} /> : <Bell size={20} />}
-            </button>
-          )}
 
           {/* Publish */}
           {isAuthenticated && user?.developerProfile?.isDeveloper && (
@@ -196,7 +181,7 @@ function Navbar() {
       </div>
 
       {/* Mobile Types */}
-      {!hideMobileMenu && !searchModalOpen && !bellModalOpen && (
+      {!hideMobileMenu && !searchModalOpen && (
         <div className="xl:hidden bg-white border-t border-gray-200 px-3 sm:px-4 py-2">
           <div className="flex gap-3 sm:gap-2 overflow-x-auto no-scrollbar">
             {types.map((cat) => (
@@ -277,23 +262,6 @@ function Navbar() {
                 )}
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Notifications */}
-      {bellModalOpen && (
-        <div className="absolute top-full right-4 sm:right-6 w-[90%] sm:w-[380px] bg-white border border-gray-200 rounded-xl shadow-lg z-40">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800">Notifications</h3>
-          </div>
-
-          <div className="flex flex-col items-center justify-center text-center px-6 py-10 text-gray-500">
-            <Bell size={40} className="mb-3 text-gray-300" />
-            <p className="font-medium">No notifications yet</p>
-            <p className="text-sm">
-              Updates, reviews, and alerts will appear here.
-            </p>
           </div>
         </div>
       )}

@@ -191,7 +191,15 @@ function DeveloperProfile() {
         <div className="max-w-xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
           {/* Back */}
           <div
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              const canGoBack =
+                window.history.state && window.history.state.idx > 0;
+              if (canGoBack) {
+                navigate(-1);
+              } else {
+                navigate("/");
+              }
+            }}
             className="flex items-center gap-2 cursor-pointer"
           >
             <ChevronLeft className="h-8 w-8 text-gray-700 bg-gray-100 border-2 border-gray-200 shadow-md backdrop-blur-sm rounded-xl p-1 pl-0.5" />

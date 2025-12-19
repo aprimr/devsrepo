@@ -169,7 +169,15 @@ const AppDetails = () => {
         <div className="max-w-[1450px] mx-auto flex items-center justify-between px-4 sm:px-6 py-3 gap-2 relative">
           {/* Back Btn */}
           <div
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              const canGoBack =
+                window.history.state && window.history.state.idx > 0;
+              if (canGoBack) {
+                navigate(-1);
+              } else {
+                navigate("/");
+              }
+            }}
             className="flex flex-1 items-center py-1.5 gap-2 min-w-0 cursor-pointer"
           >
             <ChevronLeft size={26} className="text-black" />
