@@ -26,7 +26,7 @@ function AppCardSquare({ app }) {
       <div className="px-2 pb-2">
         {/* App Name */}
         <h3 className="font-poppins font-normal text-xs sm:text-sm h-8.5 sm:h-10.5 sm:font-normal text-gray-900 line-clamp-2">
-          {details.name} yoo
+          {details.name}
         </h3>
 
         {/* Rating & Downlaod */}

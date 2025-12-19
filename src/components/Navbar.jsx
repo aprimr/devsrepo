@@ -255,6 +255,9 @@ function Navbar() {
                   </div>
                 ) : (
                   <div className="max-h-[78vh] overflow-y-auto no-scrollbar">
+                    <p className="font-poppins text-xs text-gray-600 mb-0.5">
+                      Search results
+                    </p>
                     {searchResults.map((app) => (
                       <SearchResult key={app.appId} app={app} />
                     ))}

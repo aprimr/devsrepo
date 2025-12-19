@@ -596,7 +596,7 @@ export default function Publish() {
 
             <label
               htmlFor="banner-upload"
-              className="w-full h-36 rounded-lg border border-gray-300 bg-white flex items-center justify-center cursor-pointer overflow-hidden relative"
+              className="w-full aspect-video rounded-lg border border-gray-300 bg-white flex items-center justify-center cursor-pointer overflow-hidden relative"
             >
               {bannerFile && bannerFilePreview ? (
                 <>
@@ -888,19 +888,19 @@ export default function Publish() {
             </div>
 
             {/* Short Description */}
-            <div>
+            <div className="lg:col-span-2">
               <label className="block text-sm text-gray-600 font-poppins mb-2">
                 Short Description
               </label>
               <input
                 value={shortDesc}
                 onChange={(e) => setShortDesc(e.target.value)}
-                maxLength={100}
+                maxLength={200}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="One-line pitch"
               />
               <p className="text-xs text-gray-500 font-outfit text-right px-1 mt-0.5 ">
-                {shortDesc.length}/100 Characters
+                {shortDesc.length}/200 Characters
               </p>
             </div>
 
@@ -913,12 +913,12 @@ export default function Publish() {
                 value={longDesc}
                 onChange={(e) => setLongDesc(e.target.value)}
                 rows={5}
-                maxLength={400}
+                maxLength={4000}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl font-poppins focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
                 placeholder="Explain features and usage"
               ></textarea>
               <p className="text-xs text-gray-500 font-outfit text-right px-1 mt-0.5 ">
-                {shortDesc.length}/400 Characters
+                {longDesc.length}/4000 Characters
               </p>
             </div>
 

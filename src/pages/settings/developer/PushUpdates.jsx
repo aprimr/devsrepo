@@ -352,7 +352,7 @@ export default function PushUpdates() {
                 }/files/${prevApp?.details?.media?.icon}/view?project=${
                   import.meta.env.VITE_APPWRITE_PROJECT_ID
                 }`}
-                className="w-20 h-20 rounded-2xl border border-gray-300 bg-gray-100 flex items-center justify-center"
+                className="w-20 h-20 rounded-2xl border border-gray-300 bg-gray-100 flex items-center justify-center object-cover"
               />
               <div>
                 <h2 className="text-base font-medium font-poppins line-clamp-1 text-gray-900">
