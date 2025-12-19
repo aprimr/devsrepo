@@ -123,7 +123,44 @@ const AppDetails = () => {
   };
 
   if (loading) return <AppLoading />;
-  if (!app) return <AppNotFound />;
+  if (!app || app.status.rejection.isRejected) return <AppNotFound />;
+  if (!app.status.approval.isApproved || !app.status.isActive) {
+    const isNotApproved = !app.status.approval.isApproved;
+
+    return (
+      <div className="min-h-screen flex justify-center px-4 pt-20 bg-gray-50">
+        <div className="max-w-md w-full p-6">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            {isNotApproved ? "App is Not Yet Approved" : "App is Inactive"}
+          </h1>
+
+          <p className="mt-2 text-sm font-poppins text-gray-600 leading-relaxed">
+            {isNotApproved
+              ? "This application is currently under review and has not been approved yet. Please wait for the approval process to complete or contact the administrator for further clarification."
+              : "This application is currently inactive. You may activate it from the dashboard, or contact support if you believe this is an error."}
+          </p>
+
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-5 py-1.5 rounded-sm font-poppins border-2 border-green-600 bg-green-600 text-white text-sm font-medium hover:bg-green-500 hover:border-green-500 transition-colors"
+            >
+              Go Back
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="px-5 py-1.5 rounded-sm font-poppins border-2 border-green-600 text-green-600 text-sm font-medium hover:bg-green-50 transition-colors"
+            >
+              Go to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white font-sans">
