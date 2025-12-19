@@ -106,6 +106,7 @@ const developerSections = [
       "To publish apps, you must create a developer account by linking your GitHub and LinkedIn profiles.",
       "Providing accurate information is required. These links will be visible on your public profile and can help showcase your work.",
       "Your DevsRepo profile can serve as your profile for showcase purposes.",
+      "We collect your email when you create a developer account. This email is used to contact you regarding your apps. You can change it later. Your email will also be shown publicly on your profile and used as the support email for your apps.",
     ],
   },
   {

@@ -1200,7 +1200,7 @@ const AppSupport = ({ app }) => {
             <Mail className="w-5 h-5 text-gray-700 mt-1" />
             <div className="flex flex-col">
               <span className="text-sm font-medium font-poppins text-gray-800">
-                Email
+                Contact Developer
               </span>
               <a
                 href={`mailto:${app.details.links.contactEmail}`}
@@ -1213,8 +1213,8 @@ const AppSupport = ({ app }) => {
           </div>
 
           {/* Privacy Policy */}
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-gray-700 mt-1" />
+          <div className="flex items-start gap-3 overflow-hidden">
+            <Shield className="w-5 h-5 text-gray-700 mt-1 shrink-0" />
             <div className="flex flex-col">
               <span className="text-sm font-medium font-poppins text-gray-800">
                 Privacy Policy
@@ -1233,7 +1233,7 @@ const AppSupport = ({ app }) => {
 
           {/* Terms & Conditions */}
           {app.details.links.termsUrl && (
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 overflow-hidden">
               <BadgeQuestionMark className="w-5 h-5 text-gray-700 mt-1" />
               <div className="flex flex-col">
                 <span className="text-sm font-medium font-poppins text-gray-800">
