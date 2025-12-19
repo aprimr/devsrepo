@@ -58,7 +58,7 @@ DevsRepo is an open platform designed to remove the common friction points assoc
   <img src="./src/assets/screens/9.jpg" width="30%" />
 </p>
 
-<p align="center">
+<p align="left">
   <img src="./src/assets/screens/10.jpg" width="30%" />
 </p>
 
