@@ -114,8 +114,8 @@ function Setting() {
             onClick={() => navigate("/edit-profile")}
             className="flex justify-center items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white border-2 border-green-600 hover:bg-green-700 disabled:bg-green-700 disabled:text-gray-200 transition-all duration-300 font-poppins font-medium text-sm md:text-base cursor-pointer"
           >
-            <Handshake size={18} />
-            <span>Support Dev</span>
+            <UserRound size={18} />
+            <span>Profile</span>
           </button>
         </div>
       </nav>
